@@ -5,7 +5,7 @@ import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase
 if(!document.querySelector('link[href^="shell-fixes.css"]')){
   const style=document.createElement('link');
   style.rel='stylesheet';
-  style.href='shell-fixes.css?v=20260730-1853';
+  style.href='shell-fixes.css?v=20260730-2000';
   document.head.append(style);
 }
 
@@ -25,19 +25,16 @@ function montarMenuMobile(){
   trigger.setAttribute('aria-label','Abrir menu');
   trigger.setAttribute('aria-expanded','false');
   trigger.innerHTML='<span></span><span></span><span></span>';
-
   const backdrop=document.createElement('button');
   backdrop.className='menu-backdrop';
   backdrop.type='button';
   backdrop.setAttribute('aria-label','Fechar menu');
-
   const close=document.createElement('button');
   close.className='menu-close';
   close.type='button';
   close.setAttribute('aria-label','Fechar menu');
   close.textContent='×';
   menu.prepend(close);
-
   trigger.addEventListener('click',()=>{
     const aberto=!body.classList.contains('menu-open');
     body.classList.toggle('menu-open',aberto);
@@ -46,7 +43,6 @@ function montarMenuMobile(){
   close.addEventListener('click',fecharMenu);
   backdrop.addEventListener('click',fecharMenu);
   menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',fecharMenu));
-
   const conteudo=document.querySelector('.conteudo');
   (conteudo||document.body).prepend(trigger);
   document.body.append(backdrop);
@@ -54,19 +50,26 @@ function montarMenuMobile(){
   window.addEventListener('resize',()=>{if(innerWidth>768)fecharMenu()});
 }
 
-function garantirLinkAdmin(){
+function garantirLinksAdmin(){
   if(!menu)return;
-  const links=[...menu.querySelectorAll('a')].filter(a=>a.getAttribute('href')==='perfil-admin.html');
-  links.slice(1).forEach(a=>a.remove());
-  let link=links[0];
-  if(!link){
-    link=document.createElement('a');
-    link.href='perfil-admin.html';
-    link.textContent='Administração';
-    menu.insertBefore(link,menu.querySelector('.logout-btn, button[onclick]')||null);
-  }
-  link.dataset.adminLink='true';
-  link.classList.add('admin-only');
+  const before=menu.querySelector('.logout-btn, button[onclick]');
+  const defs=[
+    {href:'perfil-admin.html',text:'Administração'},
+    {href:'excluir-cliente.html',text:'Excluir cliente'}
+  ];
+  defs.forEach(def=>{
+    const matches=[...menu.querySelectorAll('a')].filter(a=>a.getAttribute('href')===def.href);
+    matches.slice(1).forEach(a=>a.remove());
+    let link=matches[0];
+    if(!link){
+      link=document.createElement('a');
+      link.href=def.href;
+      link.textContent=def.text;
+      menu.insertBefore(link,before||null);
+    }
+    link.dataset.adminLink='true';
+    link.classList.add('admin-only');
+  });
 }
 
 async function carregarDocumentoUsuario(user){
@@ -81,41 +84,29 @@ async function sair(event){
   event?.preventDefault?.();
   const botoes=document.querySelectorAll('.logout-btn, [data-action="logout"]');
   botoes.forEach(botao=>{botao.disabled=true;botao.textContent='Saindo...'});
-  try{
-    body.classList.add('is-signing-out');
-    await signOut(auth);
-  }catch(error){
-    console.error('Erro ao sair:',error);
-  }finally{
-    location.replace('index.html');
-  }
+  try{body.classList.add('is-signing-out');await signOut(auth);}catch(error){console.error('Erro ao sair:',error);}finally{location.replace('index.html');}
 }
 window.sair=sair;
 
 function ligarLogout(){
   document.querySelectorAll('.logout-btn, .menu button[onclick*="sair"], [data-action="logout"]').forEach(botao=>{
-    botao.removeAttribute('onclick');
-    botao.type='button';
-    botao.addEventListener('click',sair);
+    botao.removeAttribute('onclick');botao.type='button';botao.addEventListener('click',sair);
   });
 }
 
 montarMenuMobile();
-garantirLinkAdmin();
+garantirLinksAdmin();
 ligarLogout();
 
 onAuthStateChanged(auth,async user=>{
   if(!user){location.replace('index.html');return}
   let dados;
-  try{
-    dados=await carregarDocumentoUsuario(user);
-  }catch(error){
+  try{dados=await carregarDocumentoUsuario(user);}catch(error){
     console.error('Perfil do clube indisponível:',error);
     document.dispatchEvent(new CustomEvent('wd-profile-error',{detail:{user,error}}));
     if(error.code==='wd/missing-club-profile'){
       alert('Esta conta não possui mais cadastro ativo no WD Founder. Entre novamente ou crie um novo cadastro.');
-      await signOut(auth).catch(()=>{});
-      location.replace('index.html');
+      await signOut(auth).catch(()=>{});location.replace('index.html');
     }
     return;
   }
