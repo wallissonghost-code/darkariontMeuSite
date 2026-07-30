@@ -2,6 +2,13 @@ import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
+if(!document.querySelector('link[href="shell-fixes.css"]')){
+  const style=document.createElement('link');
+  style.rel='stylesheet';
+  style.href='shell-fixes.css';
+  document.head.append(style);
+}
+
 const body=document.body;
 const menu=document.querySelector('.menu');
 
