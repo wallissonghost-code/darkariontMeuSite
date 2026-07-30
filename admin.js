@@ -1,6 +1,10 @@
 import { db } from './firebase.js';
-import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 const level=document.getElementById('adminLevel');const field=document.getElementById('adminBenefits');const status=document.getElementById('adminStatus');
-async function load(){const id=level.value;const s=await getDoc(doc(db,'niveis',id));field.value=s.exists()&&Array.isArray(s.data().beneficios)?s.data().beneficios.join('\n'):'';status.textContent='';}
-async function save(){const beneficios=field.value.split('\n').map(x=>x.trim()).filter(Boolean);await setDoc(doc(db,'niveis',level.value),{beneficios,atualizadoEm:new Date().toISOString()},{merge:true});status.textContent='Benefícios salvos com sucesso.';}
-level.addEventListener('change',load);document.getElementById('saveBenefits').addEventListener('click',save);load();
+async function loadBenefits(){const s=await getDoc(doc(db,'niveis',level.value));field.value=s.exists()&&Array.isArray(s.data().beneficios)?s.data().beneficios.join('\n'):'';status.textContent='';}
+async function saveBenefits(){const beneficios=field.value.split('\n').map(x=>x.trim()).filter(Boolean);await setDoc(doc(db,'niveis',level.value),{beneficios,atualizadoEm:serverTimestamp()},{merge:true});status.textContent='Benefícios salvos com sucesso.';}
+level.addEventListener('change',loadBenefits);document.getElementById('saveBenefits').addEventListener('click',saveBenefits);loadBenefits();
+const offerId=document.getElementById('offerId');const offerStatus=document.getElementById('offerStatus');
+async function loadOffer(){const s=await getDoc(doc(db,'ofertas',offerId.value));const d=s.exists()?s.data():{};document.getElementById('offerCategory').value=d.categoria||'';document.getElementById('offerTitle').value=d.titulo||'';document.getElementById('offerDescription').value=d.descricao||'';document.getElementById('offerButton').value=d.botao||'';document.getElementById('offerOrder').value=d.ordem||Number(offerId.value.replace('oferta',''))||1;offerStatus.textContent='';}
+async function saveOffer(){const data={categoria:document.getElementById('offerCategory').value.trim(),titulo:document.getElementById('offerTitle').value.trim(),descricao:document.getElementById('offerDescription').value.trim(),botao:document.getElementById('offerButton').value.trim()||'Ver benefício',ordem:Number(document.getElementById('offerOrder').value)||1,ativo:true,atualizadoEm:serverTimestamp()};if(!data.titulo)return offerStatus.textContent='Informe o título da oferta.';await setDoc(doc(db,'ofertas',offerId.value),data,{merge:true});offerStatus.textContent='Oferta salva com sucesso.';}
+offerId.addEventListener('change',loadOffer);document.getElementById('saveOffer').addEventListener('click',saveOffer);loadOffer();
