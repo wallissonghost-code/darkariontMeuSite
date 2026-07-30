@@ -1,55 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeuSite - Login</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WD Founder — Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <div class="login-container">
-
-        <div class="brand">
-            <div class="logo">◆</div>
-            <h1>MeuSite</h1>
-            <p>Sua plataforma, simples e poderosa.</p>
-        </div>
-
-
-        <div class="login-box">
-
-            <h2>Entrar</h2>
-
-            <p>Acesse sua conta</p>
-
-            <input type="text" placeholder="E-mail ou Celular">
-
-            <input type="password" placeholder="Senha">
-
-
-            <button onclick="entrar()">
-                Entrar
-            </button>
-
-
-            <p class="cadastro">
-                Não possui uma conta?
-                <a href="cadastro.html">
-                    Cadastre-se
-                </a>
-            </p>
-
-        </div>
-
+  <div class="login-container">
+    <div class="brand">
+      <div class="logo">WD</div>
+      <h1>WD FOUNDER</h1>
+      <p>Seu clube de benefícios e fidelidade.</p>
     </div>
 
-
-<script src="script.js"></script>
-
+    <form class="login-box" id="formLogin">
+      <h2>Entrar</h2>
+      <p>Acesse sua conta Founder</p>
+      <input id="email" type="email" autocomplete="email" placeholder="E-mail" required>
+      <input id="senha" type="password" autocomplete="current-password" placeholder="Senha" required minlength="6">
+      <button type="submit">Entrar</button>
+      <p id="mensagem" class="mensagem" aria-live="polite"></p>
+      <p class="cadastro">Não possui uma conta? <a href="cadastro.html">Cadastre-se</a></p>
+    </form>
+  </div>
+  <script type="module" src="auth.js"></script>
 </body>
-
 </html>
