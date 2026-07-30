@@ -1,6 +1,6 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
-import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
 if(!document.querySelector('link[href="shell-fixes.css"]')){
   const style=document.createElement('link');
@@ -69,22 +69,43 @@ function garantirLinkAdmin(){
   link.classList.add('admin-only');
 }
 
+async function garantirDocumentoUsuario(user){
+  const referencia=doc(db,'usuarios',user.uid);
+  const snap=await getDoc(referencia);
+  if(snap.exists())return snap.data();
+
+  const novoUsuario={
+    nome:user.displayName||user.email?.split('@')[0]||'Cliente Founder',
+    email:user.email||'',
+    telefone:'',
+    role:'cliente',
+    vip:0,
+    carimbos:0,
+    creditos:0,
+    criadoEm:serverTimestamp(),
+    atualizadoEm:serverTimestamp()
+  };
+  await setDoc(referencia,novoUsuario);
+  return novoUsuario;
+}
+
 async function sair(event){
   event?.preventDefault?.();
+  const botoes=document.querySelectorAll('.logout-btn, [data-action="logout"]');
+  botoes.forEach(botao=>{botao.disabled=true;botao.textContent='Saindo...'});
   try{
     body.classList.add('is-signing-out');
     await signOut(auth);
-    location.replace('index.html');
   }catch(error){
     console.error('Erro ao sair:',error);
-    body.classList.remove('is-signing-out');
-    alert('Não foi possível sair agora. Tente novamente.');
+  }finally{
+    location.replace('index.html');
   }
 }
 window.sair=sair;
 
 function ligarLogout(){
-  document.querySelectorAll('.logout-btn, .menu button[onclick*="sair"]').forEach(botao=>{
+  document.querySelectorAll('.logout-btn, .menu button[onclick*="sair"], [data-action="logout"]').forEach(botao=>{
     botao.removeAttribute('onclick');
     botao.type='button';
     botao.addEventListener('click',sair);
@@ -97,14 +118,18 @@ ligarLogout();
 
 onAuthStateChanged(auth,async user=>{
   if(!user){location.replace('index.html');return}
-  let role='cliente';
+  let dados;
   try{
-    const snap=await getDoc(doc(db,'usuarios',user.uid));
-    if(snap.exists())role=(snap.data().role||'cliente').toLowerCase();
-  }catch(error){console.error(error)}
+    dados=await garantirDocumentoUsuario(user);
+  }catch(error){
+    console.error('Não foi possível carregar ou criar o perfil:',error);
+    document.dispatchEvent(new CustomEvent('wd-profile-error',{detail:{user,error}}));
+    return;
+  }
+  const role=String(dados?.role||'cliente').toLowerCase();
   const admin=['admin','administrador','master'].includes(role);
   document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('is-visible',admin));
   document.documentElement.dataset.role=admin?'admin':'cliente';
-  if(body.dataset.adminPage==='true'&&!admin)location.replace('home.html');
-  document.dispatchEvent(new CustomEvent('wd-role-ready',{detail:{user,role,admin}}));
+  if(body.dataset.adminPage==='true'&&!admin){location.replace('home.html');return}
+  document.dispatchEvent(new CustomEvent('wd-role-ready',{detail:{user,role,admin,dados}}));
 });
