@@ -1,10 +1,112 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, updateProfile, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+
 const names=['BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELITE','PRIME','FOUNDER'];
-const themes=[['#c67a2d','#5b280c','#fff'],['#e5e5e5','#777','#111'],['#e0bd45','#7d5b08','#18130a'],['#8d62ef','#341477','#fff'],['#f4f5f6','#8b949c','#111'],['#2471e8','#07316f','#fff'],['#333','#050505','#fff'],['#d14455','#6a0e1b','#fff'],['#3256b8','#10235d','#fff'],['#d8ad45','#76510b','#17110a']];
-const form=document.getElementById('profileForm'),status=document.getElementById('profileStatus');let currentUser=null;
-function msg(t,e=false){status.textContent=t;status.style.color=e?'#a83d32':'var(--gold)'}
-onAuthStateChanged(auth,async user=>{if(!user)return;currentUser=user;const snap=await getDoc(doc(db,'usuarios',user.uid));const data=snap.exists()?snap.data():{};const vip=Math.max(0,Math.min(9,Number(data.vip)||0));const nome=data.nome||user.displayName||'Cliente Founder';const telefone=data.telefone||'';perfilNome.textContent=nome;perfilEmail.textContent=user.email||'';perfilNivel.textContent=`LV${vip+1} — ${names[vip]}`;perfilTelefone.textContent=telefone||'Não informado';document.getElementById('nome').value=nome;document.getElementById('telefone').value=telefone;const box=perfilNivel.closest('.profile-field');if(box){const [a,b,t]=themes[vip];box.style.background=`linear-gradient(135deg,${a},${b})`;box.style.color=t;box.style.borderColor='rgba(255,255,255,.28)';box.classList.add('level-highlight')}});
-form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser)return;const nome=document.getElementById('nome').value.trim();const telefone=document.getElementById('telefone').value.trim();if(nome.length<2)return msg('Informe um nome válido.',true);try{await updateProfile(currentUser,{displayName:nome});await setDoc(doc(db,'usuarios',currentUser.uid),{nome,telefone,atualizadoEm:serverTimestamp()},{merge:true});perfilNome.textContent=nome;perfilTelefone.textContent=telefone||'Não informado';msg('Perfil atualizado com sucesso.')}catch(err){msg('Não foi possível salvar agora.',true)}});
-document.getElementById('resetPassword').addEventListener('click',async()=>{if(!currentUser?.email)return;try{await sendPasswordResetEmail(auth,currentUser.email);msg('Enviamos um link de alteração de senha para seu e-mail.')}catch(err){msg('Não foi possível enviar o link de senha.',true)}});
+const themes=[['#b87333','#55280f','#fff'],['#e8e8e8','#858585','#161616'],['#d4af37','#765508','#17120a'],['#8d62ef','#341477','#fff'],['#f1f2f3','#969da3','#111'],['#2471e8','#07316f','#fff'],['#333','#050505','#fff'],['#d14455','#6a0e1b','#fff'],['#3256b8','#10235d','#fff'],['#d8ad45','#76510b','#17110a']];
+
+const form=document.getElementById('profileForm');
+const status=document.getElementById('profileStatus');
+const nomeInput=document.getElementById('nome');
+const telefoneInput=document.getElementById('telefone');
+const perfilNome=document.getElementById('perfilNome');
+const perfilEmail=document.getElementById('perfilEmail');
+const perfilNivel=document.getElementById('perfilNivel');
+const perfilTelefone=document.getElementById('perfilTelefone');
+const avatar=document.querySelector('.avatar');
+const resetPassword=document.getElementById('resetPassword');
+let currentUser=null;
+
+function msg(texto,erro=false){
+  status.textContent=texto;
+  status.style.color=erro?'#a83d32':'var(--gold)';
+}
+
+function iniciais(nome){
+  return String(nome||'WD').trim().split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase()||'WD';
+}
+
+function aplicarNivel(vip){
+  perfilNivel.textContent=`LV${vip+1} — ${names[vip]}`;
+  const box=perfilNivel.closest('.profile-field');
+  if(!box)return;
+  const [a,b,t]=themes[vip];
+  box.style.background=`linear-gradient(135deg,${a},${b})`;
+  box.style.color=t;
+  box.style.borderColor='rgba(255,255,255,.28)';
+  box.classList.add('level-highlight');
+}
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){ location.replace('index.html'); return; }
+  currentUser=user;
+  try{
+    const ref=doc(db,'usuarios',user.uid);
+    const snap=await getDoc(ref);
+    const data=snap.exists()?snap.data():{};
+    const vip=Math.max(0,Math.min(9,Number(data.vip)||0));
+    const nome=data.nome||user.displayName||'Cliente Founder';
+    const telefone=data.telefone||'';
+
+    perfilNome.textContent=nome;
+    perfilEmail.textContent=user.email||data.email||'Conta autenticada';
+    perfilTelefone.textContent=telefone||'Não informado';
+    nomeInput.value=nome==='Cliente Founder'?'':nome;
+    telefoneInput.value=telefone;
+    if(avatar)avatar.textContent=iniciais(nome);
+    aplicarNivel(vip);
+
+    // Repara somente campos ausentes, sem tocar em nível, carimbos, créditos ou função.
+    const reparo={atualizadoEm:serverTimestamp()};
+    if(!data.email&&user.email)reparo.email=user.email;
+    if(!data.nome&&user.displayName)reparo.nome=user.displayName;
+    if(!snap.exists())Object.assign(reparo,{role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp()});
+    if(Object.keys(reparo).length>1||!snap.exists())await setDoc(ref,reparo,{merge:true});
+  }catch(error){
+    console.error('Erro ao carregar perfil:',error);
+    msg('Não foi possível carregar os dados da conta.',true);
+  }
+});
+
+form.addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(!currentUser)return;
+  const nome=nomeInput.value.trim();
+  const telefone=telefoneInput.value.trim();
+  if(nome.length<2)return msg('Informe um nome válido.',true);
+  try{
+    const botao=form.querySelector('button[type="submit"]');
+    botao.disabled=true;
+    botao.textContent='Salvando...';
+    await updateProfile(currentUser,{displayName:nome});
+    await setDoc(doc(db,'usuarios',currentUser.uid),{
+      nome,
+      telefone,
+      email:currentUser.email||'',
+      atualizadoEm:serverTimestamp()
+    },{merge:true});
+    perfilNome.textContent=nome;
+    perfilTelefone.textContent=telefone||'Não informado';
+    if(avatar)avatar.textContent=iniciais(nome);
+    msg('Dados salvos permanentemente na sua conta.');
+    botao.disabled=false;
+    botao.textContent='Salvar alterações';
+  }catch(error){
+    console.error('Erro ao salvar perfil:',error);
+    const botao=form.querySelector('button[type="submit"]');
+    botao.disabled=false;
+    botao.textContent='Salvar alterações';
+    msg('Não foi possível salvar agora. Verifique as regras do Firestore.',true);
+  }
+});
+
+resetPassword.addEventListener('click',async()=>{
+  if(!currentUser?.email)return;
+  try{
+    await sendPasswordResetEmail(auth,currentUser.email);
+    msg('Enviamos o link de alteração de senha para seu e-mail.');
+  }catch(error){
+    console.error(error);
+    msg('Não foi possível enviar o link de senha.',true);
+  }
+});
