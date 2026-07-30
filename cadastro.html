@@ -1,39 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WD Founder — Cadastro</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <div class="login-box">
-
-        <h1>Criar conta</h1>
-
-        <p>Preencha seus dados</p>
-
-        <input type="text" placeholder="Nome completo">
-
-        <input type="text" placeholder="E-mail ou Celular">
-
-        <input type="password" placeholder="Criar senha">
-
-        <input type="password" placeholder="Confirmar senha">
-
-        <button onclick="cadastrar()">Cadastrar</button>
-
-        <p class="cadastro">
-            Já possui uma conta?
-            <a href="index.html">Entrar</a>
-        </p>
-
-    </div>
-<script src="script.js"></script>
+  <div class="login-container">
+    <form class="login-box" id="formCadastro">
+      <h1>Criar conta</h1>
+      <p>Preencha seus dados</p>
+      <input id="nome" type="text" autocomplete="name" placeholder="Nome completo" required>
+      <input id="email" type="email" autocomplete="email" placeholder="E-mail" required>
+      <input id="senha" type="password" autocomplete="new-password" placeholder="Criar senha" minlength="6" required>
+      <input id="confirmar" type="password" autocomplete="new-password" placeholder="Confirmar senha" minlength="6" required>
+      <button type="submit">Cadastrar</button>
+      <p id="mensagem" class="mensagem" aria-live="polite"></p>
+      <p class="cadastro">Já possui uma conta? <a href="index.html">Entrar</a></p>
+    </form>
+  </div>
+  <script type="module" src="auth.js"></script>
 </body>
-
 </html>
