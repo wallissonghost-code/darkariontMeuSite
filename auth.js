@@ -16,12 +16,15 @@ function traduzirErro(codigo) {
   const erros = {
     "auth/invalid-email": "Digite um e-mail válido.",
     "auth/invalid-credential": "E-mail ou senha incorretos.",
-    "auth/email-already-in-use": "Este e-mail já possui uma conta.",
+    "auth/email-already-in-use": "Este e-mail já possui uma conta. Tente entrar.",
     "auth/weak-password": "A senha precisa ter pelo menos 6 caracteres.",
     "auth/too-many-requests": "Muitas tentativas. Aguarde e tente novamente.",
-    "auth/network-request-failed": "Falha de conexão. Confira sua internet."
+    "auth/network-request-failed": "Falha de conexão. Confira sua internet.",
+    "auth/operation-not-allowed": "O cadastro por e-mail ainda não foi ativado no Firebase.",
+    "auth/unauthorized-domain": "O domínio do GitHub Pages ainda não foi autorizado no Firebase.",
+    "permission-denied": "A conta foi criada, mas o Firestore bloqueou o cadastro dos dados. Publique as regras do banco."
   };
-  return erros[codigo] || "Não foi possível concluir. Tente novamente.";
+  return erros[codigo] || `Erro do Firebase: ${codigo || "desconhecido"}`;
 }
 
 if (formLogin) {
@@ -52,6 +55,7 @@ if (formLogin) {
       }
       window.location.href = "home.html";
     } catch (erro) {
+      console.error("Erro no login:", erro);
       mostrarMensagem(traduzirErro(erro.code), true);
       botao.disabled = false;
       botao.textContent = "Entrar";
@@ -91,6 +95,7 @@ if (formCadastro) {
       mostrarMensagem("Conta criada com sucesso.");
       setTimeout(() => window.location.href = "home.html", 700);
     } catch (erro) {
+      console.error("Erro no cadastro:", erro);
       mostrarMensagem(traduzirErro(erro.code), true);
       botao.disabled = false;
       botao.textContent = "Cadastrar";
