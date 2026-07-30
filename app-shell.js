@@ -5,7 +5,7 @@ import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase
 if(!document.querySelector('link[href^="shell-fixes.css"]')){
   const style=document.createElement('link');
   style.rel='stylesheet';
-  style.href='shell-fixes.css?v=20260730-2015';
+  style.href='shell-fixes.css?v=20260730-2100';
   document.head.append(style);
 }
 
@@ -63,6 +63,7 @@ function garantirLinksAdmin(){
   const before=menu.querySelector('.logout-btn, button[onclick]');
   const current=location.pathname.split('/').pop()||'home.html';
   const defs=[
+    {href:'desempenho.html',text:'Desempenho'},
     {href:'perfil-admin.html',text:'Administração'},
     {href:'excluir-cliente.html',text:'Excluir conta'}
   ];
