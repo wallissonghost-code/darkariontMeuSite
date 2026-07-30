@@ -1,6 +1,6 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, updateProfile, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
-import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { doc, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
 const names=['BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELITE','PRIME','FOUNDER'];
 const themes=[['#b87333','#55280f','#fff'],['#e8e8e8','#858585','#161616'],['#d4af37','#765508','#17120a'],['#8d62ef','#341477','#fff'],['#f1f2f3','#969da3','#111'],['#2471e8','#07316f','#fff'],['#333','#050505','#fff'],['#d14455','#6a0e1b','#fff'],['#3256b8','#10235d','#fff'],['#d8ad45','#76510b','#17110a']];
@@ -16,16 +16,11 @@ const perfilTelefone=document.getElementById('perfilTelefone');
 const avatar=document.querySelector('.avatar');
 const resetPassword=document.getElementById('resetPassword');
 let currentUser=null;
+let unsubscribeProfile=null;
+let formDirty=false;
 
-function msg(texto,erro=false){
-  status.textContent=texto;
-  status.style.color=erro?'#a83d32':'var(--gold)';
-}
-
-function iniciais(nome){
-  return String(nome||'WD').trim().split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase()||'WD';
-}
-
+function msg(texto,erro=false){status.textContent=texto;status.style.color=erro?'#a83d32':'var(--gold)'}
+function iniciais(nome){return String(nome||'WD').trim().split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase()||'WD'}
 function aplicarNivel(vip){
   perfilNivel.textContent=`LV${vip+1} — ${names[vip]}`;
   const box=perfilNivel.closest('.profile-field');
@@ -36,36 +31,33 @@ function aplicarNivel(vip){
   box.style.borderColor='rgba(255,255,255,.28)';
   box.classList.add('level-highlight');
 }
+function renderProfile(user,data){
+  const vip=Math.max(0,Math.min(9,Number(data.vip)||0));
+  const nome=data.nome||user.displayName||'Cliente Founder';
+  const telefone=data.telefone||'';
+  perfilNome.textContent=nome;
+  perfilEmail.textContent=user.email||data.email||'Conta autenticada';
+  perfilTelefone.textContent=telefone||'Não informado';
+  if(!formDirty){nomeInput.value=nome==='Cliente Founder'?'':nome;telefoneInput.value=telefone}
+  if(avatar)avatar.textContent=iniciais(nome);
+  aplicarNivel(vip);
+}
+
+nomeInput.addEventListener('input',()=>formDirty=true);
+telefoneInput.addEventListener('input',()=>formDirty=true);
 
 onAuthStateChanged(auth,async user=>{
-  if(!user){ location.replace('index.html'); return; }
+  if(!user){location.replace('index.html');return}
   currentUser=user;
-  try{
-    const ref=doc(db,'usuarios',user.uid);
-    const snap=await getDoc(ref);
+  unsubscribeProfile?.();
+  const ref=doc(db,'usuarios',user.uid);
+  unsubscribeProfile=onSnapshot(ref,async snap=>{
     const data=snap.exists()?snap.data():{};
-    const vip=Math.max(0,Math.min(9,Number(data.vip)||0));
-    const nome=data.nome||user.displayName||'Cliente Founder';
-    const telefone=data.telefone||'';
-
-    perfilNome.textContent=nome;
-    perfilEmail.textContent=user.email||data.email||'Conta autenticada';
-    perfilTelefone.textContent=telefone||'Não informado';
-    nomeInput.value=nome==='Cliente Founder'?'':nome;
-    telefoneInput.value=telefone;
-    if(avatar)avatar.textContent=iniciais(nome);
-    aplicarNivel(vip);
-
-    // Repara somente campos ausentes, sem tocar em nível, carimbos, créditos ou função.
-    const reparo={atualizadoEm:serverTimestamp()};
-    if(!data.email&&user.email)reparo.email=user.email;
-    if(!data.nome&&user.displayName)reparo.nome=user.displayName;
-    if(!snap.exists())Object.assign(reparo,{role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp()});
-    if(Object.keys(reparo).length>1||!snap.exists())await setDoc(ref,reparo,{merge:true});
-  }catch(error){
-    console.error('Erro ao carregar perfil:',error);
-    msg('Não foi possível carregar os dados da conta.',true);
-  }
+    renderProfile(user,data);
+    if(!snap.exists()){
+      await setDoc(ref,{nome:user.displayName||'Cliente Founder',email:user.email||'',telefone:'',role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp(),atualizadoEm:serverTimestamp()},{merge:true});
+    }
+  },error=>{console.error('Erro ao acompanhar perfil:',error);msg('Não foi possível sincronizar os dados da conta.',true)});
 });
 
 form.addEventListener('submit',async event=>{
@@ -74,39 +66,19 @@ form.addEventListener('submit',async event=>{
   const nome=nomeInput.value.trim();
   const telefone=telefoneInput.value.trim();
   if(nome.length<2)return msg('Informe um nome válido.',true);
+  const botao=form.querySelector('button[type="submit"]');
   try{
-    const botao=form.querySelector('button[type="submit"]');
-    botao.disabled=true;
-    botao.textContent='Salvando...';
+    botao.disabled=true;botao.textContent='Salvando...';
     await updateProfile(currentUser,{displayName:nome});
-    await setDoc(doc(db,'usuarios',currentUser.uid),{
-      nome,
-      telefone,
-      email:currentUser.email||'',
-      atualizadoEm:serverTimestamp()
-    },{merge:true});
-    perfilNome.textContent=nome;
-    perfilTelefone.textContent=telefone||'Não informado';
-    if(avatar)avatar.textContent=iniciais(nome);
+    await setDoc(doc(db,'usuarios',currentUser.uid),{nome,telefone,email:currentUser.email||'',atualizadoEm:serverTimestamp()},{merge:true});
+    formDirty=false;
     msg('Dados salvos permanentemente na sua conta.');
-    botao.disabled=false;
-    botao.textContent='Salvar alterações';
-  }catch(error){
-    console.error('Erro ao salvar perfil:',error);
-    const botao=form.querySelector('button[type="submit"]');
-    botao.disabled=false;
-    botao.textContent='Salvar alterações';
-    msg('Não foi possível salvar agora. Verifique as regras do Firestore.',true);
-  }
+  }catch(error){console.error('Erro ao salvar perfil:',error);msg('Não foi possível salvar agora. Verifique as regras do Firestore.',true)}
+  finally{botao.disabled=false;botao.textContent='Salvar alterações'}
 });
 
 resetPassword.addEventListener('click',async()=>{
   if(!currentUser?.email)return;
-  try{
-    await sendPasswordResetEmail(auth,currentUser.email);
-    msg('Enviamos o link de alteração de senha para seu e-mail.');
-  }catch(error){
-    console.error(error);
-    msg('Não foi possível enviar o link de senha.',true);
-  }
+  try{await sendPasswordResetEmail(auth,currentUser.email);msg('Enviamos o link de alteração de senha para seu e-mail.')}
+  catch(error){console.error(error);msg('Não foi possível enviar o link de senha.',true)}
 });
