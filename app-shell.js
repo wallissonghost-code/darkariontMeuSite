@@ -5,12 +5,20 @@ import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase
 if(!document.querySelector('link[href^="shell-fixes.css"]')){
   const style=document.createElement('link');
   style.rel='stylesheet';
-  style.href='shell-fixes.css?v=20260730-2000';
+  style.href='shell-fixes.css?v=20260730-2015';
   document.head.append(style);
 }
 
 const body=document.body;
 const menu=document.querySelector('.menu');
+
+if(body.dataset.adminPage==='true'&&!document.getElementById('deleteDuplicateProfile')){
+  const compatibilityButton=document.createElement('button');
+  compatibilityButton.id='deleteDuplicateProfile';
+  compatibilityButton.type='button';
+  compatibilityButton.hidden=true;
+  document.body.append(compatibilityButton);
+}
 
 function fecharMenu(){
   body.classList.remove('menu-open');
@@ -53,9 +61,10 @@ function montarMenuMobile(){
 function garantirLinksAdmin(){
   if(!menu)return;
   const before=menu.querySelector('.logout-btn, button[onclick]');
+  const current=location.pathname.split('/').pop()||'home.html';
   const defs=[
     {href:'perfil-admin.html',text:'Administração'},
-    {href:'excluir-cliente.html',text:'Excluir cliente'}
+    {href:'excluir-cliente.html',text:'Excluir conta'}
   ];
   defs.forEach(def=>{
     const matches=[...menu.querySelectorAll('a')].filter(a=>a.getAttribute('href')===def.href);
@@ -69,6 +78,7 @@ function garantirLinksAdmin(){
     }
     link.dataset.adminLink='true';
     link.classList.add('admin-only');
+    link.classList.toggle('ativo',current===def.href);
   });
 }
 
