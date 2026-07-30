@@ -5,7 +5,10 @@ import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase
 const body=document.body;
 const menu=document.querySelector('.menu');
 
-function fecharMenu(){body.classList.remove('menu-open')}
+function fecharMenu(){
+  body.classList.remove('menu-open');
+  document.querySelector('.mobile-menu-trigger')?.setAttribute('aria-expanded','false');
+}
 
 function montarMenuMobile(){
   if(!menu||document.querySelector('.mobile-menu-trigger'))return;
@@ -15,16 +18,19 @@ function montarMenuMobile(){
   trigger.setAttribute('aria-label','Abrir menu');
   trigger.setAttribute('aria-expanded','false');
   trigger.innerHTML='<span></span><span></span><span></span>';
+
   const backdrop=document.createElement('button');
   backdrop.className='menu-backdrop';
   backdrop.type='button';
   backdrop.setAttribute('aria-label','Fechar menu');
+
   const close=document.createElement('button');
   close.className='menu-close';
   close.type='button';
   close.setAttribute('aria-label','Fechar menu');
   close.textContent='×';
   menu.prepend(close);
+
   trigger.addEventListener('click',()=>{
     const aberto=!body.classList.contains('menu-open');
     body.classList.toggle('menu-open',aberto);
@@ -33,6 +39,7 @@ function montarMenuMobile(){
   close.addEventListener('click',fecharMenu);
   backdrop.addEventListener('click',fecharMenu);
   menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',fecharMenu));
+
   const conteudo=document.querySelector('.conteudo');
   (conteudo||document.body).prepend(trigger);
   document.body.append(backdrop);
@@ -49,24 +56,45 @@ function garantirLinkAdmin(){
     link=document.createElement('a');
     link.href='perfil-admin.html';
     link.textContent='Administração';
-    menu.insertBefore(link,menu.querySelector('button[onclick]')||null);
+    menu.insertBefore(link,menu.querySelector('.logout-btn, button[onclick]')||null);
   }
   link.dataset.adminLink='true';
   link.classList.add('admin-only');
 }
 
-async function sair(){await signOut(auth);location.href='index.html'}
+async function sair(event){
+  event?.preventDefault?.();
+  try{
+    body.classList.add('is-signing-out');
+    await signOut(auth);
+    location.replace('index.html');
+  }catch(error){
+    console.error('Erro ao sair:',error);
+    body.classList.remove('is-signing-out');
+    alert('Não foi possível sair agora. Tente novamente.');
+  }
+}
 window.sair=sair;
+
+function ligarLogout(){
+  document.querySelectorAll('.logout-btn, .menu button[onclick*="sair"]').forEach(botao=>{
+    botao.removeAttribute('onclick');
+    botao.type='button';
+    botao.addEventListener('click',sair);
+  });
+}
+
 montarMenuMobile();
 garantirLinkAdmin();
+ligarLogout();
 
 onAuthStateChanged(auth,async user=>{
-  if(!user){location.href='index.html';return}
+  if(!user){location.replace('index.html');return}
   let role='cliente';
   try{
     const snap=await getDoc(doc(db,'usuarios',user.uid));
     if(snap.exists())role=(snap.data().role||'cliente').toLowerCase();
-  }catch(e){console.error(e)}
+  }catch(error){console.error(error)}
   const admin=['admin','administrador','master'].includes(role);
   document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('is-visible',admin));
   document.documentElement.dataset.role=admin?'admin':'cliente';
