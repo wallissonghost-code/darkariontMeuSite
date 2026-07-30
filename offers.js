@@ -1,0 +1,6 @@
+import { db } from './firebase.js';
+import { collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+const grid=document.getElementById('offersGrid');
+const defaults=[{categoria:'DROP EXCLUSIVO',titulo:'20% OFF',descricao:'Condição especial aplicada em coleções selecionadas.',botao:'Ver condição',ordem:1,ativo:true},{categoria:'BENEFÍCIO VIP',titulo:'FRETE GRÁTIS',descricao:'Disponível para membros elegíveis conforme o nível.',botao:'Consultar benefício',ordem:2,ativo:true},{categoria:'ACESSO PRIVADO',titulo:'PRÉ-LANÇAMENTO',descricao:'Antecipe o acesso às próximas coleções WD Founder.',botao:'Ver disponibilidade',ordem:3,ativo:true}];
+function render(items){grid.innerHTML=items.filter(x=>x.ativo!==false).map(x=>`<article class="oferta"><h2>${x.categoria||'BENEFÍCIO'}</h2><h1>${x.titulo||'Oferta'}</h1><p>${x.descricao||''}</p><button>${x.botao||'Ver benefício'}</button></article>`).join('')||'<article class="oferta"><h2>EM BREVE</h2><h1>Novos benefícios</h1><p>Não há condições ativas no momento.</p></article>'}
+try{const snap=await getDocs(query(collection(db,'ofertas'),orderBy('ordem')));render(snap.empty?defaults:snap.docs.map(d=>({id:d.id,...d.data()})));}catch(e){render(defaults)}
