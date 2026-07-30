@@ -13,38 +13,49 @@ const roleLabel=role=>['admin','administrador','master'].includes(String(role||'
 
 function render(){
   const c=clients.find(x=>x.id===select.value);
-  if(!c){summary.innerHTML='<span>Selecione uma conta para conferir os dados.</span>';return;}
-  summary.innerHTML=`<strong>${c.nome||c.email||'Cliente'}</strong><span>${c.email||'Sem e-mail'} · ${roleLabel(c.role)}</span><span>UID final: ${shortUid(c.id)} · LV${Math.max(1,(Number(c.vip)||0)+1)}</span>${c.id===auth.currentUser?.uid?'<span><strong>Esta é a conta que está logada agora e não pode ser excluída.</strong></span>':''}`;
+  if(!c){summary.innerHTML='<span>Selecione uma conta para conferir os dados.</span>';button.disabled=true;return;}
+  const current=c.id===auth.currentUser?.uid;
+  summary.innerHTML=`<strong>${c.nome||c.email||'Cliente'}</strong><span>${c.email||'Sem e-mail'} · ${roleLabel(c.role)}</span><span>UID final: ${shortUid(c.id)} · LV${Math.max(1,(Number(c.vip)||0)+1)}</span>${current?'<span class="current-warning">Esta é a conta usada agora. Excluí-la encerrará seu acesso ao painel.</span>':''}`;
+  button.disabled=false;
+  button.textContent=current?'Excluir minha conta administrativa':'Excluir conta selecionada';
 }
 
 async function loadClients(){
   try{
+    const selected=select.value;
     const snap=await getDocs(collection(db,'usuarios'));
     clients=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.nome||a.email||'').localeCompare(b.nome||b.email||''));
-    select.innerHTML='<option value="">Selecione um cliente</option>'+clients.map(c=>`<option value="${c.id}">${c.nome||c.email||'Cliente'} · ${c.email||'sem e-mail'} · ${roleLabel(c.role)} · ID ${shortUid(c.id)}${c.id===auth.currentUser?.uid?' · VOCÊ':''}</option>`).join('');
+    select.innerHTML='<option value="">Selecione uma conta</option>'+clients.map(c=>`<option value="${c.id}">${c.nome||c.email||'Cliente'} · ${c.email||'sem e-mail'} · ${roleLabel(c.role)} · ID ${shortUid(c.id)}${c.id===auth.currentUser?.uid?' · VOCÊ':''}</option>`).join('');
+    if(clients.some(c=>c.id===selected))select.value=selected;
     render();
   }catch(error){
     console.error(error);
-    select.innerHTML='<option value="">Não foi possível carregar clientes</option>';
+    select.innerHTML='<option value="">Não foi possível carregar contas</option>';
     status.textContent='Verifique as regras administrativas do Firestore.';
   }
 }
 
 async function removeClient(){
   const c=clients.find(x=>x.id===select.value);
-  if(!c){status.textContent='Selecione um cliente.';return;}
-  if(c.id===auth.currentUser?.uid){status.textContent='A conta atualmente logada não pode ser excluída.';return;}
+  if(!c){status.textContent='Selecione uma conta.';return;}
   const motivo=reason.value.trim();
   if(motivo.length<3){status.textContent='Informe o motivo da exclusão.';return;}
-  const confirmation=prompt(`Digite EXCLUIR para remover ${c.nome||c.email}:`);
-  if(confirmation!=='EXCLUIR'){status.textContent='Exclusão cancelada.';return;}
+  const deletingSelf=c.id===auth.currentUser?.uid;
+  const required=deletingSelf?'EXCLUIR MINHA CONTA':'EXCLUIR';
+  const confirmation=prompt(`Esta ação remove permanentemente o perfil de ${c.nome||c.email} do site. Digite ${required} para confirmar:`);
+  if(confirmation!==required){status.textContent='Exclusão cancelada.';return;}
   button.disabled=true;
-  status.textContent='Excluindo perfil...';
+  status.textContent='Excluindo conta...';
   try{
-    await addDoc(collection(db,'logs'),{tipo:'perfil_excluido',clienteId:c.id,clienteNome:c.nome||'',clienteEmail:c.email||'',motivo,admin:{uid:auth.currentUser?.uid||'',email:auth.currentUser?.email||''},dadosExcluidos:c,criadoEm:serverTimestamp()});
+    await addDoc(collection(db,'logs'),{tipo:'perfil_excluido',clienteId:c.id,clienteNome:c.nome||'',clienteEmail:c.email||'',clienteRole:c.role||'cliente',motivo,admin:{uid:auth.currentUser?.uid||'',email:auth.currentUser?.email||''},dadosExcluidos:c,criadoEm:serverTimestamp()});
     await deleteDoc(doc(db,'usuarios',c.id));
-    status.textContent='Perfil excluído do site. Remova também no Authentication caso essa conta ainda esteja lá.';
     reason.value='';
+    if(deletingSelf){
+      alert('Sua conta administrativa foi removida do site. Exclua também o usuário no Authentication caso queira removê-lo por completo.');
+      location.replace('index.html');
+      return;
+    }
+    status.textContent='Conta excluída do site com sucesso. Para removê-la por completo, exclua também o usuário correspondente no Authentication.';
     await loadClients();
   }catch(error){
     console.error(error);
@@ -56,4 +67,5 @@ async function removeClient(){
 
 select.addEventListener('change',render);
 button.addEventListener('click',removeClient);
+button.disabled=true;
 loadClients();
