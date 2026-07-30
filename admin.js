@@ -4,12 +4,16 @@ const names=['BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELI
 const level=document.getElementById('adminLevel'),field=document.getElementById('adminBenefits'),status=document.getElementById('adminStatus');
 const clientSelect=document.getElementById('clientSelect'),clientSummary=document.getElementById('clientSummary'),purchaseStatus=document.getElementById('purchaseStatus'),history=document.getElementById('purchaseHistory');
 const correctionClient=document.getElementById('correctionClient'),correctionVip=document.getElementById('correctionVip'),correctionStamps=document.getElementById('correctionStamps'),correctionCredits=document.getElementById('correctionCredits'),correctionReason=document.getElementById('correctionReason'),correctionStatus=document.getElementById('correctionStatus');
+const duplicateInfo=document.getElementById('duplicateInfo');
 let clients=[];
 
 function parseMoney(raw){return Number(String(raw||'').replace('R$','').replace(/\./g,'').replace(',','.').trim())}
 function money(value){return Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function formatDate(ts){try{return ts?.toDate().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})||'Agora'}catch{return 'Agora'}}
 function currentAdmin(){return {uid:auth.currentUser?.uid||'',email:auth.currentUser?.email||''}}
+function shortUid(uid){return String(uid||'').slice(-6)}
+function normalized(value){return String(value||'').trim().toLowerCase()}
+function roleLabel(role){const r=normalized(role);return ['admin','administrador','master'].includes(r)?'ADMIN':'CLIENTE'}
 async function audit(type,payload){await addDoc(collection(db,'logs'),{tipo:type,...payload,admin:currentAdmin(),criadoEm:serverTimestamp()})}
 
 async function loadBenefits(){const s=await getDoc(doc(db,'niveis',level.value));field.value=s.exists()&&Array.isArray(s.data().beneficios)?s.data().beneficios.join('\n'):'';status.textContent=''}
@@ -21,9 +25,28 @@ async function loadOffer(){const s=await getDoc(doc(db,'ofertas',offerId.value))
 async function saveOffer(){const data={categoria:offerCategory.value.trim(),titulo:offerTitle.value.trim(),descricao:offerDescription.value.trim(),botao:offerButton.value.trim()||'Ver benefício',ordem:Number(offerOrder.value)||1,ativo:true,atualizadoEm:serverTimestamp()};if(!data.titulo)return offerStatus.textContent='Informe o título da oferta.';await setDoc(doc(db,'ofertas',offerId.value),data,{merge:true});offerStatus.textContent='Oferta salva com sucesso.'}
 offerId.addEventListener('change',loadOffer);document.getElementById('saveOffer').addEventListener('click',saveOffer);loadOffer();
 
-function optionLabel(c){return `${c.nome||c.email||'Cliente'} — LV${Math.max(1,(Number(c.vip)||0)+1)}`}
-function renderClient(){const c=clients.find(x=>x.id===clientSelect.value);if(!c){clientSummary.innerHTML='<strong>Nenhum cliente selecionado</strong><span>O nível e o telefone aparecerão aqui.</span>';return}const vip=Math.max(0,Math.min(9,Number(c.vip)||0));clientSummary.innerHTML=`<strong>${c.nome||c.email||'Cliente'}</strong><span>LV${vip+1} — ${names[vip]} · ${c.telefone||'Telefone não informado'}</span>`}
-function renderCorrection(){const c=clients.find(x=>x.id===correctionClient.value);if(!c)return;correctionVip.value=String(Math.max(0,Math.min(9,Number(c.vip)||0)));correctionStamps.value=String(Math.max(0,Math.min(10,Number(c.carimbos)||0)));correctionCredits.value=Number(c.creditos||0).toFixed(2).replace('.',',')}
+function duplicateCount(c){
+  return clients.filter(x=>x.id!==c.id&&((c.email&&normalized(x.email)===normalized(c.email))||(!c.email&&!x.email&&normalized(x.nome)===normalized(c.nome)))).length;
+}
+function optionLabel(c){
+  const you=c.id===auth.currentUser?.uid?' · VOCÊ':'';
+  const duplicate=duplicateCount(c)?' · POSSÍVEL DUPLICADO':'';
+  const email=c.email||'sem e-mail';
+  return `${c.nome||email} — LV${Math.max(1,(Number(c.vip)||0)+1)} · ${roleLabel(c.role)} · ${email} · ID ${shortUid(c.id)}${you}${duplicate}`;
+}
+function identityHtml(c){
+  const duplicate=duplicateCount(c)>0;
+  return `<strong>${c.nome||c.email||'Cliente'}</strong><span>${c.email||'Sem e-mail'} · ${roleLabel(c.role)} · ID final ${shortUid(c.id)}</span><span>LV${Math.max(1,(Number(c.vip)||0)+1)} — ${names[Math.max(0,Math.min(9,Number(c.vip)||0))]} · ${c.telefone||'Telefone não informado'}</span>${duplicate?'<span class="duplicate-alert">Atenção: há outro cadastro com a mesma identidade.</span>':''}`;
+}
+function renderClient(){const c=clients.find(x=>x.id===clientSelect.value);clientSummary.innerHTML=c?identityHtml(c):'<strong>Nenhum cliente selecionado</strong><span>Nome, e-mail, função e ID aparecerão aqui.</span>'}
+function renderCorrection(){
+  const c=clients.find(x=>x.id===correctionClient.value);
+  if(!c){if(duplicateInfo)duplicateInfo.innerHTML='';return;}
+  correctionVip.value=String(Math.max(0,Math.min(9,Number(c.vip)||0)));
+  correctionStamps.value=String(Math.max(0,Math.min(10,Number(c.carimbos)||0)));
+  correctionCredits.value=Number(c.creditos||0).toFixed(2).replace('.',',');
+  if(duplicateInfo)duplicateInfo.innerHTML=identityHtml(c);
+}
 async function loadClients(){
   try{
     const selected=clientSelect.value,selectedCorrection=correctionClient.value;
@@ -33,15 +56,16 @@ async function loadClients(){
     clientSelect.innerHTML=options;correctionClient.innerHTML=options;
     if(clients.some(c=>c.id===selected))clientSelect.value=selected;
     if(clients.some(c=>c.id===selectedCorrection))correctionClient.value=selectedCorrection;
+    else if(clients.some(c=>c.id===auth.currentUser?.uid))correctionClient.value=auth.currentUser.uid;
     renderClient();renderCorrection();
-  }catch(e){clientSelect.innerHTML='<option value="">Sem permissão para listar clientes</option>';correctionClient.innerHTML=clientSelect.innerHTML;purchaseStatus.textContent='As regras do Firestore precisam permitir leitura administrativa da coleção usuarios.'}
+  }catch(e){console.error(e);clientSelect.innerHTML='<option value="">Sem permissão para listar clientes</option>';correctionClient.innerHTML=clientSelect.innerHTML;purchaseStatus.textContent='As regras do Firestore precisam permitir leitura administrativa da coleção usuarios.'}
 }
 
 async function loadHistory(){
   try{
     const snap=await getDocs(query(collection(db,'compras'),orderBy('criadoEm','desc'),limit(100)));
     const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
-    history.innerHTML=rows.length?rows.map(r=>`<article class="history-item"><div><strong>${r.clienteNome||r.clienteEmail||'Cliente'}</strong><small>LV${Number(r.vipDepois||0)+1} — ${names[Math.max(0,Math.min(9,Number(r.vipDepois)||0))]}</small></div><div class="history-value">${money(r.valor)}</div><div class="history-stamps">+${Number(r.carimbosGanhos||0)} carimbo(s)</div><small class="history-date">${formatDate(r.criadoEm)}</small><button class="danger-btn delete-purchase" data-id="${r.id}" type="button">Excluir lançamento</button></article>`).join(''):'<div class="client-summary"><span>Nenhuma compra registrada ainda.</span></div>';
+    history.innerHTML=rows.length?rows.map(r=>`<article class="history-item"><div><strong>${r.clienteNome||r.clienteEmail||'Cliente'}</strong><small>${r.clienteEmail||''} · ID ${shortUid(r.clienteId)}</small><small>LV${Number(r.vipDepois||0)+1} — ${names[Math.max(0,Math.min(9,Number(r.vipDepois)||0))]}</small></div><div class="history-value">${money(r.valor)}</div><div class="history-stamps">+${Number(r.carimbosGanhos||0)} carimbo(s)</div><small class="history-date">${formatDate(r.criadoEm)}</small><button class="danger-btn delete-purchase" data-id="${r.id}" type="button">Excluir lançamento</button></article>`).join(''):'<div class="client-summary"><span>Nenhuma compra registrada ainda.</span></div>';
     document.querySelectorAll('.delete-purchase').forEach(btn=>btn.addEventListener('click',()=>deletePurchase(btn.dataset.id,rows.find(r=>r.id===btn.dataset.id))));
   }catch(e){console.error(e);history.innerHTML='<div class="client-summary"><span>Não foi possível carregar o histórico. Verifique as regras da coleção compras.</span></div>'}
 }
@@ -55,7 +79,7 @@ async function savePurchase(){
   await updateDoc(doc(db,'usuarios',c.id),{vip,carimbos:stamps,creditos:increment(value),atualizadoEm:serverTimestamp()});
   const purchase=await addDoc(collection(db,'compras'),{clienteId:c.id,clienteNome:c.nome||'',clienteEmail:c.email||'',telefone:c.telefone||'',valor:value,carimbosGanhos:gained,carimbosAntes:stampsAntes,carimbosDepois:stamps,vipAntes,vipDepois:vip,criadoEm:serverTimestamp()});
   await audit('compra_registrada',{clienteId:c.id,clienteNome:c.nome||c.email||'',compraId:purchase.id,valor:value,vipAntes,vipDepois:vip,carimbosAntes:stampsAntes,carimbosDepois:stamps});
-  document.getElementById('purchaseValue').value='';purchaseStatus.textContent=`Compra registrada para ${c.nome||c.email}. ${gained} carimbo(s) adicionado(s).`;
+  document.getElementById('purchaseValue').value='';purchaseStatus.textContent=`Compra registrada para ${c.nome||c.email} · ID ${shortUid(c.id)}.`;
   await loadClients();await loadHistory();
 }
 
@@ -70,19 +94,31 @@ async function saveCorrection(){
   const before={vip:Number(c.vip)||0,carimbos:Number(c.carimbos)||0,creditos:Number(c.creditos)||0};
   const after={vip:newVip,carimbos:newStamps,creditos:newCredits};
   await updateDoc(doc(db,'usuarios',c.id),{...after,atualizadoEm:serverTimestamp()});
-  await audit('conta_corrigida',{clienteId:c.id,clienteNome:c.nome||c.email||'',motivo:reason,antes:before,depois:after});
-  correctionStatus.textContent=`Conta de ${c.nome||c.email} corrigida e registrada no histórico administrativo.`;
+  await audit('conta_corrigida',{clienteId:c.id,clienteNome:c.nome||c.email||'',clienteEmail:c.email||'',motivo:reason,antes:before,depois:after});
+  correctionStatus.textContent=`Conta correta atualizada: ${c.nome||c.email} · ID ${shortUid(c.id)}.`;
   correctionReason.value='';await loadClients();
 }
 
 async function resetCustomer(){
   const c=clients.find(x=>x.id===correctionClient.value);if(!c)return correctionStatus.textContent='Selecione um cliente.';
   const reason=correctionReason.value.trim();if(reason.length<3)return correctionStatus.textContent='Informe o motivo antes de zerar a conta.';
-  if(!confirm(`Zerar nível, carimbos e créditos de ${c.nome||c.email}?`))return;
+  if(!confirm(`Zerar nível, carimbos e créditos de ${c.nome||c.email} · ID ${shortUid(c.id)}?`))return;
   const before={vip:Number(c.vip)||0,carimbos:Number(c.carimbos)||0,creditos:Number(c.creditos)||0};
   await updateDoc(doc(db,'usuarios',c.id),{vip:0,carimbos:0,creditos:0,atualizadoEm:serverTimestamp()});
-  await audit('conta_zerada',{clienteId:c.id,clienteNome:c.nome||c.email||'',motivo:reason,antes:before,depois:{vip:0,carimbos:0,creditos:0}});
-  correctionStatus.textContent=`Conta de ${c.nome||c.email} zerada com registro administrativo.`;correctionReason.value='';await loadClients();
+  await audit('conta_zerada',{clienteId:c.id,clienteNome:c.nome||c.email||'',clienteEmail:c.email||'',motivo:reason,antes:before,depois:{vip:0,carimbos:0,creditos:0}});
+  correctionStatus.textContent=`Conta zerada: ${c.nome||c.email} · ID ${shortUid(c.id)}.`;correctionReason.value='';await loadClients();
+}
+
+async function deleteDuplicateProfile(){
+  const c=clients.find(x=>x.id===correctionClient.value);if(!c)return correctionStatus.textContent='Selecione o cadastro duplicado.';
+  if(c.id===auth.currentUser?.uid)return correctionStatus.textContent='A conta atualmente logada não pode ser excluída. Selecione o outro cadastro duplicado.';
+  if(duplicateCount(c)<1)return correctionStatus.textContent='Esse cadastro não foi identificado como duplicado. Confira e-mail, nome e ID antes de excluir.';
+  const reason=correctionReason.value.trim();if(reason.length<3)return correctionStatus.textContent='Informe o motivo da exclusão.';
+  if(!confirm(`Excluir o cadastro duplicado ${c.nome||c.email} · ID ${shortUid(c.id)}? Essa ação não exclui o usuário do Authentication.`))return;
+  await audit('cadastro_duplicado_excluido',{clienteId:c.id,clienteNome:c.nome||'',clienteEmail:c.email||'',motivo:reason,dadosExcluidos:c});
+  await deleteDoc(doc(db,'usuarios',c.id));
+  correctionReason.value='';correctionStatus.textContent='Cadastro duplicado removido. A conta autenticada principal foi preservada.';
+  await loadClients();
 }
 
 async function deletePurchase(id,purchase){
@@ -97,4 +133,5 @@ correctionClient.addEventListener('change',renderCorrection);
 document.getElementById('savePurchase').addEventListener('click',savePurchase);
 document.getElementById('saveCorrection').addEventListener('click',saveCorrection);
 document.getElementById('resetCustomer').addEventListener('click',resetCustomer);
+document.getElementById('deleteDuplicateProfile').addEventListener('click',deleteDuplicateProfile);
 loadClients();loadHistory();
