@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function ehDono(uid) {
+      return autenticado() && request.auth.uid == uid;
+    }
+
+    function ehAdmin() {
+      return autenticado()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in ['admin', 'administrador', 'master'];
+    }
+
+    match /usuarios/{uid} {
+      allow get: if ehDono(uid) || ehAdmin();
+      allow list: if ehAdmin();
+
+      allow create: if ehDono(uid)
+        && request.resource.data.role == 'cliente'
+        && request.resource.data.vip == 0
+        && request.resource.data.carimbos == 0
+        && request.resource.data.creditos == 0
+        && request.resource.data.email == request.auth.token.email;
+
+      allow update: if ehAdmin() || (
+        ehDono(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'nome',
+          'telefone',
+          'atualizadoEm'
+        ])
+      );
+
+      allow delete: if ehAdmin();
+    }
+
+    match /compras/{compraId} {
+      allow read: if ehAdmin() || (
+        autenticado() && resource.data.clienteId == request.auth.uid
+      );
+      allow create, update, delete: if ehAdmin();
+    }
+
+    match /niveis/{nivelId} {
+      allow read: if autenticado();
+      allow write: if ehAdmin();
+    }
+
+    match /ofertas/{ofertaId} {
+      allow read: if autenticado();
+      allow write: if ehAdmin();
+    }
+
+    match /configuracoes/{configId} {
+      allow read: if autenticado();
+      allow write: if ehAdmin();
+    }
+
+    match /notificacoes/{notificacaoId} {
+      allow read: if ehAdmin() || (
+        autenticado() && resource.data.clienteId == request.auth.uid
+      );
+      allow create, update, delete: if ehAdmin();
+    }
+
+    match /logs/{logId} {
+      allow read, create: if ehAdmin();
+      allow update, delete: if false;
+    }
+
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}
