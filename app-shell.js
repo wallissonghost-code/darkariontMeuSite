@@ -1,11 +1,11 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
-import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-if(!document.querySelector('link[href="shell-fixes.css"]')){
+if(!document.querySelector('link[href^="shell-fixes.css"]')){
   const style=document.createElement('link');
   style.rel='stylesheet';
-  style.href='shell-fixes.css';
+  style.href='shell-fixes.css?v=20260730-1853';
   document.head.append(style);
 }
 
@@ -69,24 +69,12 @@ function garantirLinkAdmin(){
   link.classList.add('admin-only');
 }
 
-async function garantirDocumentoUsuario(user){
-  const referencia=doc(db,'usuarios',user.uid);
-  const snap=await getDoc(referencia);
+async function carregarDocumentoUsuario(user){
+  const snap=await getDoc(doc(db,'usuarios',user.uid));
   if(snap.exists())return snap.data();
-
-  const novoUsuario={
-    nome:user.displayName||user.email?.split('@')[0]||'Cliente Founder',
-    email:user.email||'',
-    telefone:'',
-    role:'cliente',
-    vip:0,
-    carimbos:0,
-    creditos:0,
-    criadoEm:serverTimestamp(),
-    atualizadoEm:serverTimestamp()
-  };
-  await setDoc(referencia,novoUsuario);
-  return novoUsuario;
+  const error=new Error('Cadastro do clube não encontrado.');
+  error.code='wd/missing-club-profile';
+  throw error;
 }
 
 async function sair(event){
@@ -120,10 +108,15 @@ onAuthStateChanged(auth,async user=>{
   if(!user){location.replace('index.html');return}
   let dados;
   try{
-    dados=await garantirDocumentoUsuario(user);
+    dados=await carregarDocumentoUsuario(user);
   }catch(error){
-    console.error('Não foi possível carregar ou criar o perfil:',error);
+    console.error('Perfil do clube indisponível:',error);
     document.dispatchEvent(new CustomEvent('wd-profile-error',{detail:{user,error}}));
+    if(error.code==='wd/missing-club-profile'){
+      alert('Esta conta não possui mais cadastro ativo no WD Founder. Entre novamente ou crie um novo cadastro.');
+      await signOut(auth).catch(()=>{});
+      location.replace('index.html');
+    }
     return;
   }
   const role=String(dados?.role||'cliente').toLowerCase();
