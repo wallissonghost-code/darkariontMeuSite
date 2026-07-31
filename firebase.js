@@ -1,6 +1,6 @@
 // Firebase Web SDK — configuração do projeto WD Founder
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -13,8 +13,28 @@ const firebaseConfig = {
   measurementId: "G-0WBQZPS5Z1"
 };
 
-const app = initializeApp(firebaseConfig);
+const path = location.pathname.toLowerCase();
+const isAdminContext = document.body?.dataset.adminPage === 'true'
+  || document.body?.dataset.adminLogin === 'true'
+  || path.endsWith('/admin-login.html');
+
+const appName = isAdminContext ? 'wd-founder-admin' : '[DEFAULT]';
+const app = appName === '[DEFAULT]'
+  ? (getApps().some(item => item.name === '[DEFAULT]') ? getApp() : initializeApp(firebaseConfig))
+  : (getApps().some(item => item.name === appName) ? getApp(appName) : initializeApp(firebaseConfig, appName));
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, auth, db };
+// O membro permanece conectado no navegador. O administrador usa uma sessão
+// independente por aba, impedindo que um login substitua o outro.
+const authReady = setPersistence(
+  auth,
+  isAdminContext ? browserSessionPersistence : browserLocalPersistence
+).catch(error => {
+  console.error('Não foi possível configurar a persistência da sessão:', error);
+});
+
+const sessionScope = isAdminContext ? 'admin' : 'member';
+
+export { app, auth, db, authReady, isAdminContext, sessionScope };
