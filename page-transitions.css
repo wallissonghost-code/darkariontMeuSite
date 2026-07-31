@@ -1,9 +1,31 @@
+@view-transition{navigation:auto}
+
 html.wd-transitions-ready{background:var(--bg,#f5f2eb)}
-body.wd-page-enter .conteudo,body.wd-page-enter main,body.wd-page-enter .dashboard-page{opacity:.985;transform:translate3d(0,4px,0)}
-body.wd-page-visible .conteudo,body.wd-page-visible main,body.wd-page-visible .dashboard-page{opacity:1;transform:translate3d(0,0,0);transition:opacity .16s ease-out,transform .18s cubic-bezier(.22,1,.36,1)}
-body.wd-page-leaving{pointer-events:none}
-body.wd-page-leaving .conteudo,body.wd-page-leaving main,body.wd-page-leaving .dashboard-page{opacity:.94!important;transform:translate3d(0,-2px,0)!important;transition:opacity .045s linear,transform .045s linear!important}
-.client-bottom-nav{opacity:1!important;transform:none!important;transition:none!important;animation:none!important;will-change:auto!important}
-body.wd-page-leaving .client-bottom-nav,body.wd-page-enter .client-bottom-nav,body.wd-page-visible .client-bottom-nav{opacity:1!important;transform:none!important;filter:none!important;visibility:visible!important}
+body{opacity:1}
+
+.client-bottom-nav{view-transition-name:wd-bottom-nav;contain:paint}
+.menu{view-transition-name:wd-side-menu}
+
+::view-transition-group(root){animation-duration:.22s;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+::view-transition-old(root){animation:wd-page-out .14s ease both}
+::view-transition-new(root){animation:wd-page-in .22s cubic-bezier(.22,1,.36,1) both}
+
+::view-transition-group(wd-bottom-nav){animation-duration:.01s}
+::view-transition-old(wd-bottom-nav),::view-transition-new(wd-bottom-nav){animation:none;mix-blend-mode:normal}
+
+@keyframes wd-page-out{
+  to{opacity:.82;transform:translate3d(-8px,0,0) scale(.998)}
+}
+
+@keyframes wd-page-in{
+  from{opacity:.82;transform:translate3d(10px,0,0) scale(.998)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+
+.wd-page-visible .conteudo,.wd-page-visible main,.wd-page-visible .dashboard-page{opacity:1;transform:none}
 .wd-page-curtain{display:none!important}
-@media(prefers-reduced-motion:reduce){body.wd-page-enter .conteudo,body.wd-page-enter main,body.wd-page-enter .dashboard-page,body.wd-page-visible .conteudo,body.wd-page-visible main,body.wd-page-visible .dashboard-page,body.wd-page-leaving .conteudo,body.wd-page-leaving main,body.wd-page-leaving .dashboard-page{opacity:1!important;transform:none!important;transition:none!important}}
+
+@media(prefers-reduced-motion:reduce){
+  @view-transition{navigation:auto}
+  ::view-transition-group(root),::view-transition-old(root),::view-transition-new(root),::view-transition-group(wd-bottom-nav),::view-transition-old(wd-bottom-nav),::view-transition-new(wd-bottom-nav){animation:none!important}
+}
