@@ -2,7 +2,7 @@ import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-const BUILD = '20260731-1505';
+const BUILD = '20260731-1538';
 const body = document.body;
 const menu = document.querySelector('.menu');
 const isClientApp = body.dataset.clientApp === 'true';
@@ -69,8 +69,23 @@ function abrirMenu() {
   document.querySelector('.mobile-menu-trigger')?.setAttribute('aria-expanded', 'true');
 }
 
+function removerMenuCliente() {
+  fecharMenu();
+  document.querySelectorAll('.mobile-menu-trigger,.menu-backdrop').forEach(el => el.remove());
+  menu?.querySelectorAll('.menu-close,.menu-links,.menu-footer,a,button').forEach(el => el.remove());
+  if (menu) {
+    menu.hidden = true;
+    menu.setAttribute('aria-hidden', 'true');
+  }
+  body.classList.add('client-menu-disabled');
+}
+
 function garantirLinksAdmin() {
   if (!menu) return;
+  menu.hidden = false;
+  menu.removeAttribute('aria-hidden');
+  body.classList.remove('client-menu-disabled');
+
   const current = location.pathname.split('/').pop() || 'home.html';
   const defs = [
     ['registrar-compra.html', 'Registrar compra'],
@@ -80,68 +95,46 @@ function garantirLinksAdmin() {
     ['perfil-admin.html', 'Administração'],
     ['excluir-cliente.html', 'Excluir conta']
   ];
+
+  menu.querySelectorAll('a').forEach(a => a.remove());
   defs.forEach(([href, text]) => {
-    const matches = [...menu.querySelectorAll('a')].filter(a => a.getAttribute('href') === href);
-    matches.slice(1).forEach(a => a.remove());
-    const link = matches[0] || document.createElement('a');
+    const link = document.createElement('a');
     link.href = href;
     link.textContent = text;
     link.dataset.adminLink = 'true';
-    link.classList.add('admin-only');
-    link.classList.toggle('ativo', current === href);
+    link.className = `admin-only is-visible${current === href ? ' ativo' : ''}`;
     menu.append(link);
   });
 }
 
-function montarEstruturaMenu() {
+function montarEstruturaMenuAdmin() {
   if (!menu) return;
+
   let links = menu.querySelector('.menu-links');
-  let footer = menu.querySelector('.menu-footer');
   if (!links) {
     links = document.createElement('div');
     links.className = 'menu-links';
-  }
-  if (!footer) {
-    footer = document.createElement('div');
-    footer.className = 'menu-footer';
   }
 
   const marca = menu.querySelector('.marca');
   const close = menu.querySelector('.menu-close');
   [...menu.children].forEach(el => {
-    if ([marca, close, links, footer].includes(el)) return;
-    if (el.matches('.logout-btn,[data-action="logout"],button[onclick*="sair"]')) footer.append(el);
-    else if (el.matches('a')) links.append(el);
+    if ([marca, close, links].includes(el)) return;
+    if (el.matches('a')) links.append(el);
+    else if (el.matches('.menu-footer,.logout-btn,[data-action="logout"]')) el.remove();
   });
 
   if (marca) menu.insertBefore(links, marca.nextSibling);
   else menu.prepend(links);
-  menu.append(footer);
-
-  footer.querySelectorAll('button').forEach((button, index) => {
-    if (index > 0) button.remove();
-  });
-  let logout = footer.querySelector('button');
-  if (!logout) {
-    logout = document.createElement('button');
-    footer.append(logout);
-  }
-  logout.className = 'logout-btn';
-  logout.dataset.action = 'logout';
-  logout.type = 'button';
-  logout.textContent = 'Sair da conta';
-  logout.hidden = false;
-  logout.disabled = false;
-  logout.removeAttribute('onclick');
-  logout.removeAttribute('style');
 }
 
-function montarMenuMobile() {
+function montarMenuMobileAdmin() {
   if (!menu || document.querySelector('.mobile-menu-trigger')) return;
+
   const trigger = document.createElement('button');
-  trigger.className = 'mobile-menu-trigger';
+  trigger.className = 'mobile-menu-trigger admin-menu-trigger';
   trigger.type = 'button';
-  trigger.setAttribute('aria-label', 'Abrir menu');
+  trigger.setAttribute('aria-label', 'Abrir ferramentas administrativas');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.innerHTML = '<span></span><span></span><span></span>';
 
@@ -166,9 +159,6 @@ function montarMenuMobile() {
 
   (document.querySelector('.conteudo,.app-stage') || document.body).prepend(trigger);
   document.body.append(backdrop);
-  window.addEventListener('pageshow', fecharMenu);
-  window.addEventListener('resize', () => { if (innerWidth > 768) fecharMenu(); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') fecharMenu(); });
 }
 
 function iniciais(nome) {
@@ -227,12 +217,9 @@ async function sair(event) {
 }
 
 window.sair = sair;
-
-// Um único listener delegado controla todo logout, inclusive botões recriados.
 document.addEventListener('click', event => {
   const button = event.target.closest('[data-action="logout"],.logout-btn,button[onclick*="sair"]');
-  if (!button) return;
-  sair(event);
+  if (button) sair(event);
 }, true);
 
 if (body.dataset.adminPage === 'true' && !document.getElementById('deleteDuplicateProfile')) {
@@ -242,10 +229,6 @@ if (body.dataset.adminPage === 'true' && !document.getElementById('deleteDuplica
   button.hidden = true;
   document.body.append(button);
 }
-
-garantirLinksAdmin();
-montarEstruturaMenu();
-montarMenuMobile();
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -280,9 +263,16 @@ onAuthStateChanged(auth, async user => {
 
   const role = String(dados?.role || 'cliente').toLowerCase();
   const admin = ['admin', 'administrador', 'master'].includes(role);
-  document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('is-visible', admin));
   document.documentElement.dataset.role = admin ? 'admin' : 'cliente';
-  montarEstruturaMenu();
+
+  if (admin) {
+    garantirLinksAdmin();
+    montarEstruturaMenuAdmin();
+    montarMenuMobileAdmin();
+  } else {
+    removerMenuCliente();
+  }
+
   montarNavegacaoCliente(dados);
 
   if (body.dataset.adminPage === 'true' && !admin) {
