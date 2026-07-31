@@ -5,17 +5,17 @@ import { calcularFidelidade,money } from './regras-fidelidade.js';
 
 const levels=['MEMBRO','BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELITE','PRIME','FOUNDER'];
 const palettes=[
-  {a:'#4b4c50',b:'#23252a',c:'#090a0c',edge:'#d7d9dd',shadow:'rgba(0,0,0,.48)',text:'#fff'},
-  {a:'#f0a45b',b:'#B87333',c:'#4b1f0d',edge:'#ffd0a0',shadow:'rgba(184,115,51,.48)',text:'#fff'},
-  {a:'#ffffff',b:'#C0C0C0',c:'#5f6670',edge:'#ffffff',shadow:'rgba(150,160,175,.42)',text:'#171717'},
-  {a:'#ffe083',b:'#D4AF37',c:'#5b3c00',edge:'#fff2b0',shadow:'rgba(212,175,55,.52)',text:'#fff'},
-  {a:'#ad82ff',b:'#6C3CE9',c:'#21104f',edge:'#e5d6ff',shadow:'rgba(108,60,233,.5)',text:'#fff'},
-  {a:'#ffffff',b:'#E5E4E2',c:'#87909b',edge:'#ffffff',shadow:'rgba(190,200,212,.48)',text:'#171717'},
-  {a:'#4c8dff',b:'#0F52BA',c:'#031b49',edge:'#b8d4ff',shadow:'rgba(15,82,186,.52)',text:'#fff'},
-  {a:'#353535',b:'#121212',c:'#000000',edge:'#bfc2c7',shadow:'rgba(0,0,0,.65)',text:'#fff'},
-  {a:'#ee5365',b:'#B11226',c:'#3b020b',edge:'#ffc0c8',shadow:'rgba(177,18,38,.52)',text:'#fff'},
-  {a:'#4265c5',b:'#1F3A93',c:'#071337',edge:'#D4AF37',shadow:'rgba(31,58,147,.58)',text:'#fff'},
-  {a:'#303030',b:'#0A0A0A',c:'#000000',edge:'#FFD700',shadow:'rgba(0,0,0,.72)',text:'#fff'}
+  {a:'#35363a',b:'#1e2024',c:'#090a0c',edge:'#d7d9dd',shadow:'rgba(0,0,0,.58)',text:'#fff'},
+  {a:'#c98a50',b:'#8d4d22',c:'#2b1408',edge:'#f0bd88',shadow:'rgba(83,42,16,.58)',text:'#fff'},
+  {a:'#e9eaec',b:'#aeb2b7',c:'#545a61',edge:'#ffffff',shadow:'rgba(70,76,84,.46)',text:'#171717'},
+  {a:'#d1b352',b:'#9c7618',c:'#332400',edge:'#f5df91',shadow:'rgba(75,53,5,.55)',text:'#fff'},
+  {a:'#7652c6',b:'#4e2a95',c:'#1b0d3d',edge:'#c9b6f4',shadow:'rgba(45,22,90,.56)',text:'#fff'},
+  {a:'#e7e8e9',b:'#b9bdc1',c:'#70777e',edge:'#ffffff',shadow:'rgba(79,85,92,.46)',text:'#171717'},
+  {a:'#316cc4',b:'#174887',c:'#061b3d',edge:'#9fc3ef',shadow:'rgba(9,42,86,.56)',text:'#fff'},
+  {a:'#252628',b:'#101113',c:'#020203',edge:'#8d9298',shadow:'rgba(0,0,0,.72)',text:'#fff'},
+  {a:'#ba3446',b:'#7d1424',c:'#29040a',edge:'#ed9aa5',shadow:'rgba(82,8,19,.58)',text:'#fff'},
+  {a:'#324b91',b:'#1e3269',c:'#07122f',edge:'#c7a94a',shadow:'rgba(8,21,58,.62)',text:'#fff'},
+  {a:'#252117',b:'#0b0b0c',c:'#000000',edge:'#d8b958',shadow:'rgba(0,0,0,.76)',text:'#fff'}
 ];
 const dateText=value=>{try{const d=value?.toDate?value.toDate():new Date(value);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});}catch{return 'Data indisponível';}};
 const loyaltyValue=p=>Math.max(0,Number(p.valorFidelidade ?? p.valorPago ?? p.valor)||0);
@@ -27,6 +27,7 @@ async function renderUser(user,data){
   const purchasesSnap=await getDocs(query(collection(db,'compras'),where('clienteId','==',user.uid)));
   const purchases=purchasesSnap.docs.map(d=>({id:d.id,...d.data()}));
   const total=purchases.reduce((sum,p)=>sum+loyaltyValue(p),0);
+  const savings=purchases.reduce((sum,p)=>sum+Math.max(0,Number(p.creditoUsado)||0),0);
   const calc=calcularFidelidade(total);
   const vip=calc.vip,stamps=calc.carimbos,name=data.nome||user.displayName||'Membro';
   const bonus=money(data.creditos||0),card=document.getElementById('homeCard');
@@ -36,7 +37,7 @@ async function renderUser(user,data){
   document.getElementById('homeLevelName').textContent=levels[vip];document.getElementById('homeBadge').textContent=levels[vip];document.getElementById('homeClientName').textContent=name;document.getElementById('homeCredits').textContent=bonus;
   document.getElementById('heroLevel').textContent=`LV${vip} — ${levels[vip]}`;document.getElementById('heroMessage').textContent=vip===10?'Você alcançou o nível máximo do clube.':'Continue evoluindo para liberar novas vantagens.';
   document.getElementById('heroStampText').textContent=`${stamps} de 10`;document.getElementById('heroProgressBar').style.width=`${stamps*10}%`;
-  document.getElementById('metricCredits').textContent=money(total);document.getElementById('metricNext').textContent=vip===10?'Nível máximo':`LV${vip+1} ${levels[vip+1]}`;document.getElementById('metricMissing').textContent=vip===10?'Status Founder ativo':`Faltam ${money(calc.faltam)}`;
+  document.getElementById('metricCredits').textContent=money(total);document.getElementById('metricSavings').textContent=money(savings);document.getElementById('metricNext').textContent=vip===10?'Nível máximo':`LV${vip+1} ${levels[vip+1]}`;document.getElementById('metricMissing').textContent=vip===10?'Status Founder ativo':`Faltam ${money(calc.faltam)}`;
   loadBenefits(vip);renderHistory(purchases);
 }
 
