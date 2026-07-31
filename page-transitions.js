@@ -1,44 +1,28 @@
-const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const REDUCED_MOTION=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function markReady() {
+function markReady(){
   document.documentElement.classList.add('wd-transitions-ready');
   document.body.classList.add('wd-page-visible');
 }
 
-function isInternalNavigation(link, event) {
-  if (!link || link.dataset.noTransition === 'true') return false;
-  if (event.defaultPrevented || event.button !== 0) return false;
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
-  if (link.target && link.target !== '_self') return false;
-  if (link.hasAttribute('download')) return false;
+// A navegação do app é controlada por app-tabs.js. Este arquivo não altera
+// opacidade, visibilidade, display ou animação do documento inteiro.
+document.addEventListener('click',event=>{
+  const link=event.target.closest('a[href]');
+  if(!link)return;
 
-  const raw = link.getAttribute('href');
-  if (!raw || raw.startsWith('#') || raw.startsWith('javascript:') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return false;
+  const href=link.getAttribute('href')||'';
+  const insideSpa=link.closest('#appBottomNav')||link.dataset.route||href.startsWith('#');
+  if(insideSpa)return;
 
-  const url = new URL(link.href, location.href);
-  return url.origin === location.origin;
-}
-
-// A troca acontece imediatamente. O navegador cuida da animação nativa
-// entre documentos quando o recurso View Transitions está disponível.
-document.addEventListener('click', event => {
-  const link = event.target.closest('a[href]');
-  if (!isInternalNavigation(link, event)) return;
-
-  if (link.closest('.client-bottom-nav')) {
-    document.querySelectorAll('.client-bottom-nav a').forEach(item => item.classList.remove('ativo'));
+  if(link.closest('.client-bottom-nav')){
+    document.querySelectorAll('.client-bottom-nav a').forEach(item=>item.classList.remove('ativo'));
     link.classList.add('ativo');
   }
-}, true);
+},true);
 
-window.addEventListener('pageshow', markReady);
+window.addEventListener('pageshow',markReady);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',markReady,{once:true});
+else markReady();
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', markReady, { once: true });
-} else {
-  markReady();
-}
-
-if (REDUCED_MOTION) {
-  document.documentElement.classList.add('wd-reduced-motion');
-}
+if(REDUCED_MOTION)document.documentElement.classList.add('wd-reduced-motion');
