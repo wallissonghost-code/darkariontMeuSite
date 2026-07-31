@@ -18,6 +18,7 @@ const palettes=[
   {a:'#303030',b:'#0A0A0A',c:'#000000',edge:'#FFD700',shadow:'rgba(0,0,0,.72)',text:'#fff'}
 ];
 const dateText=value=>{try{const d=value?.toDate?value.toDate():new Date(value);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});}catch{return 'Data indisponível';}};
+const loyaltyValue=p=>Math.max(0,Number(p.valorFidelidade ?? p.valorPago ?? p.valor)||0);
 let stopUserListener=null;
 
 function applyPalette(card,vip){const p=palettes[vip]||palettes[0];card.dataset.vip=String(vip);card.style.setProperty('--a',p.a);card.style.setProperty('--b',p.b);card.style.setProperty('--c',p.c);card.style.setProperty('--edge',p.edge);card.style.setProperty('--shadow',p.shadow);card.style.setProperty('--text',p.text);card.classList.toggle('light-card',vip===2||vip===5);card.classList.toggle('prime-card',vip===9);card.classList.toggle('founder-card',vip===10)}
@@ -25,7 +26,7 @@ function applyPalette(card,vip){const p=palettes[vip]||palettes[0];card.dataset.
 async function renderUser(user,data){
   const purchasesSnap=await getDocs(query(collection(db,'compras'),where('clienteId','==',user.uid)));
   const purchases=purchasesSnap.docs.map(d=>({id:d.id,...d.data()}));
-  const total=purchases.reduce((sum,p)=>sum+Math.max(0,Number(p.valor)||0),0);
+  const total=purchases.reduce((sum,p)=>sum+loyaltyValue(p),0);
   const calc=calcularFidelidade(total);
   const vip=calc.vip,stamps=calc.carimbos,name=data.nome||user.displayName||'Membro';
   const bonus=money(data.creditos||0),card=document.getElementById('homeCard');
@@ -41,6 +42,6 @@ async function renderUser(user,data){
 
 async function loadBenefits(vip){const next=Math.min(10,vip+1);document.getElementById('benefitLevel').textContent=vip===10?'Benefícios Founder':`Benefícios do LV${next}`;let benefits=['Condições especiais para membros','Acesso a vantagens exclusivas'];try{const snap=await getDoc(doc(db,'niveis',`lv${next}`));if(snap.exists()&&Array.isArray(snap.data().beneficios)&&snap.data().beneficios.length)benefits=snap.data().beneficios}catch(e){console.error(e)}document.getElementById('homeBenefits').innerHTML=benefits.map(x=>`<div class="home-benefit">${x}</div>`).join('')}
 
-function renderHistory(items){const timeline=document.getElementById('timeline');items.sort((a,b)=>(b.criadoEm?.seconds||0)-(a.criadoEm?.seconds||0));if(!items.length){timeline.innerHTML='<div class="empty-state">Nenhuma compra registrada ainda.</div>';document.getElementById('metricLastPurchase').textContent='Nenhuma';return}const latest=items[0];document.getElementById('metricLastPurchase').textContent=money(latest.valor);document.getElementById('metricLastDate').textContent=dateText(latest.criadoEm);timeline.innerHTML=items.slice(0,5).map(item=>`<div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-main"><strong>Compra registrada</strong><span>${dateText(item.criadoEm)}</span></div><div class="timeline-value"><strong>${money(item.valor)}</strong><small>Progresso atualizado</small></div></div>`).join('')}
+function renderHistory(items){const timeline=document.getElementById('timeline');items.sort((a,b)=>(b.criadoEm?.seconds||0)-(a.criadoEm?.seconds||0));if(!items.length){timeline.innerHTML='<div class="empty-state">Nenhuma compra registrada ainda.</div>';document.getElementById('metricLastPurchase').textContent='Nenhuma';return}const latest=items[0];document.getElementById('metricLastPurchase').textContent=money(latest.valor);document.getElementById('metricLastDate').textContent=dateText(latest.criadoEm);timeline.innerHTML=items.slice(0,5).map(item=>`<div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-main"><strong>Compra registrada</strong><span>${dateText(item.criadoEm)}</span></div><div class="timeline-value"><strong>${money(item.valor)}</strong><small>${money(loyaltyValue(item))} válido no VIP</small></div></div>`).join('')}
 
 onAuthStateChanged(auth,user=>{if(stopUserListener){stopUserListener();stopUserListener=null}if(!user)return;stopUserListener=onSnapshot(doc(db,'usuarios',user.uid),snap=>{renderUser(user,snap.exists()?snap.data():{}).catch(error=>console.error('Erro ao renderizar dashboard:',error))},error=>console.error('Erro ao sincronizar dashboard:',error))});
