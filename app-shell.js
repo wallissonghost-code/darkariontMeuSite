@@ -1,7 +1,19 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
-const BUILD='20260731-1635',body=document.body,menu=document.querySelector('.menu'),isClientApp=body.dataset.clientApp==='true';let scrollTravado=0,saindo=false;
+const BUILD='20260731-1705',body=document.body,menu=document.querySelector('.menu'),isClientApp=body.dataset.clientApp==='true';
+
+if(body.dataset.adminPage==='true'){
+  try{
+    const { requireAdmin }=await import(`./admin-guard.js?v=${BUILD}`);
+    await requireAdmin();
+  }catch(error){
+    console.error('Rota administrativa bloqueada:',error);
+    throw error;
+  }
+}
+
+let scrollTravado=0,saindo=false;
 function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=`${href}?v=${BUILD}`;document.head.append(link)}
 carregarCss('shell-fixes.css');carregarCss('dark-mode.css');carregarCss('ui-fixes-v2.css');
 const temaValido=v=>v==='dark'||v==='light';
