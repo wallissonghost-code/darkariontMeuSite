@@ -12,6 +12,7 @@ export const NIVEIS=[
   {vip:10,nome:'FOUNDER',minimo:35000}
 ];
 
+export const BONUS_POR_NIVEL=100;
 export const money=value=>Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
 export function calcularFidelidade(totalGasto){
@@ -23,13 +24,27 @@ export function calcularFidelidade(totalGasto){
   }
   const atual=NIVEIS[indice];
   const proximo=NIVEIS[indice+1]||null;
-  if(!proximo){return {vip:10,nome:atual.nome,carimbos:10,valorCarimbo:0,totalGasto:total,faltam:0,proximo:null};}
+  if(!proximo)return {vip:10,nome:atual.nome,carimbos:10,valorCarimbo:0,totalGasto:total,faltam:0,proximo:null};
   const faixa=proximo.minimo-atual.minimo;
   const valorCarimbo=faixa/10;
   const gastoNaFaixa=Math.max(0,total-atual.minimo);
   const carimbos=Math.max(0,Math.min(9,Math.floor(gastoNaFaixa/valorCarimbo)));
-  const faltam=Math.max(0,proximo.minimo-total);
-  return {vip:indice,nome:atual.nome,carimbos,valorCarimbo,totalGasto:total,faltam,proximo};
+  return {vip:indice,nome:atual.nome,carimbos,valorCarimbo,totalGasto:total,faltam:Math.max(0,proximo.minimo-total),proximo};
+}
+
+export function calcularCarteira(data={},novoVip=0){
+  const vipAtual=Math.max(0,Math.min(10,Number(data.vip)||0));
+  const baseSalva=Number(data.bonusBaseVip);
+  const bonusBaseVip=Number.isFinite(baseSalva)?Math.max(0,Math.min(10,baseSalva)):vipAtual;
+  const automaticoAnterior=Math.max(0,Number(data.bonusNivel)||0);
+  const bonusManualSalvo=Number(data.bonusManual);
+  const bonusManual=Number.isFinite(bonusManualSalvo)?Math.max(0,bonusManualSalvo):Math.max(0,(Number(data.creditos)||0)-automaticoAnterior);
+  const bonusNivel=Math.max(0,(Math.max(0,Math.min(10,Number(novoVip)||0))-bonusBaseVip)*BONUS_POR_NIVEL);
+  return {bonusBaseVip,bonusManual,bonusNivel,creditos:bonusManual+bonusNivel};
+}
+
+export function bonusDaEvolucao(vipAntes,vipDepois){
+  return Math.max(0,(Number(vipDepois)||0)-(Number(vipAntes)||0))*BONUS_POR_NIVEL;
 }
 
 export function descreverRegra(totalGasto){
