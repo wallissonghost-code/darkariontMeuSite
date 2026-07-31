@@ -1,5 +1,4 @@
-const BUILD=sessionStorage.getItem('wd-build')||String(Date.now());
-sessionStorage.setItem('wd-build',BUILD);
+const BUILD='20260731-1630';
 const routes={home:`home.html?embedded=1&v=${BUILD}`,card:`cartao.html?embedded=1&v=${BUILD}`,store:`mercadorias.html?embedded=1&v=${BUILD}`,account:`perfil.html?embedded=1&v=${BUILD}`};
 const stage=document.getElementById('appStage');
 const loader=document.getElementById('appLoader');
@@ -17,4 +16,4 @@ nav.addEventListener('click',event=>{const link=event.target.closest('[data-rout
 window.addEventListener('popstate',()=>showRoute(routeFromHash(),{push:false}));window.addEventListener('hashchange',()=>showRoute(routeFromHash(),{push:false}));
 document.addEventListener('wd-role-ready',event=>{const nome=event.detail?.dados?.nome||event.detail?.user?.displayName||'WD';const avatar=String(nome).trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'WD';const el=document.getElementById('appNavAvatar');if(el)el.textContent=avatar;limparMenuExterno()});
 const menuObserver=new MutationObserver(limparMenuExterno);if(document.querySelector('.menu'))menuObserver.observe(document.querySelector('.menu'),{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
-limparMenuExterno();showRoute(routeFromHash(),{push:false});const preload=()=>Object.keys(routes).forEach((route,index)=>setTimeout(()=>ensureFrame(route),index*100));if('requestIdleCallback'in window)requestIdleCallback(preload,{timeout:800});else setTimeout(preload,350);
+limparMenuExterno();showRoute(routeFromHash(),{push:false});const preload=()=>Object.keys(routes).forEach((route,index)=>setTimeout(()=>ensureFrame(route),index*90));if('requestIdleCallback'in window)requestIdleCallback(preload,{timeout:700});else setTimeout(preload,300);
