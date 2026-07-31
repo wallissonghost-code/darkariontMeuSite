@@ -1,12 +1,15 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
-const BUILD='20260731-1645',body=document.body,menu=document.querySelector('.menu'),isClientApp=body.dataset.clientApp==='true';let scrollTravado=0,saindo=false;
+const BUILD='20260731-1635',body=document.body,menu=document.querySelector('.menu'),isClientApp=body.dataset.clientApp==='true';let scrollTravado=0,saindo=false;
 function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=`${href}?v=${BUILD}`;document.head.append(link)}
 carregarCss('shell-fixes.css');carregarCss('dark-mode.css');carregarCss('ui-fixes-v2.css');
 const temaValido=v=>v==='dark'||v==='light';
-function aplicarTema(tema,uid=''){const valor=tema==='dark'?'dark':'light';document.documentElement.dataset.theme=valor;localStorage.setItem('wd-theme',valor);if(uid)localStorage.setItem(`wd-theme:${uid}`,valor);document.dispatchEvent(new CustomEvent('wd-theme-ready',{detail:{theme:valor,uid}}))}
-window.aplicarTemaWD=(tema,uid='')=>aplicarTema(tema,uid||auth.currentUser?.uid||'');const temaInicial=localStorage.getItem('wd-theme');if(temaValido(temaInicial))aplicarTema(temaInicial);
+function aplicarTema(tema,uid='',opcoes={}){const valor=tema==='dark'?'dark':'light';document.documentElement.dataset.theme=valor;document.documentElement.style.colorScheme=valor;localStorage.setItem('wd-theme',valor);if(uid)localStorage.setItem(`wd-theme:${uid}`,valor);document.dispatchEvent(new CustomEvent('wd-theme-ready',{detail:{theme:valor,uid}}));if(opcoes.broadcast!==false&&window.parent!==window){window.parent.postMessage({type:'wd-theme-change',theme:valor,uid},location.origin)}}
+window.aplicarTemaWD=(tema,uid='')=>aplicarTema(tema,uid||auth.currentUser?.uid||'');
+window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.type!=='wd-theme-change'||!temaValido(event.data?.theme))return;aplicarTema(event.data.theme,event.data.uid||auth.currentUser?.uid||'',{broadcast:false})});
+window.addEventListener('storage',event=>{if(event.key==='wd-theme'&&temaValido(event.newValue))aplicarTema(event.newValue,auth.currentUser?.uid||'',{broadcast:false})});
+const temaInicial=localStorage.getItem('wd-theme');if(temaValido(temaInicial))aplicarTema(temaInicial,'',{broadcast:false});
 function travarPagina(){scrollTravado=window.scrollY||0;Object.assign(body.style,{position:'fixed',top:`-${scrollTravado}px`,left:'0',right:'0',width:'100%'})}
 function destravarPagina(){['position','top','left','right','width'].forEach(k=>body.style[k]='');window.scrollTo(0,scrollTravado)}
 function fecharMenu(){const aberta=body.classList.contains('menu-open');body.classList.remove('menu-open');document.querySelector('.mobile-menu-trigger')?.setAttribute('aria-expanded','false');if(aberta)destravarPagina()}
