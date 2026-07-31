@@ -2,7 +2,7 @@ import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const style=document.createElement('link');style.rel='stylesheet';style.href=`${href}?v=20260730-2235`;document.head.append(style)}
+function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const style=document.createElement('link');style.rel='stylesheet';style.href=`${href}?v=20260730-2245`;document.head.append(style)}
 carregarCss('shell-fixes.css');carregarCss('dark-mode.css');
 
 const temaLocal=localStorage.getItem('wd-theme');
