@@ -1,104 +1,22 @@
-import { auth, db } from "./firebase.js";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { auth, db } from './firebase.js';
+import { createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
+import { doc,getDoc,serverTimestamp,setDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-const formLogin = document.getElementById("formLogin");
-const formCadastro = document.getElementById("formCadastro");
-const mensagem = document.getElementById("mensagem");
+const formLogin=document.getElementById('formLogin'),formCadastro=document.getElementById('formCadastro'),mensagem=document.getElementById('mensagem'),googleButton=document.getElementById('googleLogin');
+const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
 
-function mostrarMensagem(texto, erro = false) {
-  if (!mensagem) return;
-  mensagem.textContent = texto;
-  mensagem.className = erro ? "mensagem erro" : "mensagem sucesso";
-}
+function mostrarMensagem(texto,erro=false){if(!mensagem)return;mensagem.textContent=texto;mensagem.className=erro?'mensagem erro':'mensagem sucesso'}
+function traduzirErro(codigo){const erros={'auth/invalid-email':'Digite um e-mail válido.','auth/invalid-credential':'E-mail ou senha incorretos.','auth/email-already-in-use':'Este e-mail já possui uma conta. Tente entrar.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/too-many-requests':'Muitas tentativas. Aguarde e tente novamente.','auth/network-request-failed':'Falha de conexão. Confira sua internet.','auth/operation-not-allowed':'Ative esse método de login no Firebase Authentication.','auth/unauthorized-domain':'Autorize wallissonghost-code.github.io nos domínios do Firebase Authentication.','auth/popup-blocked':'O navegador bloqueou a janela do Google. Tente novamente.','auth/popup-closed-by-user':'A janela do Google foi fechada antes de concluir.','auth/cancelled-popup-request':'A tentativa anterior foi cancelada. Tente novamente.','permission-denied':'O Firestore bloqueou o cadastro. Confira e publique as regras.'};return erros[codigo]||`Não foi possível entrar (${codigo||'erro desconhecido'}).`}
+async function garantirPerfil(user){const ref=doc(db,'usuarios',user.uid),snap=await getDoc(ref);if(snap.exists())return snap.data();const nome=user.displayName||'Cliente Founder';await setDoc(ref,{nome,email:user.email||'',foto:user.photoURL||'',role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp(),atualizadoEm:serverTimestamp()});return {nome,role:'cliente'}}
+async function concluirLogin(user){await garantirPerfil(user);location.replace(`home.html?v=${Date.now()}`)}
+function setLoading(button,loading,text='Entrando...'){if(!button)return;button.disabled=loading;if(loading){button.dataset.original=button.innerHTML;button.textContent=text}else if(button.dataset.original)button.innerHTML=button.dataset.original}
 
-function traduzirErro(codigo) {
-  const erros = {
-    "auth/invalid-email": "Digite um e-mail válido.",
-    "auth/invalid-credential": "E-mail ou senha incorretos.",
-    "auth/email-already-in-use": "Este e-mail já possui uma conta. Tente entrar.",
-    "auth/weak-password": "A senha precisa ter pelo menos 6 caracteres.",
-    "auth/too-many-requests": "Muitas tentativas. Aguarde e tente novamente.",
-    "auth/network-request-failed": "Falha de conexão. Confira sua internet.",
-    "auth/operation-not-allowed": "O cadastro por e-mail ainda não foi ativado no Firebase.",
-    "auth/unauthorized-domain": "O domínio do GitHub Pages ainda não foi autorizado no Firebase.",
-    "permission-denied": "A conta foi criada, mas o Firestore bloqueou o cadastro dos dados. Publique as regras do banco."
-  };
-  return erros[codigo] || `Erro do Firebase: ${codigo || "desconhecido"}`;
-}
+getRedirectResult(auth).then(async result=>{if(result?.user){mostrarMensagem('Acesso confirmado. Abrindo sua conta...');await concluirLogin(result.user)}}).catch(error=>{console.error('Erro no retorno Google:',error);mostrarMensagem(traduzirErro(error.code),true);setLoading(googleButton,false)});
 
-if (formLogin) {
-  formLogin.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value;
-    const botao = formLogin.querySelector("button");
-    botao.disabled = true;
-    botao.textContent = "Entrando...";
-    mostrarMensagem("");
+if(formLogin)formLogin.addEventListener('submit',async event=>{event.preventDefault();const email=document.getElementById('email').value.trim(),senha=document.getElementById('senha').value,botao=formLogin.querySelector('.primary-button');setLoading(botao,true,'Entrando...');mostrarMensagem('');try{const credencial=await signInWithEmailAndPassword(auth,email,senha);await concluirLogin(credencial.user)}catch(error){console.error('Erro no login:',error);mostrarMensagem(traduzirErro(error.code),true);setLoading(botao,false)}});
 
-    try {
-      const credencial = await signInWithEmailAndPassword(auth, email, senha);
-      const referencia = doc(db, "usuarios", credencial.user.uid);
-      const usuarioDoc = await getDoc(referencia);
-      if (!usuarioDoc.exists()) {
-        await setDoc(referencia, {
-          nome: credencial.user.displayName || "Cliente Founder",
-          email: credencial.user.email,
-          role: "cliente",
-          vip: 0,
-          carimbos: 0,
-          creditos: 0,
-          criadoEm: serverTimestamp(),
-          atualizadoEm: serverTimestamp()
-        });
-      }
-      window.location.href = "home.html";
-    } catch (erro) {
-      console.error("Erro no login:", erro);
-      mostrarMensagem(traduzirErro(erro.code), true);
-      botao.disabled = false;
-      botao.textContent = "Entrar";
-    }
-  });
-}
+if(googleButton)googleButton.addEventListener('click',async()=>{setLoading(googleButton,true,'Conectando ao Google...');mostrarMensagem('');try{const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);if(mobile){sessionStorage.setItem('wd-google-redirect','1');await signInWithRedirect(auth,provider);return}const result=await signInWithPopup(auth,provider);await concluirLogin(result.user)}catch(error){console.error('Erro no Google:',error);if(error.code==='auth/popup-blocked'){try{await signInWithRedirect(auth,provider);return}catch(redirectError){error=redirectError}}mostrarMensagem(traduzirErro(error.code),true);setLoading(googleButton,false)}});
 
-if (formCadastro) {
-  formCadastro.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const nome = document.getElementById("nome").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value;
-    const confirmar = document.getElementById("confirmar").value;
-    const botao = formCadastro.querySelector("button");
+document.getElementById('togglePassword')?.addEventListener('click',event=>{const input=document.getElementById('senha'),show=input.type==='password';input.type=show?'text':'password';event.currentTarget.textContent=show?'Ocultar':'Ver';event.currentTarget.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha')});
 
-    if (nome.length < 2) return mostrarMensagem("Digite seu nome completo.", true);
-    if (senha !== confirmar) return mostrarMensagem("As senhas não são iguais.", true);
-
-    botao.disabled = true;
-    botao.textContent = "Criando conta...";
-    mostrarMensagem("");
-
-    try {
-      const credencial = await createUserWithEmailAndPassword(auth, email, senha);
-      await updateProfile(credencial.user, { displayName: nome });
-      await setDoc(doc(db, "usuarios", credencial.user.uid), {
-        nome,
-        email,
-        role: "cliente",
-        vip: 0,
-        carimbos: 0,
-        creditos: 0,
-        criadoEm: serverTimestamp(),
-        atualizadoEm: serverTimestamp()
-      });
-      mostrarMensagem("Conta criada com sucesso.");
-      setTimeout(() => window.location.href = "home.html", 700);
-    } catch (erro) {
-      console.error("Erro no cadastro:", erro);
-      mostrarMensagem(traduzirErro(erro.code), true);
-      botao.disabled = false;
-      botao.textContent = "Cadastrar";
-    }
-  });
-}
+if(formCadastro)formCadastro.addEventListener('submit',async event=>{event.preventDefault();const nome=document.getElementById('nome').value.trim(),email=document.getElementById('email').value.trim(),senha=document.getElementById('senha').value,confirmar=document.getElementById('confirmar').value,botao=formCadastro.querySelector('button[type="submit"]');if(nome.length<2)return mostrarMensagem('Digite seu nome completo.',true);if(senha!==confirmar)return mostrarMensagem('As senhas não são iguais.',true);setLoading(botao,true,'Criando conta...');mostrarMensagem('');try{const credencial=await createUserWithEmailAndPassword(auth,email,senha);await updateProfile(credencial.user,{displayName:nome});await setDoc(doc(db,'usuarios',credencial.user.uid),{nome,email,role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp(),atualizadoEm:serverTimestamp()});mostrarMensagem('Conta criada com sucesso.');setTimeout(()=>location.replace('home.html'),500)}catch(error){console.error('Erro no cadastro:',error);mostrarMensagem(traduzirErro(error.code),true);setLoading(botao,false)}});
