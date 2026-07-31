@@ -1,28 +1,20 @@
-/* WD Founder UI fixes v2 */
-html[data-theme="dark"] body .home-card{
-  background:radial-gradient(circle at 15% 8%,rgba(255,255,255,.45),transparent 20%),radial-gradient(circle at 88% 88%,rgba(0,0,0,.54),transparent 42%),linear-gradient(132deg,var(--a),var(--b) 48%,var(--c))!important;
-  color:var(--text)!important;
-  border-color:rgba(255,255,255,.4)!important;
-  box-shadow:0 34px 90px var(--shadow),0 12px 28px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.65),inset 0 -1px rgba(0,0,0,.32)!important;
-}
-html[data-theme="dark"] body .home-card strong,
-html[data-theme="dark"] body .home-card span,
-html[data-theme="dark"] body .home-card p{color:var(--text)!important;-webkit-text-fill-color:var(--text)!important}
+/* WD Founder UI fixes v3 */
+html[data-theme="dark"] body .home-card{background:radial-gradient(circle at 15% 8%,rgba(255,255,255,.45),transparent 20%),radial-gradient(circle at 88% 88%,rgba(0,0,0,.54),transparent 42%),linear-gradient(132deg,var(--a),var(--b) 48%,var(--c))!important;color:var(--text)!important;border-color:rgba(255,255,255,.4)!important;box-shadow:0 34px 90px var(--shadow),0 12px 28px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.65),inset 0 -1px rgba(0,0,0,.32)!important}
+html[data-theme="dark"] body .home-card strong,html[data-theme="dark"] body .home-card span,html[data-theme="dark"] body .home-card p{color:var(--text)!important;-webkit-text-fill-color:var(--text)!important}
 html[data-theme="dark"] body .home-card .primary-link{background:#fff!important;color:#21150c!important;-webkit-text-fill-color:#21150c!important}
 html[data-theme="dark"] body .home-card .secondary-link{color:var(--text)!important;-webkit-text-fill-color:var(--text)!important}
 html[data-theme="dark"] body .profile-shortcut{background:#17191d!important;color:#fff!important;border-color:rgba(255,255,255,.13)!important}
 
-/* A administração não repete atalhos que já estão no menu. */
-body[data-admin-page="true"] .quick-links{display:none!important}
-body[data-admin-page="true"] .admin-sections>.editor:first-child{display:none!important}
-body[data-admin-page="true"] .admin-sections{grid-template-columns:1fr!important}
+/* A tela de registro acompanha o modo noturno por completo. */
+html[data-theme="dark"] .purchase-page .form-shell{background:linear-gradient(145deg,#1b1e23,#111318)!important;border-color:rgba(255,255,255,.12)!important;box-shadow:0 28px 70px rgba(0,0,0,.45)!important}
+html[data-theme="dark"] .purchase-page .client-strip{background:#171a1f!important;border-color:rgba(255,255,255,.1)!important}
+html[data-theme="dark"] .purchase-page .client-strip strong,html[data-theme="dark"] .purchase-page .field-label{color:#f7f4ed!important}
+html[data-theme="dark"] .purchase-page .helper{color:#aaa49a!important}
+html[data-theme="dark"] .purchase-page .confirm-button{background:#f4f2ed!important;color:#161719!important;-webkit-text-fill-color:#161719!important}
 
-/* Histórico compacto e navegável. */
+/* Administração sem atalhos duplicados, mas preserva todos os editores reais. */
+body[data-admin-page="true"] .quick-links{display:none!important}
+
+/* Histórico legado compacto, quando existir. */
 body[data-admin-page="true"] .history-list{max-height:620px;overflow:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
-body[data-admin-page="true"] .history-item{position:relative;grid-template-columns:minmax(0,1fr) auto;gap:10px 18px;padding:20px;border-radius:20px;margin-bottom:10px;box-shadow:0 10px 30px rgba(0,0,0,.05)}
-body[data-admin-page="true"] .history-value{font-size:20px;text-align:right}
-body[data-admin-page="true"] .history-stamps{grid-column:1/2;font-size:12px}
-body[data-admin-page="true"] .history-date{grid-column:1/2}
-body[data-admin-page="true"] .history-item .danger-btn{grid-column:2;grid-row:2/4;align-self:center;min-width:132px}
 html[data-theme="dark"] body[data-admin-page="true"] .history-item{background:#171a1f!important;border-color:rgba(255,255,255,.1)!important}
-@media(max-width:600px){body[data-admin-page="true"] .history-list{max-height:540px}body[data-admin-page="true"] .history-item{grid-template-columns:1fr}body[data-admin-page="true"] .history-value{text-align:left}body[data-admin-page="true"] .history-stamps,body[data-admin-page="true"] .history-date,body[data-admin-page="true"] .history-item .danger-btn{grid-column:1;grid-row:auto}body[data-admin-page="true"] .history-item .danger-btn{width:100%}}
