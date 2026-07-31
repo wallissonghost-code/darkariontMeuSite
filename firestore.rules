@@ -32,6 +32,7 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'nome',
           'telefone',
+          'tema',
           'atualizadoEm'
         ])
       );
@@ -40,6 +41,17 @@ service cloud.firestore {
     }
 
     match /compras/{compraId} {
+      allow read: if ehAdmin() || (
+        autenticado() && resource.data.clienteId == request.auth.uid
+      );
+      allow create, update, delete: if ehAdmin();
+    }
+
+    match /produtos/{produtoId} {
+      allow read, create, update, delete: if ehAdmin();
+    }
+
+    match /carteira_movimentos/{movimentoId} {
       allow read: if ehAdmin() || (
         autenticado() && resource.data.clienteId == request.auth.uid
       );
