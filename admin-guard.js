@@ -2,9 +2,8 @@ import { auth, db } from './firebase.js';
 import { onAuthStateChanged, getIdTokenResult } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-// UIDs não são segredos. Preencha apenas se quiser manter um admin de emergência.
 const FIXED_ADMIN_UIDS = new Set([
-  // 'COLE_AQUI_O_UID_COMPLETO_DO_ADMIN'
+  'WAPN8cPkPGP2mwiQ8FNbIGyUaUl1'
 ]);
 
 const ADMIN_ROLES = new Set(['admin', 'administrador', 'master']);
@@ -31,7 +30,6 @@ async function hasAdminAccess(user) {
   if (!user) return false;
   if (FIXED_ADMIN_UIDS.has(user.uid)) return true;
 
-  // Fonte preferencial: claim assinada no ID token.
   try {
     const token = await getIdTokenResult(user, true);
     if (token.claims.admin === true || token.claims.role === 'admin') return true;
@@ -39,8 +37,6 @@ async function hasAdminAccess(user) {
     console.error('Não foi possível validar as claims administrativas:', error);
   }
 
-  // Compatibilidade temporária com o sistema atual.
-  // É seguro apenas enquanto firestore.rules impedir o usuário de alterar o próprio role.
   try {
     const snapshot = await getDoc(doc(db, 'usuarios', user.uid));
     const role = String(snapshot.data()?.role || '').trim().toLowerCase();
