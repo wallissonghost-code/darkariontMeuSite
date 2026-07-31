@@ -10,6 +10,11 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    function isFixedAdmin() {
+      return signedIn()
+        && request.auth.uid == 'WAPN8cPkPGP2mwiQ8FNbIGyUaUl1';
+    }
+
     function hasAdminClaim() {
       return signedIn() && (
         request.auth.token.admin == true ||
@@ -17,8 +22,8 @@ service cloud.firestore {
       );
     }
 
-    // Compatibilidade com o modelo atual. Depois de configurar Custom Claims
-    // para todos os administradores, esta função pode ser removida de isAdmin().
+    // Compatibilidade temporária com o modelo atual.
+    // Depois de configurar Custom Claims, esta função pode ser removida.
     function hasLegacyAdminRole() {
       return signedIn()
         && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
@@ -27,7 +32,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return hasAdminClaim() || hasLegacyAdminRole();
+      return isFixedAdmin() || hasAdminClaim() || hasLegacyAdminRole();
     }
 
     function validTheme(value) {
@@ -83,7 +88,6 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Estoque interno, custos e margem: somente administradores.
     match /produtos/{produtoId} {
       allow read, write: if isAdmin();
     }
@@ -92,7 +96,6 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // Coleção antiga ainda referenciada por admin.js.
     match /produtosVitrine/{produtoId} {
       allow read, write: if isAdmin();
     }
@@ -104,20 +107,16 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Benefícios públicos necessários para o cartão do cliente.
-    // Não coloque custos, fórmulas internas ou parâmetros secretos aqui.
     match /niveis/{nivelId} {
       allow read: if signedIn();
       allow write: if isAdmin();
     }
 
-    // A vitrine usa ofertas com tipo == 'produto'. Clientes apenas leem.
     match /ofertas/{ofertaId} {
       allow read: if signedIn();
       allow create, update, delete: if isAdmin();
     }
 
-    // Configurações operacionais nunca são expostas a clientes.
     match /configuracoes/{configId} {
       allow read, write: if isAdmin();
     }
@@ -138,7 +137,6 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Negação explícita para qualquer coleção nova não revisada.
     match /{document=**} {
       allow read, write: if false;
     }
