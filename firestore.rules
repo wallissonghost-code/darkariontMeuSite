@@ -2,90 +2,144 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function autenticado() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function ehDono(uid) {
-      return autenticado() && request.auth.uid == uid;
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
     }
 
-    function ehAdmin() {
-      return autenticado()
+    function hasAdminClaim() {
+      return signedIn() && (
+        request.auth.token.admin == true ||
+        request.auth.token.role == 'admin'
+      );
+    }
+
+    // Compatibilidade com o modelo atual. Depois de configurar Custom Claims
+    // para todos os administradores, esta função pode ser removida de isAdmin().
+    function hasLegacyAdminRole() {
+      return signedIn()
         && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in ['admin', 'administrador', 'master'];
+        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role
+          in ['admin', 'administrador', 'master'];
     }
 
-    match /usuarios/{uid} {
-      allow get: if ehDono(uid) || ehAdmin();
-      allow list: if ehAdmin();
+    function isAdmin() {
+      return hasAdminClaim() || hasLegacyAdminRole();
+    }
 
-      allow create: if ehDono(uid)
-        && request.resource.data.role == 'cliente'
-        && request.resource.data.vip == 0
-        && request.resource.data.carimbos == 0
-        && request.resource.data.creditos == 0
-        && request.resource.data.email == request.auth.token.email;
+    function validTheme(value) {
+      return value in ['light', 'dark'];
+    }
 
-      allow update: if ehAdmin() || (
-        ehDono(uid)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+    function validOwnProfileUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'nome',
           'telefone',
           'tema',
           'atualizadoEm'
         ])
-      );
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() >= 2
+        && request.resource.data.nome.size() <= 120
+        && request.resource.data.telefone is string
+        && request.resource.data.telefone.size() <= 30
+        && validTheme(request.resource.data.tema);
+    }
 
-      allow delete: if ehAdmin();
+    match /usuarios/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly([
+          'nome', 'email', 'telefone', 'role', 'vip', 'carimbos',
+          'creditos', 'totalGasto', 'bonusBaseVip', 'bonusNivel',
+          'bonusManual', 'tema', 'criadoEm', 'atualizadoEm'
+        ])
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() >= 2
+        && request.resource.data.nome.size() <= 120
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.telefone is string
+        && request.resource.data.telefone.size() <= 30
+        && request.resource.data.role == 'cliente'
+        && request.resource.data.vip == 0
+        && request.resource.data.carimbos == 0
+        && request.resource.data.creditos == 0
+        && request.resource.data.totalGasto == 0
+        && validTheme(request.resource.data.tema);
+
+      allow update: if isAdmin() || (isOwner(uid) && validOwnProfileUpdate());
+      allow delete: if isAdmin();
     }
 
     match /compras/{compraId} {
-      allow read: if ehAdmin() || (
-        autenticado() && resource.data.clienteId == request.auth.uid
+      allow get, list: if isAdmin() || (
+        signedIn() && resource.data.clienteId == request.auth.uid
       );
-      allow create, update, delete: if ehAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
+    // Estoque interno, custos e margem: somente administradores.
     match /produtos/{produtoId} {
-      allow read, create, update, delete: if ehAdmin();
+      allow read, write: if isAdmin();
+    }
+
+    match /estoque_movimentos/{movimentoId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Coleção antiga ainda referenciada por admin.js.
+    match /produtosVitrine/{produtoId} {
+      allow read, write: if isAdmin();
     }
 
     match /carteira_movimentos/{movimentoId} {
-      allow read: if ehAdmin() || (
-        autenticado() && resource.data.clienteId == request.auth.uid
+      allow get, list: if isAdmin() || (
+        signedIn() && resource.data.clienteId == request.auth.uid
       );
-      allow create, update, delete: if ehAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
+    // Benefícios públicos necessários para o cartão do cliente.
+    // Não coloque custos, fórmulas internas ou parâmetros secretos aqui.
     match /niveis/{nivelId} {
-      allow read: if autenticado();
-      allow write: if ehAdmin();
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
 
+    // A vitrine usa ofertas com tipo == 'produto'. Clientes apenas leem.
     match /ofertas/{ofertaId} {
-      allow read: if autenticado();
-      allow write: if ehAdmin();
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
     }
 
+    // Configurações operacionais nunca são expostas a clientes.
     match /configuracoes/{configId} {
-      allow read: if autenticado();
-      allow write: if ehAdmin();
+      allow read, write: if isAdmin();
+    }
+
+    match /configuracoes_nivel/{configId} {
+      allow read, write: if isAdmin();
     }
 
     match /notificacoes/{notificacaoId} {
-      allow read: if ehAdmin() || (
-        autenticado() && resource.data.clienteId == request.auth.uid
+      allow get, list: if isAdmin() || (
+        signedIn() && resource.data.clienteId == request.auth.uid
       );
-      allow create, update, delete: if ehAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /logs/{logId} {
-      allow read, create: if ehAdmin();
+      allow read, create: if isAdmin();
       allow update, delete: if false;
     }
 
-    match /{documento=**} {
+    // Negação explícita para qualquer coleção nova não revisada.
+    match /{document=**} {
       allow read, write: if false;
     }
   }
