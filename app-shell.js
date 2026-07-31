@@ -2,7 +2,7 @@ import { auth, db, isAdminContext } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-const BUILD='20260731-2015';
+const BUILD='20260731-2020';
 const body=document.body;
 const FIXED_ADMIN_UIDS=new Set(['WAPN8cPkPGP2mwiQ8FNbIGyUaUl1']);
 const ADMIN_ROLES=new Set(['admin','administrador','master']);
@@ -65,7 +65,7 @@ function montarMenuCliente(dados={}){
 }
 
 function fecharAdminMenu(){body.classList.remove('wd-admin-menu-open')}
-function montarMenuAdmin(dados={}){
+function montarMenuAdmin(){
   limparNavegacaoAnterior();
   body.classList.add('wd-admin-layout');
   const current=paginaAtual();
@@ -81,7 +81,7 @@ function montarMenuAdmin(dados={}){
   const aside=document.createElement('aside');
   aside.className='wd-admin-sidebar';
   aside.setAttribute('aria-label','Painel administrativo');
-  aside.innerHTML=`<div class="wd-admin-brand"><strong>WD</strong><span>FOUNDER ADMIN</span></div><nav class="wd-admin-links">${items.map(([href,label])=>`<a href="${href}" class="${current===href?'is-active':''}" ${current===href?'aria-current="page"':''}>${label}</a>`).join('')}</nav><div class="wd-admin-footer"><a href="home.html">Abrir área do membro</a><button type="button" data-action="logout">Sair do administrador</button></div>`;
+  aside.innerHTML=`<div class="wd-admin-brand"><strong>WD</strong><span>FOUNDER ADMIN</span></div><nav class="wd-admin-links">${items.map(([href,label])=>`<a href="${href}" class="${current===href?'is-active':''}" ${current===href?'aria-current="page"':''}>${label}</a>`).join('')}</nav><div class="wd-admin-footer"><button type="button" data-action="logout">Sair do administrador</button></div>`;
   const trigger=document.createElement('button');
   trigger.className='wd-admin-mobile-trigger';
   trigger.type='button';
@@ -155,7 +155,7 @@ async function iniciarComUsuario(user){
   const admin=FIXED_ADMIN_UIDS.has(user.uid)||ADMIN_ROLES.has(role);
   document.documentElement.dataset.role=admin?'admin':'cliente';
   if(body.dataset.adminPage==='true'&&!admin){location.replace('home.html');return}
-  if(body.dataset.adminPage==='true'||isAdminContext)montarMenuAdmin(dados);else montarMenuCliente(dados);
+  if(body.dataset.adminPage==='true'||isAdminContext)montarMenuAdmin();else montarMenuCliente(dados);
   document.dispatchEvent(new CustomEvent('wd-role-ready',{detail:{user,role,admin,dados}}));
 }
 
