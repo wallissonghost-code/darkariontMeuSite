@@ -1,1 +1,30 @@
-<section class="conteudo spa-page-content store-page" data-view="store"><div class="store-toolbar" role="search"><label class="store-search"><span aria-hidden="true">⌕</span><input id="storeSearch" type="search" placeholder="Buscar mercadoria" aria-label="Buscar mercadoria"></label><label class="store-category"><span aria-hidden="true">◇</span><select id="storeCategory" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select></label></div><section class="product-grid" id="productsGrid"><div class="store-empty">Carregando mercadorias...</div></section><dialog class="product-dialog" id="productDialog"><button class="dialog-close" id="dialogClose" type="button" aria-label="Fechar">×</button><div id="dialogContent"></div></dialog></section>
+<section class="conteudo spa-page-content store-page" data-view="store">
+  <div class="store-toolbar" role="search">
+    <label class="store-search">
+      <span aria-hidden="true">⌕</span>
+      <input id="storeSearch" type="search" placeholder="Buscar mercadoria" aria-label="Buscar mercadoria">
+    </label>
+    <label class="store-category">
+      <span aria-hidden="true">◇</span>
+      <select id="storeCategory" aria-label="Filtrar por categoria">
+        <option value="">Todas as categorias</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="store-results-head">
+    <strong>Produtos</strong>
+    <span id="storeResultCount" aria-live="polite"></span>
+  </div>
+
+  <section class="product-grid" id="productsGrid">
+    <div class="store-empty">Carregando mercadorias...</div>
+  </section>
+
+  <nav class="store-pagination" id="storePagination" aria-label="Paginação de produtos" hidden></nav>
+
+  <dialog class="product-dialog" id="productDialog">
+    <button class="dialog-close" id="dialogClose" type="button" aria-label="Fechar">×</button>
+    <div id="dialogContent"></div>
+  </dialog>
+</section>
