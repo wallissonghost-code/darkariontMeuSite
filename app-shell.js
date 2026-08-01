@@ -97,7 +97,6 @@ function abrirFerramentasAdmin(){
 function alternarFerramentasAdmin(){body.classList.contains('spa-admin-open')?fecharFerramentasAdmin():abrirFerramentasAdmin()}
 function montarAcessosAdminSpa(){
   if(!isSpaShell||document.querySelector('[data-spa-admin-tools]'))return;
-
   const desktopNav=document.querySelector('.spa-sidebar .spa-nav');
   const bottomNav=document.querySelector('.spa-bottom-nav');
   if(!desktopNav||!bottomNav)return;
@@ -147,7 +146,12 @@ async function sair(event){
   if(saindo)return;
   saindo=true;
   document.querySelectorAll('[data-action="logout"],.logout-btn').forEach(button=>{button.disabled=true;button.textContent='Saindo...'});
-  try{window.WDSession?.resetClientState?.();await signOut(auth)}catch(error{console.error('Erro ao sair:',error)}finally{
+  try{
+    window.WDSession?.resetClientState?.();
+    await signOut(auth);
+  }catch(error){
+    console.error('Erro ao sair:',error);
+  }finally{
     const destino=isAdminContext?'admin-login.html':'index.html';
     location.replace(`${destino}?logout=1`);
   }
