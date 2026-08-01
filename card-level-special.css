@@ -1,0 +1,167 @@
+/* Ajustes exclusivos para LV5 Platinum e LV10 Founder */
+
+.vip-card.platinum{
+  --ink:#10151b;
+  color:#10151b;
+  background:
+    radial-gradient(circle at 14% 8%,rgba(255,255,255,.92),transparent 24%),
+    radial-gradient(circle at 86% 88%,rgba(62,75,90,.2),transparent 42%),
+    linear-gradient(132deg,#f9fafb 0%,#dfe4e9 42%,#aab3bd 72%,#68737f 100%);
+  border-color:rgba(255,255,255,.9);
+  box-shadow:
+    0 30px 76px rgba(105,119,136,.36),
+    0 12px 28px rgba(16,24,32,.18),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -1px 0 rgba(38,49,61,.28);
+  text-shadow:none;
+}
+
+.vip-card.platinum:before{
+  opacity:.58;
+  background:
+    repeating-linear-gradient(118deg,transparent 0 24px,rgba(255,255,255,.16) 25px 26px),
+    linear-gradient(112deg,transparent 35%,rgba(255,255,255,.72) 48%,transparent 61%);
+}
+
+.vip-card.platinum:after{
+  border-color:rgba(255,255,255,.68);
+  box-shadow:
+    inset 0 0 0 1px rgba(73,86,101,.2),
+    inset 0 0 34px rgba(255,255,255,.28);
+}
+
+.vip-card.platinum .card-brand strong,
+.vip-card.platinum .card-brand span,
+.vip-card.platinum .card-level small,
+.vip-card.platinum .card-level h2,
+.vip-card.platinum .stamps-head,
+.vip-card.platinum .card-footer span,
+.vip-card.platinum .card-footer strong{
+  color:#11171d;
+  opacity:1;
+  text-shadow:0 1px 0 rgba(255,255,255,.75);
+}
+
+.vip-card.platinum .level-badge{
+  color:#11171d;
+  border-color:rgba(34,45,57,.22);
+  background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(213,220,227,.58));
+  box-shadow:inset 0 1px rgba(255,255,255,.92),0 8px 22px rgba(58,72,87,.15);
+}
+
+.vip-card.platinum .stamp{
+  border-color:rgba(42,54,67,.35);
+  background:rgba(255,255,255,.34);
+  box-shadow:inset 0 1px rgba(255,255,255,.9);
+}
+
+.vip-card.platinum .stamp.on{
+  background:linear-gradient(180deg,#ffffff,#d6dde4);
+  border-color:#fff;
+  box-shadow:0 0 14px rgba(255,255,255,.88),inset 0 1px #fff;
+}
+
+.vip-card.platinum .card-footer{
+  border-top-color:rgba(38,49,61,.22);
+}
+
+.vip-card.founder{
+  color:#fff7cf;
+  background:
+    radial-gradient(circle at 14% 10%,rgba(255,217,75,.17),transparent 23%),
+    radial-gradient(circle at 84% 88%,rgba(255,183,0,.11),transparent 38%),
+    linear-gradient(135deg,#242424 0%,#0a0a0a 44%,#000 72%,#161006 100%);
+  border:1px solid rgba(255,215,0,.62);
+  box-shadow:
+    0 0 0 1px rgba(255,215,0,.12),
+    0 34px 92px rgba(0,0,0,.78),
+    0 0 54px rgba(255,196,0,.2),
+    inset 0 1px 0 rgba(255,241,173,.56),
+    inset 0 -1px 0 rgba(120,78,0,.48);
+}
+
+.vip-card.founder:before{
+  inset:-8%;
+  opacity:1;
+  background:
+    radial-gradient(circle at 15% 18%,rgba(255,215,0,.18),transparent 19%),
+    repeating-linear-gradient(118deg,transparent 0 26px,rgba(255,215,0,.055) 27px 28px),
+    linear-gradient(112deg,transparent 35%,rgba(255,230,125,.24) 48%,transparent 61%);
+  animation:founderShine 7s ease-in-out infinite;
+}
+
+.vip-card.founder:after{
+  inset:7px;
+  border:1px solid rgba(255,224,98,.42);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    inset 0 0 42px rgba(255,197,0,.06),
+    0 0 18px rgba(255,215,0,.08);
+}
+
+.vip-card.founder .card-brand strong{
+  color:#ffe784;
+  text-shadow:0 0 18px rgba(255,214,72,.32),0 2px 12px rgba(0,0,0,.8);
+}
+
+.vip-card.founder .card-brand span,
+.vip-card.founder .card-level small,
+.vip-card.founder .stamps-head,
+.vip-card.founder .card-footer span{
+  color:#e8ca64;
+  opacity:.9;
+}
+
+.vip-card.founder .card-level h2{
+  color:#fff9df;
+  text-shadow:0 0 26px rgba(255,215,0,.24),0 3px 18px rgba(0,0,0,.82);
+}
+
+.vip-card.founder .level-badge{
+  color:#fff4bd;
+  border-color:rgba(255,218,74,.58);
+  background:linear-gradient(180deg,rgba(255,215,0,.18),rgba(255,215,0,.055));
+  box-shadow:
+    inset 0 1px rgba(255,242,168,.36),
+    0 0 22px rgba(255,195,0,.15);
+}
+
+.vip-card.founder .stamp{
+  border-color:rgba(255,214,72,.54);
+  background:rgba(255,215,0,.045);
+}
+
+.vip-card.founder .stamp.on{
+  background:linear-gradient(180deg,#fffad6,#ffd700 56%,#c88b00);
+  border-color:#fff6b2;
+  box-shadow:
+    0 0 16px rgba(255,215,0,.72),
+    0 0 5px rgba(255,255,255,.72),
+    inset 0 1px #fff;
+}
+
+.vip-card.founder .card-footer{
+  border-top-color:rgba(255,214,72,.28);
+}
+
+.vip-card.founder .card-footer strong{
+  color:#fff6c5;
+}
+
+@keyframes founderShine{
+  0%,32%{transform:translateX(-62%) rotate(.001deg)}
+  62%,100%{transform:translateX(62%) rotate(.001deg)}
+}
+
+@media(max-width:600px){
+  .vip-card.platinum{
+    box-shadow:0 24px 56px rgba(105,119,136,.32),0 10px 24px rgba(16,24,32,.16),inset 0 1px rgba(255,255,255,.98);
+  }
+  .vip-card.founder{
+    box-shadow:0 26px 64px rgba(0,0,0,.76),0 0 34px rgba(255,196,0,.16),inset 0 1px rgba(255,241,173,.48);
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .vip-card.founder:before{animation:none}
+}
