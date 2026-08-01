@@ -1,4 +1,4 @@
-const BUILD='2.3.3';
+const BUILD='2.3.4';
 const routes={home:{title:'Início',view:'views/home.html',modules:['./home.js']},card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},store:{title:'Mercadorias',view:'views/store.html',modules:['./mercadorias.js']},account:{title:'Minha conta',view:'views/account.html',modules:['./perfil.js']}};
 const aliases={'home.html':'home','cartao.html':'card','ofertas.html':'card','mercadorias.html':'store','perfil.html':'account'};
 const content=document.getElementById('conteudo'),loader=document.getElementById('spaLoader'),views=new Map(),loading=new Map();
