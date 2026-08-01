@@ -1,0 +1,156 @@
+/* Coerência global entre modo claro e modo noturno — carregado por último */
+
+/* Base clara explícita */
+html:not([data-theme="dark"]){
+  color-scheme:light;
+  --bg:#f6f2ea;
+  --surface:#ffffff;
+  --surface-2:#f4efe6;
+  --surface-3:#ebe4d8;
+  --ink:#171719;
+  --muted:#746f67;
+  --line:rgba(31,27,20,.12);
+  --gold:#a77b22;
+  --gold2:#c49a38;
+  --shadow:0 22px 60px rgba(65,49,21,.12);
+}
+html:not([data-theme="dark"]) body{
+  background:radial-gradient(circle at 12% -8%,rgba(196,154,56,.13),transparent 30%),linear-gradient(145deg,#fbf8f2,#f4efe6 55%,#efe8dc)!important;
+  color:var(--ink)!important;
+}
+html:not([data-theme="dark"]) .spa-main,
+html:not([data-theme="dark"]) .spa-page-content,
+html:not([data-theme="dark"]) .conteudo{background:transparent!important;color:var(--ink)!important}
+html:not([data-theme="dark"]) h1,
+html:not([data-theme="dark"]) h2,
+html:not([data-theme="dark"]) h3,
+html:not([data-theme="dark"]) h4,
+html:not([data-theme="dark"]) label{color:var(--ink)!important}
+html:not([data-theme="dark"]) p,
+html:not([data-theme="dark"]) small,
+html:not([data-theme="dark"]) .muted{color:var(--muted)!important}
+
+/* Barra inferior fixa — clara e escura seguem o tema */
+@media(max-width:768px){
+  html:not([data-theme="dark"]) .spa-bottom-nav{
+    background:rgba(255,253,248,.98)!important;
+    border-top-color:rgba(167,123,34,.22)!important;
+    box-shadow:0 -10px 32px rgba(64,47,18,.12)!important;
+  }
+  html:not([data-theme="dark"]) .spa-bottom-nav a,
+  html:not([data-theme="dark"]) .spa-admin-nav-button{color:#817b72!important}
+  html:not([data-theme="dark"]) .spa-bottom-nav a.is-active,
+  html:not([data-theme="dark"]) .spa-admin-nav-button[aria-expanded="true"]{
+    color:#30240f!important;
+    border-color:rgba(167,123,34,.24)!important;
+    background:linear-gradient(145deg,rgba(196,154,56,.18),rgba(196,154,56,.055))!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.8)!important;
+  }
+  html:not([data-theme="dark"]) .spa-bottom-nav [data-spa-avatar]{
+    background:linear-gradient(145deg,#f3ebdc,#e3d7c2)!important;
+    border-color:rgba(86,67,32,.16)!important;
+    color:#8f6918!important;
+  }
+  html:not([data-theme="dark"]) .spa-bottom-nav a.is-active [data-spa-avatar]{
+    background:linear-gradient(145deg,#ead7a7,#c99f43)!important;
+    border-color:rgba(133,93,14,.30)!important;
+    color:#241a08!important;
+    box-shadow:0 0 0 3px rgba(167,123,34,.07)!important;
+  }
+}
+
+/* Perfil / Conta no modo claro */
+html:not([data-theme="dark"]) .profile-panel.profile-premium{
+  background:linear-gradient(155deg,#ffffff,#f7f2e9 62%,#eee6da)!important;
+  border-color:rgba(55,43,24,.12)!important;
+  box-shadow:0 28px 72px rgba(72,53,20,.14),inset 0 1px rgba(255,255,255,.9)!important;
+}
+html:not([data-theme="dark"]) .profile-cover{
+  background:radial-gradient(circle at 8% 0,rgba(196,154,56,.22),transparent 35%),linear-gradient(135deg,#f9f1df,#f3ede4 55%,#e9e0d2)!important;
+  border-bottom-color:rgba(56,43,23,.10)!important;
+}
+html:not([data-theme="dark"]) .profile-meta h2{color:#181714!important}
+html:not([data-theme="dark"]) .profile-meta p{color:#777168!important}
+html:not([data-theme="dark"]) .profile-panel .avatar{
+  background:linear-gradient(145deg,#ead7a8,#b98a2c)!important;
+  border-color:rgba(126,88,17,.30)!important;
+  color:#241a08!important;
+}
+html:not([data-theme="dark"]) .profile-badge{
+  color:#7c5a14!important;
+  background:rgba(167,123,34,.10)!important;
+  border-color:rgba(167,123,34,.24)!important;
+}
+html:not([data-theme="dark"]) .profile-field,
+html:not([data-theme="dark"]) .theme-setting,
+html:not([data-theme="dark"]) .profile-form,
+html:not([data-theme="dark"]) .account-exit{
+  background:linear-gradient(145deg,#fff,#f4efe7)!important;
+  border-color:rgba(48,38,22,.11)!important;
+  color:#1b1a17!important;
+  box-shadow:none!important;
+}
+html:not([data-theme="dark"]) .profile-field span{color:#7b756d!important}
+html:not([data-theme="dark"]) .profile-field strong,
+html:not([data-theme="dark"]) .theme-setting h3,
+html:not([data-theme="dark"]) .profile-form h3,
+html:not([data-theme="dark"]) .account-exit h3{color:#181714!important}
+html:not([data-theme="dark"]) .profile-form label{color:#555047!important}
+html:not([data-theme="dark"]) .profile-form input{
+  background:#fff!important;
+  color:#171719!important;
+  -webkit-text-fill-color:#171719!important;
+  border-color:rgba(48,38,22,.14)!important;
+}
+html:not([data-theme="dark"]) .secondary-btn{background:#eee7dc!important;color:#25221d!important;border-color:rgba(48,38,22,.12)!important}
+html:not([data-theme="dark"]) .profile-security{color:#777168!important}
+
+/* Vitrine no modo claro */
+html:not([data-theme="dark"]) .store-toolbar{
+  background:rgba(255,253,248,.94)!important;
+  border-color:rgba(48,38,22,.12)!important;
+  box-shadow:0 12px 34px rgba(72,53,20,.10)!important;
+}
+html:not([data-theme="dark"]) .store-toolbar label{background:rgba(244,239,230,.92)!important}
+html:not([data-theme="dark"]) .store-toolbar input,
+html:not([data-theme="dark"]) .store-toolbar select{color:#1c1a16!important;-webkit-text-fill-color:#1c1a16!important}
+html:not([data-theme="dark"]) .product-card{
+  background:#fff!important;
+  color:#191815!important;
+  border-color:rgba(45,36,22,.12)!important;
+  box-shadow:0 10px 28px rgba(73,54,21,.09)!important;
+}
+html:not([data-theme="dark"]) .product-title,
+html:not([data-theme="dark"]) .product-price strong{color:#181714!important}
+html:not([data-theme="dark"]) .product-stock,
+html:not([data-theme="dark"]) .product-price del{color:#827b70!important}
+html:not([data-theme="dark"]) .product-card.is-sale{
+  border-color:rgba(184,55,48,.28)!important;
+  box-shadow:0 12px 32px rgba(150,46,40,.10)!important;
+}
+
+/* Sidebar desktop no modo claro */
+@media(min-width:769px){
+  html:not([data-theme="dark"]) .spa-sidebar{
+    background:radial-gradient(circle at 18% 0,rgba(196,154,56,.13),transparent 30%),linear-gradient(180deg,#fffdf8,#f4eee4 62%,#ece3d5)!important;
+    border-right-color:rgba(50,39,21,.12)!important;
+    box-shadow:18px 0 48px rgba(70,51,18,.10)!important;
+  }
+  html:not([data-theme="dark"]) .spa-brand strong{color:#171612!important;text-shadow:none!important}
+  html:not([data-theme="dark"]) .spa-brand span{color:#9a711d!important}
+  html:not([data-theme="dark"]) .spa-nav a{color:#716b62!important}
+  html:not([data-theme="dark"]) .spa-nav a:hover{color:#221d14!important;background:rgba(167,123,34,.07)!important;border-color:rgba(167,123,34,.12)!important}
+  html:not([data-theme="dark"]) .spa-nav a.is-active{color:#231b0d!important;background:linear-gradient(90deg,rgba(196,154,56,.18),rgba(255,255,255,.45))!important;border-color:rgba(167,123,34,.26)!important;box-shadow:none!important}
+  html:not([data-theme="dark"]) .spa-nav-icon,
+  html:not([data-theme="dark"]) .spa-admin-links a span{background:linear-gradient(145deg,#f5eee2,#e7dccb)!important;border-color:rgba(60,46,23,.11)!important;color:#87631a!important}
+  html:not([data-theme="dark"]) .spa-admin-section{border-top-color:rgba(50,39,21,.11)!important}
+  html:not([data-theme="dark"]) .spa-admin-links a{color:#756f66!important}
+  html:not([data-theme="dark"]) .spa-admin-links a:hover{color:#211c13!important;background:rgba(167,123,34,.07)!important}
+  html:not([data-theme="dark"]) .spa-admin-section-title b{color:#8a847a!important}
+  html:not([data-theme="dark"]) .spa-sidebar-footer{border-top-color:rgba(50,39,21,.11)!important}
+  html:not([data-theme="dark"]) .spa-logout{background:rgba(255,255,255,.48)!important;color:#6d675e!important;border-color:rgba(50,39,21,.11)!important}
+}
+
+/* Garante que o modo escuro continue integral */
+html[data-theme="dark"] .spa-main,
+html[data-theme="dark"] .spa-page-content{color:var(--ink)!important}
