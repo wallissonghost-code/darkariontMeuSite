@@ -4,12 +4,16 @@ import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/12.16.0/
 const grid = document.getElementById('productsGrid');
 const search = document.getElementById('storeSearch');
 const category = document.getElementById('storeCategory');
+const pagination = document.getElementById('storePagination');
+const resultCount = document.getElementById('storeResultCount');
 const dialog = document.getElementById('productDialog');
 const dialogContent = document.getElementById('dialogContent');
 
+const PAGE_SIZE = 20;
 const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[c]));
 let items = [];
+let currentPage = 1;
 
 function imagesOf(product) {
   const list = Array.isArray(product.imagens) && product.imagens.length ? product.imagens : (product.imagem ? [product.imagem] : []);
@@ -20,23 +24,92 @@ function discountOf(product) {
   const oldPrice = Number(product.precoAntigo || 0), price = Number(product.preco || 0);
   return oldPrice > price && oldPrice > 0 ? Math.round((1 - price / oldPrice) * 100) : 0;
 }
-
-function render() {
+function normalizedLabel(product) {
+  return String(product.selo || product.status || '').trim().toLowerCase();
+}
+function priorityOf(product) {
+  const label = normalizedLabel(product);
+  if (label.includes('tend')) return 0;
+  if (discountOf(product) > 0 || label.includes('oferta') || label.includes('promo')) return 1;
+  if (label.includes('new') || label.includes('novo') || label.includes('novidade')) return 2;
+  return 3;
+}
+function timestampOf(product) {
+  const value = product.criadoEm || product.createdAt || product.dataCriacao || product.atualizadoEm;
+  if (value?.toMillis) return value.toMillis();
+  if (value?.seconds) return Number(value.seconds) * 1000;
+  const parsed = Date.parse(value || '');
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+function compareProducts(a, b) {
+  const priority = priorityOf(a) - priorityOf(b);
+  if (priority) return priority;
+  const orderA = Number(a.ordem);
+  const orderB = Number(b.ordem);
+  if (Number.isFinite(orderA) || Number.isFinite(orderB)) {
+    const safeA = Number.isFinite(orderA) ? orderA : 999999;
+    const safeB = Number.isFinite(orderB) ? orderB : 999999;
+    if (safeA !== safeB) return safeA - safeB;
+  }
+  const time = timestampOf(b) - timestampOf(a);
+  if (time) return time;
+  return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR');
+}
+function filteredProducts() {
   const term = search.value.trim().toLowerCase();
   const selectedCategory = category.value;
-  const filtered = items.filter(product => {
-    const text = `${product.nome || ''} ${product.categoria || ''} ${product.descricao || ''}`.toLowerCase();
+  return items.filter(product => {
+    const text = `${product.nome || ''} ${product.categoria || ''} ${product.descricao || ''} ${product.selo || ''}`.toLowerCase();
     return product.ativo !== false && (!selectedCategory || product.categoria === selectedCategory) && (!term || text.includes(term));
+  }).sort(compareProducts);
+}
+function pageNumbers(totalPages, page) {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  const values = new Set([1, totalPages, page - 1, page, page + 1]);
+  if (page <= 3) [2, 3, 4].forEach(value => values.add(value));
+  if (page >= totalPages - 2) [totalPages - 3, totalPages - 2, totalPages - 1].forEach(value => values.add(value));
+  const ordered = [...values].filter(value => value >= 1 && value <= totalPages).sort((a, b) => a - b);
+  const result = [];
+  ordered.forEach((value, index) => {
+    if (index && value - ordered[index - 1] > 1) result.push('ellipsis');
+    result.push(value);
   });
+  return result;
+}
+function renderPagination(totalItems) {
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  if (totalItems <= PAGE_SIZE) {
+    pagination.hidden = true;
+    pagination.innerHTML = '';
+    return;
+  }
+  pagination.hidden = false;
+  pagination.innerHTML = `
+    <button type="button" class="pagination-nav" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''} aria-label="Página anterior">‹ <span>Anterior</span></button>
+    <div class="pagination-pages">
+      ${pageNumbers(totalPages, currentPage).map(value => value === 'ellipsis'
+        ? '<span class="pagination-ellipsis" aria-hidden="true">…</span>'
+        : `<button type="button" data-page="${value}" class="${value === currentPage ? 'is-active' : ''}" ${value === currentPage ? 'aria-current="page"' : ''}>${value}</button>`).join('')}
+    </div>
+    <button type="button" class="pagination-nav" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Próxima página"><span>Próxima</span> ›</button>`;
+}
+function render() {
+  const filtered = filteredProducts();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const visible = filtered.slice(start, start + PAGE_SIZE);
 
-  grid.innerHTML = filtered.map(product => {
+  resultCount.textContent = filtered.length === 1 ? '1 produto' : `${filtered.length} produtos`;
+  grid.innerHTML = visible.map(product => {
     const images = imagesOf(product);
     const discount = discountOf(product);
     const image = images[0]
       ? `<img src="${esc(images[0])}" alt="${esc(product.nome || 'Mercadoria')}" loading="lazy" onerror="this.parentElement.classList.add('no-image');this.remove()">`
       : '<span class="product-placeholder">WD</span>';
     return `
-      <article class="product-card" data-open-product="${esc(product.id)}" tabindex="0" role="button" aria-label="Ver ${esc(product.nome || 'produto')}">
+      <article class="product-card" data-open-product="${esc(product.id)}" data-priority="${priorityOf(product)}" tabindex="0" role="button" aria-label="Ver ${esc(product.nome || 'produto')}">
         <div class="product-media ${images[0] ? '' : 'no-image'}">
           ${image}
           <div class="product-media-top">
@@ -58,6 +131,19 @@ function render() {
         </div>
       </article>`;
   }).join('') || '<div class="store-empty">Nenhuma mercadoria encontrada.</div>';
+  renderPagination(filtered.length);
+}
+function resetAndRender() {
+  currentPage = 1;
+  render();
+}
+function goToPage(page) {
+  const totalPages = Math.max(1, Math.ceil(filteredProducts().length / PAGE_SIZE));
+  const nextPage = Math.min(Math.max(1, Number(page) || 1), totalPages);
+  if (nextPage === currentPage) return;
+  currentPage = nextPage;
+  render();
+  document.querySelector('.store-results-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function openProduct(id) {
@@ -135,17 +221,22 @@ function openProduct(id) {
 
 try {
   const snapshot = await getDocs(collection(db, 'ofertas'));
-  items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(product => product.tipo === 'produto').sort((a, b) => (Number(a.ordem) || 999) - (Number(b.ordem) || 999));
-  const categories = [...new Set(items.map(product => product.categoria).filter(Boolean))].sort();
+  items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(product => product.tipo === 'produto').sort(compareProducts);
+  const categories = [...new Set(items.map(product => product.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
   category.innerHTML = '<option value="">Todas as categorias</option>' + categories.map(item => `<option>${esc(item)}</option>`).join('');
   render();
 } catch (error) {
   console.error(error);
+  resultCount.textContent = '';
   grid.innerHTML = `<div class="store-empty">Não foi possível carregar as mercadorias agora.<small>${esc(error.code || '')}</small></div>`;
 }
 
-search.addEventListener('input', render);
-category.addEventListener('change', render);
+search.addEventListener('input', resetAndRender);
+category.addEventListener('change', resetAndRender);
+pagination.addEventListener('click', event => {
+  const button = event.target.closest('[data-page]');
+  if (button && !button.disabled) goToPage(button.dataset.page);
+});
 grid.addEventListener('click', event => { const card = event.target.closest('[data-open-product]'); if (card) openProduct(card.dataset.openProduct); });
 grid.addEventListener('keydown', event => { if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-open-product]')) { event.preventDefault(); openProduct(event.target.dataset.openProduct); } });
 document.getElementById('dialogClose').addEventListener('click', () => dialog.close());
