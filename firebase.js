@@ -14,13 +14,13 @@ const firebaseConfig = {
 };
 
 const path = location.pathname.toLowerCase();
+const page = path.split('/').pop() || 'index.html';
 const isAdminContext = document.body?.dataset.adminPage === 'true'
+  || document.body?.dataset.adminShell === 'true'
   || document.body?.dataset.adminLogin === 'true'
-  || path.endsWith('/admin-login.html');
+  || page === 'admin.html'
+  || page === 'admin-login.html';
 
-// Uma única instância Firebase e uma única sessão persistente são utilizadas
-// em todo o site. A autorização administrativa continua sendo validada pelo
-// UID/role, pelo admin-guard.js e pelas regras do Firestore.
 const app = getApps().some(item => item.name === '[DEFAULT]')
   ? getApp()
   : initializeApp(firebaseConfig);
@@ -28,11 +28,15 @@ const app = getApps().some(item => item.name === '[DEFAULT]')
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const authReady = setPersistence(auth, browserLocalPersistence).catch(error => {
-  console.error('Não foi possível configurar a persistência da sessão:', error);
-});
+// A persistência só é definida nas telas em que o usuário realmente entra.
+// Reaplicar setPersistence durante cada navegação pode criar estados transitórios
+// de logout no Safari/iOS. Nas demais páginas apenas aguardamos o Auth restaurar
+// a sessão local existente.
+const isLoginPage = page === 'index.html' || page === '' || page === 'cadastro.html' || page === 'admin-login.html';
+const authReady = isLoginPage
+  ? setPersistence(auth, browserLocalPersistence).then(() => auth.authStateReady())
+  : auth.authStateReady();
 
-// Indica apenas o tipo da página atual; não cria outra autenticação.
 const sessionScope = isAdminContext ? 'admin-page' : 'member-page';
 
 export { app, auth, db, authReady, isAdminContext, sessionScope };
