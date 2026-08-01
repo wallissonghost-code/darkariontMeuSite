@@ -29,17 +29,22 @@ async function saveUserData(extra={}){
 async function syncRestocks(){
   let changed=false;
   const productMap=new Map(state.products.map(product=>[product.id,product]));
-  state.waiting=state.waiting.map(item=>{
+  const nextWaiting=[];
+  for(const item of state.waiting){
     const product=productMap.get(item.productId);
     const available=stockOf(product)>0;
-    if(available&&!item.notificadoDisponivel){
-      state.notifications.unshift({id:`restock-${item.productId}-${Date.now()}`,type:'restock',productId:item.productId,title:'Produto disponível novamente',message:`${product?.nome||item.nome||'Seu produto'} voltou ao estoque.`,image:(Array.isArray(product?.imagens)&&product.imagens[0])||product?.imagem||item.image||'',createdAt:now(),read:false});
+    if(available){
+      const alreadyNotified=state.notifications.some(notification=>notification.type==='restock'&&notification.productId===item.productId);
+      if(!alreadyNotified){
+        state.notifications.unshift({id:`restock-${item.productId}-${Date.now()}`,type:'restock',productId:item.productId,title:'Produto disponível novamente',message:`${product?.nome||item.nome||'Seu produto'} voltou ao estoque.`,image:(Array.isArray(product?.imagens)&&product.imagens[0])||product?.imagem||item.image||'',createdAt:now(),read:false});
+      }
       changed=true;
-      return {...item,nome:product?.nome||item.nome,image:(Array.isArray(product?.imagens)&&product.imagens[0])||product?.imagem||item.image||'',notificadoDisponivel:true,disponivel:true};
+      continue;
     }
-    if(!available&&item.disponivel){changed=true;return {...item,disponivel:false,notificadoDisponivel:false}}
-    return {...item,disponivel:available};
-  });
+    nextWaiting.push({...item,disponivel:false,notificadoDisponivel:false});
+  }
+  if(nextWaiting.length!==state.waiting.length)changed=true;
+  state.waiting=nextWaiting;
   state.notifications=state.notifications.slice(0,50);
   if(changed)await saveUserData();
 }
@@ -69,8 +74,9 @@ export async function addToWaiting(product){
   await initMemberCommerce();
   if(!state.user||!product?.id)return;
   const exists=state.waiting.some(item=>item.productId===product.id);
-  if(!exists){const image=(Array.isArray(product.imagens)&&product.imagens[0])||product.imagem||'';state.waiting.unshift({productId:product.id,nome:product.nome||'Produto',image,addedAt:now(),disponivel:stockOf(product)>0,notificadoDisponivel:stockOf(product)>0});await saveUserData();emit()}
+  if(!exists){const image=(Array.isArray(product.imagens)&&product.imagens[0])||product.imagem||'';state.waiting.unshift({productId:product.id,nome:product.nome||'Produto',image,addedAt:now(),disponivel:false,notificadoDisponivel:false});await saveUserData();emit()}
 }
 
 export async function removeFromWaiting(productId){await initMemberCommerce();state.waiting=state.waiting.filter(item=>item.productId!==productId);await saveUserData();emit()}
+export async function removeNotification(notificationId){await initMemberCommerce();state.notifications=state.notifications.filter(item=>item.id!==notificationId);await saveUserData();emit()}
 export async function markNotificationsRead(){await initMemberCommerce();let changed=false;state.notifications=state.notifications.map(item=>{if(item.read)return item;changed=true;return {...item,read:true}});if(changed)await saveUserData();emit()}
