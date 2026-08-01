@@ -10,7 +10,7 @@ const palettes=[
   {c1:'#ad82ff',c2:'#6C3CE9',c3:'#21104f',accent:'#e5d6ff',glow:'rgba(108,60,233,.5)'},
   {c1:'#f7f8fa',c2:'#c5cbd2',c3:'#69737f',accent:'#ffffff',glow:'rgba(151,164,179,.5)',light:true,platinum:true},
   {c1:'#4c8dff',c2:'#0F52BA',c3:'#031b49',accent:'#b8d4ff',glow:'rgba(15,82,186,.52)'},
-  {c1:'#353535',c2:'#121212',c3:'#000000',accent:'#bfc2c7',glow:'rgba(0,0,0,.65)'},
+  {c1:'#353535',c2:'#121212',c3:'#000000',accent:'#d9dde3',glow:'rgba(0,0,0,.7)'},
   {c1:'#ee5365',c2:'#B11226',c3:'#3b020b',accent:'#ffc0c8',glow:'rgba(177,18,38,.52)'},
   {c1:'#4265c5',c2:'#1F3A93',c3:'#071337',accent:'#D4AF37',glow:'rgba(31,58,147,.58)',prime:true},
   {c1:'#242424',c2:'#080808',c3:'#000000',accent:'#FFD700',glow:'rgba(212,175,55,.34)',founder:true}
@@ -38,7 +38,7 @@ function paint(){
   card.setAttribute('aria-label',`Cartão ${levels[vip]} nível ${vip}`);
 
   document.getElementById('nivel').textContent=`LV${vip}`;
-  document.getElementById('membroNivel').textContent=`MEMBRO ${levels[vip]}`;
+  document.getElementById('membroNivel').textContent=vip===0?'MEMBRO':`MEMBRO ${levels[vip]}`;
   document.getElementById('seloNivel').textContent=levels[vip];
   document.getElementById('clienteNome').textContent=currentData.nome||'Cliente Founder';
   document.getElementById('creditosCliente').textContent=Number(currentData.creditos||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
