@@ -1,0 +1,229 @@
+/* Sincronização final dos cartões WD Fidelidade — Home e Meu cartão */
+
+.vip-card,
+.home-card{
+  --card-radius:30px;
+  --card-border:rgba(255,255,255,.34);
+  --card-inner:rgba(255,255,255,.18);
+  --card-label:rgba(255,255,255,.76);
+  color:var(--card-ink,#fff);
+  background:
+    radial-gradient(circle at 13% 8%,rgba(255,255,255,.34),transparent 23%),
+    radial-gradient(circle at 88% 91%,rgba(0,0,0,.40),transparent 43%),
+    linear-gradient(132deg,var(--c1,var(--a)),var(--c2,var(--b)) 49%,var(--c3,var(--c)));
+  border:1px solid var(--card-border);
+  border-radius:var(--card-radius);
+  box-shadow:
+    0 32px 82px var(--glow,var(--shadow)),
+    0 14px 30px rgba(0,0,0,.28),
+    inset 0 1px rgba(255,255,255,.48),
+    inset 0 -1px rgba(0,0,0,.34);
+}
+
+.home-card{
+  width:min(100%,760px);
+  margin:30px auto 0;
+  padding:34px 36px;
+}
+
+.vip-card:after,
+.home-card:before{
+  inset:8px;
+  border-radius:22px;
+  border:1px solid var(--card-inner);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+}
+
+.vip-card .card-brand strong,
+.home-card .home-card-top>div>strong{
+  color:var(--card-ink,#fff);
+  font-weight:850;
+  letter-spacing:.19em;
+  text-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+
+.vip-card .card-brand span,
+.vip-card .card-level small,
+.vip-card .card-footer span,
+.home-card .home-card-top span,
+.home-card .home-card-level>span,
+.home-card .home-card-footer span{
+  color:var(--card-muted,var(--card-label));
+  opacity:1;
+}
+
+.vip-card .card-level h2,
+.vip-card .card-footer strong,
+.vip-card .stamps-head,
+.home-card .home-card-level>strong,
+.home-card .home-card-level p,
+.home-card .home-card-progress,
+.home-card .home-card-footer strong{
+  color:var(--card-ink,#fff);
+}
+
+.level-badge,
+.home-card-badge{
+  color:var(--card-ink,#fff);
+  border-color:color-mix(in srgb,var(--card-ink,#fff) 36%,transparent);
+  background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.055));
+  box-shadow:inset 0 1px rgba(255,255,255,.25),0 9px 22px rgba(0,0,0,.16);
+}
+
+.vip-card.light,
+.home-card.light-card{
+  --card-ink:#121820;
+  --card-muted:rgba(18,24,32,.68);
+  --card-border:rgba(255,255,255,.86);
+  --card-inner:rgba(37,48,60,.16);
+}
+
+.vip-card.light .card-brand strong,
+.home-card.light-card .home-card-top>div>strong,
+.vip-card.light .card-level h2,
+.home-card.light-card .home-card-level>strong{
+  text-shadow:none;
+}
+
+.vip-card.light .level-badge,
+.home-card.light-card .home-card-badge{
+  color:#121820;
+  border-color:rgba(18,24,32,.22);
+  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(225,230,235,.68));
+}
+
+.vip-card.light .stamp,
+.home-card.light-card .progress-track{
+  border-color:rgba(18,24,32,.24);
+  background:rgba(18,24,32,.10);
+}
+
+/* LV7 Black: contraste refinado e constante */
+.vip-card[data-vip="7"],
+.home-card[data-vip="7"]{
+  --card-ink:#f7f8fa;
+  --card-muted:rgba(230,233,238,.78);
+  --card-border:rgba(220,225,232,.42);
+  --card-inner:rgba(235,238,243,.15);
+}
+
+.vip-card[data-vip="7"] .level-badge,
+.home-card[data-vip="7"] .home-card-badge{
+  color:#fff;
+  border-color:rgba(230,234,240,.42);
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.035));
+}
+
+/* LV5 Platinum: legibilidade preservada em qualquer brilho */
+.vip-card[data-vip="5"],
+.home-card[data-vip="5"]{
+  --card-ink:#111820;
+  --card-muted:rgba(17,24,32,.66);
+  --card-border:rgba(255,255,255,.94);
+  --card-inner:rgba(35,48,61,.16);
+  background:
+    radial-gradient(circle at 13% 8%,rgba(255,255,255,.96),transparent 24%),
+    radial-gradient(circle at 88% 90%,rgba(55,70,86,.22),transparent 43%),
+    linear-gradient(132deg,#fbfcfd 0%,#e1e6eb 42%,#aeb7c1 73%,#697581 100%);
+}
+
+/* LV10 Founder — Black Diamond, luxuoso e sincronizado */
+.vip-card.founder,
+.home-card.founder-card{
+  --card-ink:#fff8df;
+  --card-muted:rgba(241,218,137,.82);
+  --card-border:rgba(222,181,55,.74);
+  --card-inner:rgba(238,202,87,.34);
+  background:
+    radial-gradient(ellipse at 10% 4%,rgba(255,232,146,.18),transparent 25%),
+    radial-gradient(ellipse at 92% 96%,rgba(180,126,0,.12),transparent 38%),
+    linear-gradient(145deg,rgba(255,224,112,.055),transparent 27%),
+    repeating-linear-gradient(118deg,transparent 0 31px,rgba(223,181,54,.035) 32px 33px),
+    linear-gradient(132deg,#242018 0%,#0b0b0b 30%,#020202 67%,#171105 100%);
+  border:1px solid var(--card-border);
+  box-shadow:
+    0 0 0 1px rgba(255,222,105,.10),
+    0 38px 100px rgba(0,0,0,.76),
+    0 0 52px rgba(216,170,34,.15),
+    inset 0 1px rgba(255,240,176,.48),
+    inset 0 -1px rgba(102,68,0,.52);
+}
+
+.vip-card.founder:after,
+.home-card.founder-card:before{
+  border-color:rgba(232,195,75,.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    inset 0 0 45px rgba(210,162,18,.045),
+    0 0 16px rgba(223,181,55,.08);
+}
+
+.vip-card.founder .card-brand strong,
+.home-card.founder-card .home-card-top>div>strong{
+  color:#f2d36f;
+  text-shadow:0 0 18px rgba(226,185,58,.20),0 2px 10px rgba(0,0,0,.85);
+}
+
+.vip-card.founder .level-badge,
+.home-card.founder-card .home-card-badge{
+  color:#fff3bd;
+  border-color:rgba(226,187,62,.56);
+  background:linear-gradient(180deg,rgba(218,173,35,.17),rgba(218,173,35,.045));
+  box-shadow:inset 0 1px rgba(255,235,159,.30),0 10px 28px rgba(0,0,0,.28);
+}
+
+.vip-card.founder .stamp.on,
+.home-card.founder-card .progress-track>span{
+  background:linear-gradient(180deg,#fff8c9,#e6bd38 55%,#9d6900);
+  border-color:#fff1a6;
+  box-shadow:0 0 14px rgba(226,185,58,.58),inset 0 1px #fff;
+}
+
+.home-card.founder-card:after{
+  opacity:.022;
+}
+
+.home-card.founder-card .primary-link{
+  color:#171106;
+  background:linear-gradient(135deg,#fff0a6,#d6ab2d 58%,#9a6805);
+  box-shadow:0 12px 30px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.44);
+}
+
+.home-card.founder-card .secondary-link{
+  color:#f2d36f;
+  border-color:rgba(226,187,62,.38);
+  background:rgba(218,173,35,.045);
+}
+
+/* Home mais próxima do cartão físico, sem perder as ações */
+.home-card-top{align-items:flex-start}
+.home-card-level{margin-top:32px}
+.home-card-level>strong{max-width:620px}
+.home-card-progress,.home-card-footer,.hero-actions{max-width:none}
+.home-card-footer{grid-template-columns:1fr 1fr}
+
+@media(max-width:768px){
+  .home-card{
+    width:100%;
+    padding:23px 21px 22px;
+    border-radius:25px;
+  }
+  .vip-card,.home-card{--card-radius:25px}
+  .vip-card:after,.home-card:before{inset:7px;border-radius:18px}
+  .home-card-level{margin-top:25px}
+  .home-card-level>strong{font-size:clamp(38px,10.8vw,52px);line-height:.92}
+  .home-card-level p{font-size:14px;line-height:1.45}
+  .home-card-progress{margin-top:24px}
+  .hero-actions{gap:10px;margin-top:22px}
+  .primary-link,.secondary-link{padding:13px 14px}
+  .vip-card.founder,.home-card.founder-card{
+    box-shadow:0 28px 72px rgba(0,0,0,.74),0 0 30px rgba(216,170,34,.12),inset 0 1px rgba(255,238,169,.42);
+  }
+}
+
+@media(max-width:390px){
+  .home-card{padding:21px 18px 20px}
+  .home-card-top>div>strong{font-size:14px;letter-spacing:.16em}
+  .home-card-badge{padding:8px 10px}
+  .home-card-footer strong{font-size:11px}
+}
