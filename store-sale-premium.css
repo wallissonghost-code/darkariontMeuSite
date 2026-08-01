@@ -1,0 +1,17 @@
+/* Vitrine compacta e destaque automático de ofertas */
+.store-page{padding-top:18px!important}
+.store-toolbar{top:0!important;margin:0 0 18px!important;padding:8px!important;border-radius:18px!important;background:linear-gradient(180deg,rgba(20,22,27,.97),rgba(10,11,14,.96))!important;border:1px solid rgba(255,255,255,.09)!important;box-shadow:0 16px 42px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.04)!important}
+.store-toolbar label{background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.055)!important}
+.store-toolbar label:focus-within{border-color:rgba(220,184,75,.38)!important;box-shadow:0 0 0 3px rgba(220,184,75,.07)!important}
+.store-toolbar input,.store-toolbar select{color:#f4f1e9!important}
+.store-toolbar input::placeholder{color:#777b84!important}
+.product-card:has(.product-price del){border-color:rgba(195,53,53,.38)!important;box-shadow:0 12px 34px rgba(0,0,0,.18),0 0 0 1px rgba(195,53,53,.08)!important}
+.product-card:has(.product-price del) .product-body{background:linear-gradient(180deg,rgba(142,24,29,.08),transparent 42%)!important}
+.product-card:has(.product-price del) .product-category{color:#f2c75c!important}
+.product-card:has(.product-price del) .product-price del{color:#92959d!important;text-decoration-color:#d15c61!important;text-decoration-thickness:1.5px!important}
+.product-card:has(.product-price del) .product-price strong{color:#ff6268!important;text-shadow:0 0 18px rgba(255,72,78,.13)!important}
+.product-card:not(:has(.product-price del)) .product-price strong{color:#f5f2ea!important}
+.product-card:has(.product-price del) .product-discount{background:linear-gradient(135deg,#d63d45,#8d171d)!important;box-shadow:0 7px 18px rgba(131,15,21,.34)!important}
+.detail-price-block:has(del) strong{color:#ff6268!important}
+.detail-price-block:has(del) span{background:linear-gradient(135deg,#d63d45,#8d171d)!important}
+@media(max-width:700px){.store-page{padding-top:8px!important}.store-toolbar{position:sticky!important;top:0!important;margin:0 -10px 12px!important;border-radius:0 0 18px 18px!important;padding:7px 10px!important}.product-card:has(.product-price del){box-shadow:0 9px 24px rgba(0,0,0,.2),0 0 0 1px rgba(195,53,53,.1)!important}}
