@@ -1,151 +1,179 @@
-/* Ajustes exclusivos para LV5 Platinum e LV10 Founder */
+/* Identidade única WD Fidelidade para a tela inicial e Meu cartão */
 
-.vip-card.platinum{
-  --ink:#10151b;
-  color:#10151b;
+.vip-card,
+.home-card{
+  --card-ink:#fff;
+  --card-muted:rgba(255,255,255,.78);
+  color:var(--card-ink);
+}
+
+.vip-card .card-brand strong,
+.home-card .home-card-top strong{
+  color:var(--card-ink);
+  letter-spacing:.22em;
+  text-shadow:0 2px 12px rgba(0,0,0,.24);
+}
+
+.vip-card .card-brand span,
+.vip-card .card-level small,
+.vip-card .stamps-head,
+.vip-card .card-footer span,
+.home-card .home-card-top span,
+.home-card .home-card-level>span,
+.home-card .home-card-level p,
+.home-card .home-card-footer span{
+  color:var(--card-muted);
+  opacity:1;
+}
+
+.home-card .home-club-label{
+  display:block;
+  margin-top:7px;
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.32em;
+}
+
+.home-card #homeMemberTier{
+  display:block;
+  margin-top:5px;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.2em;
+}
+
+.vip-card .card-level h2,
+.vip-card .card-footer strong,
+.vip-card .stamps-head strong,
+.home-card .home-card-level>strong,
+.home-card .home-card-progress strong,
+.home-card .home-card-footer strong{
+  color:var(--card-ink);
+}
+
+.vip-card.light,
+.home-card.light-card{
+  --card-ink:#12171c;
+  --card-muted:rgba(18,23,28,.7);
+}
+
+.vip-card.light .level-badge,
+.home-card.light-card .home-card-badge{
+  color:#12171c;
+  border-color:rgba(24,31,38,.22);
+  background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(229,233,237,.6));
+}
+
+.vip-card[data-vip="7"],
+.home-card[data-vip="7"]{
+  --card-ink:#f8fafc;
+  --card-muted:rgba(231,235,240,.82);
+}
+
+.vip-card[data-vip="7"] .level-badge,
+.home-card[data-vip="7"] .home-card-badge{
+  color:#f8fafc;
+  border-color:rgba(219,224,231,.46);
+  background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.035));
+  box-shadow:inset 0 1px rgba(255,255,255,.16),0 8px 22px rgba(0,0,0,.38);
+}
+
+.vip-card[data-vip="7"] .stamp,
+.home-card[data-vip="7"] .progress-track{
+  border-color:rgba(228,233,239,.48);
+  background:rgba(255,255,255,.08);
+}
+
+/* Platinum */
+.vip-card.platinum,
+.home-card[data-vip="5"]{
+  --card-ink:#10151b;
+  --card-muted:rgba(16,21,27,.68);
   background:
     radial-gradient(circle at 14% 8%,rgba(255,255,255,.92),transparent 24%),
     radial-gradient(circle at 86% 88%,rgba(62,75,90,.2),transparent 42%),
     linear-gradient(132deg,#f9fafb 0%,#dfe4e9 42%,#aab3bd 72%,#68737f 100%);
   border-color:rgba(255,255,255,.9);
-  box-shadow:
-    0 30px 76px rgba(105,119,136,.36),
-    0 12px 28px rgba(16,24,32,.18),
-    inset 0 1px 0 rgba(255,255,255,.98),
-    inset 0 -1px 0 rgba(38,49,61,.28);
+  box-shadow:0 30px 76px rgba(105,119,136,.36),0 12px 28px rgba(16,24,32,.18),inset 0 1px 0 rgba(255,255,255,.98),inset 0 -1px 0 rgba(38,49,61,.28);
   text-shadow:none;
 }
 
-.vip-card.platinum:before{
+.vip-card.platinum:before,
+.home-card[data-vip="5"] .home-card-texture{
   opacity:.58;
-  background:
-    repeating-linear-gradient(118deg,transparent 0 24px,rgba(255,255,255,.16) 25px 26px),
-    linear-gradient(112deg,transparent 35%,rgba(255,255,255,.72) 48%,transparent 61%);
-}
-
-.vip-card.platinum:after{
-  border-color:rgba(255,255,255,.68);
-  box-shadow:
-    inset 0 0 0 1px rgba(73,86,101,.2),
-    inset 0 0 34px rgba(255,255,255,.28);
-}
-
-.vip-card.platinum .card-brand strong,
-.vip-card.platinum .card-brand span,
-.vip-card.platinum .card-level small,
-.vip-card.platinum .card-level h2,
-.vip-card.platinum .stamps-head,
-.vip-card.platinum .card-footer span,
-.vip-card.platinum .card-footer strong{
-  color:#11171d;
-  opacity:1;
-  text-shadow:0 1px 0 rgba(255,255,255,.75);
-}
-
-.vip-card.platinum .level-badge{
-  color:#11171d;
-  border-color:rgba(34,45,57,.22);
-  background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(213,220,227,.58));
-  box-shadow:inset 0 1px rgba(255,255,255,.92),0 8px 22px rgba(58,72,87,.15);
+  background:repeating-linear-gradient(118deg,transparent 0 24px,rgba(255,255,255,.16) 25px 26px),linear-gradient(112deg,transparent 35%,rgba(255,255,255,.72) 48%,transparent 61%);
 }
 
 .vip-card.platinum .stamp{
   border-color:rgba(42,54,67,.35);
   background:rgba(255,255,255,.34);
-  box-shadow:inset 0 1px rgba(255,255,255,.9);
 }
 
-.vip-card.platinum .stamp.on{
-  background:linear-gradient(180deg,#ffffff,#d6dde4);
-  border-color:#fff;
-  box-shadow:0 0 14px rgba(255,255,255,.88),inset 0 1px #fff;
-}
-
-.vip-card.platinum .card-footer{
-  border-top-color:rgba(38,49,61,.22);
-}
-
-.vip-card.founder{
-  color:#fff7cf;
+/* Founder: acabamento Black Diamond exclusivo */
+.vip-card.founder,
+.home-card.founder-card{
+  --card-ink:#fff8df;
+  --card-muted:#e6ca72;
   background:
-    radial-gradient(circle at 14% 10%,rgba(255,217,75,.17),transparent 23%),
-    radial-gradient(circle at 84% 88%,rgba(255,183,0,.11),transparent 38%),
-    linear-gradient(135deg,#242424 0%,#0a0a0a 44%,#000 72%,#161006 100%);
-  border:1px solid rgba(255,215,0,.62);
-  box-shadow:
-    0 0 0 1px rgba(255,215,0,.12),
-    0 34px 92px rgba(0,0,0,.78),
-    0 0 54px rgba(255,196,0,.2),
-    inset 0 1px 0 rgba(255,241,173,.56),
-    inset 0 -1px 0 rgba(120,78,0,.48);
+    radial-gradient(circle at 12% 12%,rgba(255,225,118,.2),transparent 21%),
+    radial-gradient(circle at 84% 86%,rgba(198,144,0,.13),transparent 36%),
+    linear-gradient(128deg,#2b2b2b 0%,#0b0b0c 34%,#020202 64%,#171005 100%);
+  border:1px solid rgba(255,215,0,.72);
+  box-shadow:0 0 0 1px rgba(255,215,0,.16),0 38px 98px rgba(0,0,0,.82),0 0 64px rgba(255,196,0,.18),inset 0 1px 0 rgba(255,244,190,.64),inset 0 -1px 0 rgba(107,70,0,.58);
 }
 
-.vip-card.founder:before{
-  inset:-8%;
+.vip-card.founder:before,
+.home-card.founder-card .home-card-texture{
   opacity:1;
   background:
-    radial-gradient(circle at 15% 18%,rgba(255,215,0,.18),transparent 19%),
-    repeating-linear-gradient(118deg,transparent 0 26px,rgba(255,215,0,.055) 27px 28px),
-    linear-gradient(112deg,transparent 35%,rgba(255,230,125,.24) 48%,transparent 61%);
-  animation:founderShine 7s ease-in-out infinite;
+    radial-gradient(circle at 15% 18%,rgba(255,215,0,.19),transparent 19%),
+    repeating-linear-gradient(118deg,transparent 0 30px,rgba(255,215,0,.052) 31px 32px),
+    linear-gradient(112deg,transparent 34%,rgba(255,235,147,.28) 48%,transparent 61%);
+  animation:founderShine 8s ease-in-out infinite;
 }
 
 .vip-card.founder:after{
   inset:7px;
-  border:1px solid rgba(255,224,98,.42);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.06),
-    inset 0 0 42px rgba(255,197,0,.06),
-    0 0 18px rgba(255,215,0,.08);
+  border:1px solid rgba(255,224,98,.48);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.065),inset 0 0 48px rgba(255,197,0,.065),0 0 20px rgba(255,215,0,.1);
 }
 
-.vip-card.founder .card-brand strong{
+.vip-card.founder .card-brand strong,
+.home-card.founder-card .home-card-top strong{
   color:#ffe784;
-  text-shadow:0 0 18px rgba(255,214,72,.32),0 2px 12px rgba(0,0,0,.8);
+  text-shadow:0 0 20px rgba(255,214,72,.34),0 2px 12px rgba(0,0,0,.82);
 }
 
-.vip-card.founder .card-brand span,
-.vip-card.founder .card-level small,
-.vip-card.founder .stamps-head,
-.vip-card.founder .card-footer span{
-  color:#e8ca64;
-  opacity:.9;
-}
-
-.vip-card.founder .card-level h2{
-  color:#fff9df;
-  text-shadow:0 0 26px rgba(255,215,0,.24),0 3px 18px rgba(0,0,0,.82);
-}
-
-.vip-card.founder .level-badge{
+.vip-card.founder .level-badge,
+.home-card.founder-card .home-card-badge{
   color:#fff4bd;
-  border-color:rgba(255,218,74,.58);
-  background:linear-gradient(180deg,rgba(255,215,0,.18),rgba(255,215,0,.055));
-  box-shadow:
-    inset 0 1px rgba(255,242,168,.36),
-    0 0 22px rgba(255,195,0,.15);
+  border-color:rgba(255,218,74,.64);
+  background:linear-gradient(180deg,rgba(255,215,0,.2),rgba(255,215,0,.055));
+  box-shadow:inset 0 1px rgba(255,242,168,.4),0 0 24px rgba(255,195,0,.17);
 }
 
 .vip-card.founder .stamp{
-  border-color:rgba(255,214,72,.54);
+  border-color:rgba(255,214,72,.58);
   background:rgba(255,215,0,.045);
 }
 
-.vip-card.founder .stamp.on{
-  background:linear-gradient(180deg,#fffad6,#ffd700 56%,#c88b00);
+.vip-card.founder .stamp.on,
+.home-card.founder-card .progress-track>span{
+  background:linear-gradient(180deg,#fffbdc,#ffd700 56%,#bd8300);
   border-color:#fff6b2;
-  box-shadow:
-    0 0 16px rgba(255,215,0,.72),
-    0 0 5px rgba(255,255,255,.72),
-    inset 0 1px #fff;
+  box-shadow:0 0 18px rgba(255,215,0,.76),0 0 6px rgba(255,255,255,.72),inset 0 1px #fff;
 }
 
-.vip-card.founder .card-footer{
-  border-top-color:rgba(255,214,72,.28);
+.home-card.founder-card .primary-link{
+  color:#181208;
+  background:linear-gradient(135deg,#fff0a3,#d9a91f 58%,#9b6700);
+  box-shadow:0 12px 28px rgba(0,0,0,.34),0 0 22px rgba(255,196,0,.16);
 }
 
-.vip-card.founder .card-footer strong{
-  color:#fff6c5;
+.home-card.founder-card .secondary-link{
+  color:#ffe991;
+  border-color:rgba(255,218,74,.42);
+  background:rgba(255,215,0,.055);
 }
 
 @keyframes founderShine{
@@ -154,14 +182,11 @@
 }
 
 @media(max-width:600px){
-  .vip-card.platinum{
-    box-shadow:0 24px 56px rgba(105,119,136,.32),0 10px 24px rgba(16,24,32,.16),inset 0 1px rgba(255,255,255,.98);
-  }
-  .vip-card.founder{
-    box-shadow:0 26px 64px rgba(0,0,0,.76),0 0 34px rgba(255,196,0,.16),inset 0 1px rgba(255,241,173,.48);
-  }
+  .home-card .home-club-label{font-size:7px;letter-spacing:.25em}
+  .home-card #homeMemberTier{font-size:8px}
+  .vip-card.founder,.home-card.founder-card{box-shadow:0 28px 70px rgba(0,0,0,.8),0 0 38px rgba(255,196,0,.15),inset 0 1px rgba(255,241,173,.5)}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .vip-card.founder:before{animation:none}
+  .vip-card.founder:before,.home-card.founder-card .home-card-texture{animation:none}
 }
