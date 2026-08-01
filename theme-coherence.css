@@ -30,7 +30,6 @@ html:not([data-theme="dark"]) p,
 html:not([data-theme="dark"]) small,
 html:not([data-theme="dark"]) .muted{color:var(--muted)!important}
 
-/* Barra inferior fixa — clara e escura seguem o tema */
 @media(max-width:768px){
   html:not([data-theme="dark"]) .spa-bottom-nav{
     background:rgba(255,253,248,.98)!important;
@@ -57,9 +56,41 @@ html:not([data-theme="dark"]) .muted{color:var(--muted)!important}
     color:#241a08!important;
     box-shadow:0 0 0 3px rgba(167,123,34,.07)!important;
   }
+
+  html:not([data-theme="dark"]) .spa-admin-tools-panel{
+    background:linear-gradient(155deg,#fffdf8,#f5efe5)!important;
+    border-color:rgba(126,91,24,.18)!important;
+    box-shadow:0 30px 70px rgba(79,59,25,.20)!important;
+    color:#1b1915!important;
+  }
+  html:not([data-theme="dark"]) .spa-admin-tools-head{
+    border-bottom-color:rgba(48,38,22,.10)!important;
+  }
+  html:not([data-theme="dark"]) .spa-admin-tools-head h2,
+  html:not([data-theme="dark"]) .spa-admin-tools-grid strong{color:#1b1915!important}
+  html:not([data-theme="dark"]) .spa-admin-tools-head p,
+  html:not([data-theme="dark"]) .spa-admin-tools-grid small{color:#777168!important}
+  html:not([data-theme="dark"]) .spa-admin-tools-head button{
+    background:#f4eee4!important;
+    border-color:rgba(48,38,22,.12)!important;
+    color:#28231b!important;
+  }
+  html:not([data-theme="dark"]) .spa-admin-tools-grid a{
+    background:#fff!important;
+    border-color:rgba(48,38,22,.10)!important;
+    color:#1b1915!important;
+    box-shadow:0 8px 24px rgba(73,54,21,.07)!important;
+  }
+  html:not([data-theme="dark"]) .spa-admin-tool-icon{
+    background:linear-gradient(145deg,#ead8ad,#c59a3a)!important;
+    color:#2b200b!important;
+  }
+  html:not([data-theme="dark"]) .spa-admin-tools-grid b{color:#9c721c!important}
+  html:not([data-theme="dark"]) .spa-admin-tools-backdrop{
+    background:rgba(71,59,40,.30)!important;
+  }
 }
 
-/* Perfil / Conta no modo claro */
 html:not([data-theme="dark"]) .profile-panel.profile-premium{
   background:linear-gradient(155deg,#ffffff,#f7f2e9 62%,#eee6da)!important;
   border-color:rgba(55,43,24,.12)!important;
@@ -105,7 +136,6 @@ html:not([data-theme="dark"]) .profile-form input{
 html:not([data-theme="dark"]) .secondary-btn{background:#eee7dc!important;color:#25221d!important;border-color:rgba(48,38,22,.12)!important}
 html:not([data-theme="dark"]) .profile-security{color:#777168!important}
 
-/* Vitrine no modo claro */
 html:not([data-theme="dark"]) .store-toolbar{
   background:rgba(255,253,248,.94)!important;
   border-color:rgba(48,38,22,.12)!important;
@@ -129,7 +159,6 @@ html:not([data-theme="dark"]) .product-card.is-sale{
   box-shadow:0 12px 32px rgba(150,46,40,.10)!important;
 }
 
-/* Sidebar desktop no modo claro */
 @media(min-width:769px){
   html:not([data-theme="dark"]) .spa-sidebar{
     background:radial-gradient(circle at 18% 0,rgba(196,154,56,.13),transparent 30%),linear-gradient(180deg,#fffdf8,#f4eee4 62%,#ece3d5)!important;
@@ -151,6 +180,5 @@ html:not([data-theme="dark"]) .product-card.is-sale{
   html:not([data-theme="dark"]) .spa-logout{background:rgba(255,255,255,.48)!important;color:#6d675e!important;border-color:rgba(50,39,21,.11)!important}
 }
 
-/* Garante que o modo escuro continue integral */
 html[data-theme="dark"] .spa-main,
 html[data-theme="dark"] .spa-page-content{color:var(--ink)!important}
