@@ -3,7 +3,19 @@ import { doc,getDoc,collection,getDocs,query,where } from 'https://www.gstatic.c
 import { calcularFidelidade,money } from './regras-fidelidade.js';
 
 const levels=['MEMBRO','BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELITE','PRIME','FOUNDER'];
-const palettes=[{a:'#35363a',b:'#1e2024',c:'#090a0c',edge:'#d7d9dd',shadow:'rgba(0,0,0,.58)',text:'#fff'},{a:'#c98a50',b:'#8d4d22',c:'#2b1408',edge:'#f0bd88',shadow:'rgba(83,42,16,.58)',text:'#fff'},{a:'#e9eaec',b:'#aeb2b7',c:'#545a61',edge:'#ffffff',shadow:'rgba(70,76,84,.46)',text:'#171717'},{a:'#d1b352',b:'#9c7618',c:'#332400',edge:'#f5df91',shadow:'rgba(75,53,5,.55)',text:'#fff'},{a:'#7652c6',b:'#4e2a95',c:'#1b0d3d',edge:'#c9b6f4',shadow:'rgba(45,22,90,.56)',text:'#fff'},{a:'#f7f8fa',b:'#c5cbd2',c:'#69737f',edge:'#ffffff',shadow:'rgba(79,85,92,.46)',text:'#171717'},{a:'#316cc4',b:'#174887',c:'#061b3d',edge:'#9fc3ef',shadow:'rgba(9,42,86,.56)',text:'#fff'},{a:'#35363a',b:'#111214',c:'#020203',edge:'#cfd4da',shadow:'rgba(0,0,0,.76)',text:'#f7f8fa'},{a:'#ba3446',b:'#7d1424',c:'#29040a',edge:'#ed9aa5',shadow:'rgba(82,8,19,.58)',text:'#fff'},{a:'#324b91',b:'#1e3269',c:'#07122f',edge:'#c7a94a',shadow:'rgba(8,21,58,.62)',text:'#fff'},{a:'#242018',b:'#090909',c:'#000000',edge:'#FFD700',shadow:'rgba(0,0,0,.8)',text:'#fff8df'}];
+const palettes=[
+  {a:'#8c7b65',b:'#51463a',c:'#211c18',edge:'#d6c7b4',shadow:'rgba(120,105,87,.42)',text:'#fff'},
+  {a:'#f0a45b',b:'#B87333',c:'#4b1f0d',edge:'#ffd0a0',shadow:'rgba(184,115,51,.48)',text:'#fff'},
+  {a:'#ffffff',b:'#C0C0C0',c:'#5f6670',edge:'#ffffff',shadow:'rgba(150,160,175,.42)',text:'#15191d'},
+  {a:'#ffe083',b:'#D4AF37',c:'#5b3c00',edge:'#fff2b0',shadow:'rgba(212,175,55,.52)',text:'#fff'},
+  {a:'#ad82ff',b:'#6C3CE9',c:'#21104f',edge:'#e5d6ff',shadow:'rgba(108,60,233,.5)',text:'#fff'},
+  {a:'#f7f8fa',b:'#c5cbd2',c:'#69737f',edge:'#ffffff',shadow:'rgba(151,164,179,.5)',text:'#11171d'},
+  {a:'#4c8dff',b:'#0F52BA',c:'#031b49',edge:'#b8d4ff',shadow:'rgba(15,82,186,.52)',text:'#fff'},
+  {a:'#353535',b:'#121212',c:'#000000',edge:'#d9dde3',shadow:'rgba(0,0,0,.7)',text:'#f8fafc'},
+  {a:'#ee5365',b:'#B11226',c:'#3b020b',edge:'#ffc0c8',shadow:'rgba(177,18,38,.52)',text:'#fff'},
+  {a:'#4265c5',b:'#1F3A93',c:'#071337',edge:'#D4AF37',shadow:'rgba(31,58,147,.58)',text:'#fff'},
+  {a:'#242424',b:'#080808',c:'#000000',edge:'#FFD700',shadow:'rgba(212,175,55,.34)',text:'#fff8df'}
+];
 const el=id=>document.getElementById(id);
 const dateText=value=>{try{const date=value?.toDate?value.toDate():new Date(value);return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}catch{return 'Data indisponível'}};
 const loyaltyValue=purchase=>Math.max(0,Number(purchase.valorFidelidade??purchase.valorPago??purchase.valor)||0);
