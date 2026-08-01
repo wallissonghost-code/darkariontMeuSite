@@ -1,4 +1,4 @@
-const BUILD='2.1.0';
+const BUILD='2.3.3';
 const routes={home:{title:'Início',view:'views/home.html',modules:['./home.js']},card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},store:{title:'Mercadorias',view:'views/store.html',modules:['./mercadorias.js']},account:{title:'Minha conta',view:'views/account.html',modules:['./perfil.js']}};
 const aliases={'home.html':'home','cartao.html':'card','ofertas.html':'card','mercadorias.html':'store','perfil.html':'account'};
 const content=document.getElementById('conteudo'),loader=document.getElementById('spaLoader'),views=new Map(),loading=new Map();
@@ -15,5 +15,4 @@ async function navigate(route,{push=false,replace=false,force=false}={}){if(!ses
 document.addEventListener('click',event=>{const routeLink=event.target.closest('[data-spa-route]');if(routeLink){event.preventDefault();navigate(routeLink.dataset.spaRoute,{push:true});return}const link=event.target.closest('a[href]');if(!link||link.target==='_blank'||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin)return;const route=aliases[url.pathname.split('/').pop()];if(route){event.preventDefault();navigate(route,{push:true})}});
 window.addEventListener('popstate',event=>navigate(event.state?.route||routeFromUrl()));
 document.addEventListener('wd-role-ready',event=>{const name=event.detail?.dados?.nome||event.detail?.user?.displayName||'WD',initials=String(name).trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase()||'WD';document.querySelectorAll('[data-spa-avatar]').forEach(el=>el.textContent=initials)});
-
 (async()=>{const state=await window.WDSession.ready;if(state.status!=='ready')return;sessionReady=true;document.documentElement.dataset.authState='ready';document.body.classList.add('wd-auth-ready');await navigate(routeFromUrl(),{replace:true});setLoader(false)})().catch(error=>showError('home',error));
