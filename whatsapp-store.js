@@ -5,55 +5,92 @@ const content=document.getElementById('dialogContent');
 const grid=document.getElementById('productsGrid');
 let currentProductId='';
 let config=null;
+let configPromise=null;
 
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
 
 async function loadConfig(){
   if(config)return config;
-  try{
-    const snap=await getDoc(doc(db,'ofertas','__config_loja'));
-    config=snap.exists()?snap.data():{};
-  }catch(error){
-    console.error('Não foi possível carregar o WhatsApp da loja:',error);
-    config={};
-  }
-  return config;
+  if(configPromise)return configPromise;
+  configPromise=(async()=>{
+    try{
+      const snap=await getDoc(doc(db,'ofertas','__config_loja'));
+      config=snap.exists()?snap.data():{};
+    }catch(error){
+      console.error('Não foi possível carregar o WhatsApp da loja:',error);
+      config={};
+    }
+    return config;
+  })();
+  return configPromise;
 }
 
 function selectedSize(){
   return clean(content?.querySelector('[data-size-choice].selected b')?.textContent)||'Não informado';
 }
 
-function productUrl(){
-  const url=new URL(location.href);
-  url.searchParams.set('produto',currentProductId);
-  return url.toString();
-}
-
 async function openWhatsapp(){
   const settings=await loadConfig();
   const phone=String(settings.whatsappCompleto||'').replace(/\D/g,'');
-  if(phone.length<12){
-    alert('O WhatsApp da loja ainda não foi configurado pelo administrador.');
+  if(phone.length<12||phone.length>13){
+    alert('O WhatsApp da loja ainda não foi configurado corretamente pelo administrador.');
     return;
   }
+
   const name=clean(content?.querySelector('.detail-info h2')?.textContent)||'Produto';
+  const category=clean(content?.querySelector('.detail-info .product-category')?.textContent)||'WD Founder';
   const price=clean(content?.querySelector('.detail-price-block strong')?.textContent)||'Consultar valor';
+  const hasSizes=Boolean(content?.querySelector('[data-size-choice]'));
   const size=selectedSize();
+
+  if(hasSizes&&size==='Não informado'){
+    alert('Selecione um tamanho antes de continuar.');
+    return;
+  }
+
   const greeting=clean(settings.whatsappMensagem)||'Olá! Tenho interesse neste produto:';
-  const message=[greeting,'',`Produto: ${name}`,`Valor: ${price}`,`Tamanho: ${size}`,'',`Ver produto: ${productUrl()}`,'','Gostaria de finalizar meu pedido.'].join('\n');
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,'_blank','noopener');
+  const message=[
+    greeting,
+    '',
+    `Produto: ${name}`,
+    `Categoria: ${category}`,
+    `Valor: ${price}`,
+    ...(hasSizes?[`Tamanho: ${size}`]:[]),
+    '',
+    'Gostaria de mais informações e de finalizar meu pedido.'
+  ].join('\n');
+
+  const whatsappUrl=`https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  const popup=window.open(whatsappUrl,'_blank','noopener,noreferrer');
+  if(!popup)location.href=whatsappUrl;
 }
 
 function enhanceDialog(){
-  const fallback=content?.querySelector('#noContact');
-  if(!fallback)return;
-  fallback.id='whatsappProductButton';
-  fallback.textContent='Comprar pelo WhatsApp';
-  fallback.addEventListener('click',event=>{
+  const primary=content?.querySelector('.detail-actions .detail-primary');
+  if(!primary||primary.dataset.whatsappReady==='1')return;
+
+  primary.dataset.whatsappReady='1';
+  primary.id='whatsappProductButton';
+  primary.textContent='Falar sobre este produto no WhatsApp';
+  primary.removeAttribute('href');
+  primary.removeAttribute('target');
+  primary.removeAttribute('rel');
+  primary.setAttribute('role','button');
+  primary.setAttribute('tabindex','0');
+
+  const activate=event=>{
     event.preventDefault();
+    event.stopPropagation();
     event.stopImmediatePropagation();
     openWhatsapp();
+  };
+
+  primary.addEventListener('click',activate,true);
+  primary.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){
+      event.preventDefault();
+      activate(event);
+    }
   },true);
 }
 
