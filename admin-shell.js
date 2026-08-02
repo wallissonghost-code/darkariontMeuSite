@@ -7,7 +7,7 @@ const routes={
   performance:'desempenho.html',
   delete:'excluir-cliente.html'
 };
-const BUILD='2.3.5';
+const BUILD='2.3.6';
 const nav=document.getElementById('adminAppNav'),frame=document.getElementById('adminAppFrame'),loader=document.getElementById('adminAppLoader'),trigger=document.getElementById('adminAppTrigger'),backdrop=document.getElementById('adminAppBackdrop');let currentRoute='',authorized=false,pendingRoute=null;
 const normalize=value=>routes[value]?value:'panel',routeFromUrl=()=>normalize(new URLSearchParams(location.search).get('tool')),frameUrl=route=>`${routes[route]}?embeddedAdmin=1&v=${BUILD}`;
 function closeMenu(){document.body.classList.remove('admin-menu-open')}
