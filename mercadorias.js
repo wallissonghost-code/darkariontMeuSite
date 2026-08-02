@@ -1,22 +1,181 @@
 import { db } from './firebase.js';
-import { collection,getDocs } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
-const grid=document.getElementById('productsGrid'),search=document.getElementById('storeSearch'),category=document.getElementById('storeCategory'),pagination=document.getElementById('storePagination'),resultCount=document.getElementById('storeResultCount'),dialog=document.getElementById('productDialog'),dialogContent=document.getElementById('dialogContent');
-const PAGE_SIZE=20,money=value=>Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),esc=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));let items=[],currentPage=1;
-function imagesOf(p){const list=Array.isArray(p.imagens)&&p.imagens.length?p.imagens:(p.imagem?[p.imagem]:[]);return [...new Set(list.filter(Boolean))].slice(0,5)}
-function sizeStockOf(p){if(p.estoquePorTamanho&&typeof p.estoquePorTamanho==='object')return Object.entries(p.estoquePorTamanho).filter(([,q])=>Number(q)>0);const sizes=Array.isArray(p.tamanhos)?p.tamanhos.filter(Boolean):[];return sizes.map((size,index)=>[size,index===0?Math.max(0,Number(p.estoque)||0):0])}
-function totalStockOf(p){const entries=sizeStockOf(p);return entries.length?entries.reduce((sum,[,q])=>sum+Math.max(0,Number(q)||0),0):Math.max(0,Number(p.estoque)||0)}
-function discountOf(p){const old=Number(p.precoAntigo||0),price=Number(p.preco||0);return old>price&&old>0?Math.round((1-price/old)*100):0}
+import { collection,getDocs,doc,getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+
+const grid=document.getElementById('productsGrid');
+const search=document.getElementById('storeSearch');
+const category=document.getElementById('storeCategory');
+const pagination=document.getElementById('storePagination');
+const resultCount=document.getElementById('storeResultCount');
+const dialog=document.getElementById('productDialog');
+const dialogContent=document.getElementById('dialogContent');
+
+const PAGE_SIZE=20;
+const money=value=>Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
+let items=[];
+let currentPage=1;
+let storeConfig={};
+
+function imagesOf(p){
+  const list=Array.isArray(p.imagens)&&p.imagens.length?p.imagens:(p.imagem?[p.imagem]:[]);
+  return [...new Set(list.filter(Boolean))].slice(0,5);
+}
+function sizeStockOf(p){
+  if(p.estoquePorTamanho&&typeof p.estoquePorTamanho==='object')return Object.entries(p.estoquePorTamanho).filter(([,q])=>Number(q)>0);
+  const sizes=Array.isArray(p.tamanhos)?p.tamanhos.filter(Boolean):[];
+  return sizes.map((size,index)=>[size,index===0?Math.max(0,Number(p.estoque)||0):0]);
+}
+function totalStockOf(p){
+  const entries=sizeStockOf(p);
+  return entries.length?entries.reduce((sum,[,q])=>sum+Math.max(0,Number(q)||0),0):Math.max(0,Number(p.estoque)||0);
+}
+function discountOf(p){
+  const old=Number(p.precoAntigo||0),price=Number(p.preco||0);
+  return old>price&&old>0?Math.round((1-price/old)*100):0;
+}
 function labelOf(p){return String(p.selo||p.status||'').trim().toLowerCase()}
-function priorityOf(p){const label=labelOf(p);if(label.includes('tend'))return 0;if(discountOf(p)>0||label.includes('oferta')||label.includes('promo'))return 1;if(label.includes('new')||label.includes('novo')||label.includes('novidade'))return 2;return 3}
-function timeOf(p){const v=p.criadoEm||p.createdAt||p.dataCriacao||p.atualizadoEm;if(v?.toMillis)return v.toMillis();if(v?.seconds)return Number(v.seconds)*1000;const d=Date.parse(v||'');return Number.isFinite(d)?d:0}
-function compare(a,b){const priority=priorityOf(a)-priorityOf(b);if(priority)return priority;const oa=Number(a.ordem),ob=Number(b.ordem),sa=Number.isFinite(oa)?oa:999999,sb=Number.isFinite(ob)?ob:999999;if(sa!==sb)return sa-sb;return timeOf(b)-timeOf(a)||String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR')}
-function filtered(){const term=search.value.trim().toLowerCase(),cat=category.value;return items.filter(p=>{const text=`${p.nome||''} ${p.categoria||''} ${p.descricao||''} ${p.selo||''}`.toLowerCase();return p.ativo!==false&&(!cat||p.categoria===cat)&&(!term||text.includes(term))}).sort(compare)}
-function pageNumbers(total,page){if(total<=7)return Array.from({length:total},(_,i)=>i+1);const values=new Set([1,total,page-1,page,page+1]);if(page<=3)[2,3,4].forEach(v=>values.add(v));if(page>=total-2)[total-3,total-2,total-1].forEach(v=>values.add(v));const ordered=[...values].filter(v=>v>=1&&v<=total).sort((a,b)=>a-b),result=[];ordered.forEach((v,i)=>{if(i&&v-ordered[i-1]>1)result.push('ellipsis');result.push(v)});return result}
-function renderPagination(totalItems){const pages=Math.max(1,Math.ceil(totalItems/PAGE_SIZE));currentPage=Math.min(Math.max(1,currentPage),pages);if(totalItems<=PAGE_SIZE){pagination.hidden=true;pagination.innerHTML='';return}pagination.hidden=false;pagination.innerHTML=`<button type="button" class="pagination-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>‹ <span>Anterior</span></button><div class="pagination-pages">${pageNumbers(pages,currentPage).map(v=>v==='ellipsis'?'<span class="pagination-ellipsis">…</span>':`<button type="button" data-page="${v}" class="${v===currentPage?'is-active':''}">${v}</button>`).join('')}</div><button type="button" class="pagination-nav" data-page="${currentPage+1}" ${currentPage===pages?'disabled':''}><span>Próxima</span> ›</button>`}
-function render(){const list=filtered(),pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));currentPage=Math.min(Math.max(1,currentPage),pages);const visible=list.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);resultCount.textContent=list.length===1?'1 produto':`${list.length} produtos`;grid.innerHTML=visible.map(p=>{const images=imagesOf(p),discount=discountOf(p),stock=totalStockOf(p),image=images[0]?`<img src="${esc(images[0])}" alt="${esc(p.nome||'Mercadoria')}" loading="lazy" onerror="this.parentElement.classList.add('no-image');this.remove()">`:'<span class="product-placeholder">WD</span>';return `<article class="product-card" data-open-product="${esc(p.id)}" data-priority="${priorityOf(p)}" data-stock="${stock}" tabindex="0" role="button"><div class="product-media ${images[0]?'':'no-image'}">${image}<div class="product-media-top">${p.selo?`<span class="product-badge">${esc(p.selo)}</span>`:''}${discount?`<span class="product-discount">-${discount}%</span>`:''}</div>${images.length>1?`<span class="photo-count">${images.length} fotos</span>`:''}</div><div class="product-body"><span class="product-category">${esc(p.categoria||'WD Founder')}</span><h3 class="product-title">${esc(p.nome||'Mercadoria')}</h3><div class="product-price-row"><div class="product-price">${Number(p.precoAntigo||0)>Number(p.preco||0)?`<del>${money(p.precoAntigo)}</del>`:''}<strong>${money(p.preco)}</strong></div><span class="product-stock">${stock} un.</span></div></div></article>`}).join('')||'<div class="store-empty">Nenhuma mercadoria encontrada.</div>';renderPagination(list.length)}
+function priorityOf(p){
+  const label=labelOf(p);
+  if(label.includes('tend'))return 0;
+  if(discountOf(p)>0||label.includes('oferta')||label.includes('promo'))return 1;
+  if(label.includes('new')||label.includes('novo')||label.includes('novidade'))return 2;
+  return 3;
+}
+function timeOf(p){
+  const v=p.criadoEm||p.createdAt||p.dataCriacao||p.atualizadoEm;
+  if(v?.toMillis)return v.toMillis();
+  if(v?.seconds)return Number(v.seconds)*1000;
+  const d=Date.parse(v||'');
+  return Number.isFinite(d)?d:0;
+}
+function compare(a,b){
+  const priority=priorityOf(a)-priorityOf(b);
+  if(priority)return priority;
+  const oa=Number(a.ordem),ob=Number(b.ordem),sa=Number.isFinite(oa)?oa:999999,sb=Number.isFinite(ob)?ob:999999;
+  if(sa!==sb)return sa-sb;
+  return timeOf(b)-timeOf(a)||String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');
+}
+function filtered(){
+  const term=search.value.trim().toLowerCase(),cat=category.value;
+  return items.filter(p=>{
+    const text=`${p.nome||''} ${p.categoria||''} ${p.descricao||''} ${p.selo||''}`.toLowerCase();
+    return p.ativo!==false&&(!cat||p.categoria===cat)&&(!term||text.includes(term));
+  }).sort(compare);
+}
+function pageNumbers(total,page){
+  if(total<=7)return Array.from({length:total},(_,i)=>i+1);
+  const values=new Set([1,total,page-1,page,page+1]);
+  if(page<=3)[2,3,4].forEach(v=>values.add(v));
+  if(page>=total-2)[total-3,total-2,total-1].forEach(v=>values.add(v));
+  const ordered=[...values].filter(v=>v>=1&&v<=total).sort((a,b)=>a-b),result=[];
+  ordered.forEach((v,i)=>{if(i&&v-ordered[i-1]>1)result.push('ellipsis');result.push(v)});
+  return result;
+}
+function renderPagination(totalItems){
+  const pages=Math.max(1,Math.ceil(totalItems/PAGE_SIZE));
+  currentPage=Math.min(Math.max(1,currentPage),pages);
+  if(totalItems<=PAGE_SIZE){pagination.hidden=true;pagination.innerHTML='';return}
+  pagination.hidden=false;
+  pagination.innerHTML=`<button type="button" class="pagination-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>‹ <span>Anterior</span></button><div class="pagination-pages">${pageNumbers(pages,currentPage).map(v=>v==='ellipsis'?'<span class="pagination-ellipsis">…</span>':`<button type="button" data-page="${v}" class="${v===currentPage?'is-active':''}">${v}</button>`).join('')}</div><button type="button" class="pagination-nav" data-page="${currentPage+1}" ${currentPage===pages?'disabled':''}><span>Próxima</span> ›</button>`;
+}
+function render(){
+  const list=filtered(),pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
+  currentPage=Math.min(Math.max(1,currentPage),pages);
+  const visible=list.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
+  resultCount.textContent=list.length===1?'1 produto':`${list.length} produtos`;
+  grid.innerHTML=visible.map(p=>{
+    const images=imagesOf(p),discount=discountOf(p),stock=totalStockOf(p);
+    const image=images[0]?`<img src="${esc(images[0])}" alt="${esc(p.nome||'Mercadoria')}" loading="lazy" onerror="this.parentElement.classList.add('no-image');this.remove()">`:'<span class="product-placeholder">WD</span>';
+    return `<article class="product-card" data-open-product="${esc(p.id)}" data-priority="${priorityOf(p)}" data-stock="${stock}" tabindex="0" role="button"><div class="product-media ${images[0]?'':'no-image'}">${image}<div class="product-media-top">${p.selo?`<span class="product-badge">${esc(p.selo)}</span>`:''}${discount?`<span class="product-discount">-${discount}%</span>`:''}</div>${images.length>1?`<span class="photo-count">${images.length} fotos</span>`:''}</div><div class="product-body"><span class="product-category">${esc(p.categoria||'WD Founder')}</span><h3 class="product-title">${esc(p.nome||'Mercadoria')}</h3><div class="product-price-row"><div class="product-price">${Number(p.precoAntigo||0)>Number(p.preco||0)?`<del>${money(p.precoAntigo)}</del>`:''}<strong>${money(p.preco)}</strong></div><span class="product-stock">${stock} un.</span></div></div></article>`;
+  }).join('')||'<div class="store-empty">Nenhuma mercadoria encontrada.</div>';
+  renderPagination(list.length);
+}
 function reset(){currentPage=1;render()}
-function goToPage(page){const pages=Math.max(1,Math.ceil(filtered().length/PAGE_SIZE)),next=Math.min(Math.max(1,Number(page)||1),pages);if(next===currentPage)return;currentPage=next;render();document.querySelector('.store-results-head')?.scrollIntoView({behavior:'smooth',block:'start'})}
-function openProduct(id){const p=items.find(x=>x.id===id);if(!p)return;const images=imagesOf(p),sizes=sizeStockOf(p),discount=discountOf(p),stock=totalStockOf(p),gallery=images.length?`<div class="detail-gallery"><div class="detail-thumbs">${images.map((src,i)=>`<button type="button" data-thumb="${i}" class="${i===0?'active':''}"><img src="${esc(src)}" alt="Miniatura ${i+1}"></button>`).join('')}</div><div class="detail-main-media"><div class="detail-slider">${images.map((src,i)=>`<figure><img src="${esc(src)}" alt="${esc(p.nome||'Produto')} - foto ${i+1}"></figure>`).join('')}</div>${images.length>1?`<button class="gallery-arrow gallery-prev" type="button">‹</button><button class="gallery-arrow gallery-next" type="button">›</button><span class="detail-counter">1/${images.length}</span>`:''}</div></div>`:'<div class="detail-gallery no-image"><div class="detail-main-media"><span class="product-placeholder">WD</span></div></div>',contact=p.link?`<a class="detail-primary" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.botao||'Falar sobre este item')}</a>`:'<button class="detail-primary" type="button" id="noContact">Consultar disponibilidade</button>';
-dialogContent.innerHTML=`<div class="product-detail-layout">${gallery}<section class="detail-info"><div class="detail-meta-row"><span class="product-category">${esc(p.categoria||'WD Founder')}</span>${p.selo?`<span class="detail-badge">${esc(p.selo)}</span>`:''}</div><h2>${esc(p.nome||'Mercadoria')}</h2><p class="detail-description">${esc(p.descricao||'Produto selecionado da coleção WD Founder.')}</p><div class="detail-price-block">${Number(p.precoAntigo||0)>Number(p.preco||0)?`<del>${money(p.precoAntigo)}</del>`:''}<div><strong>${money(p.preco)}</strong>${discount?`<span>-${discount}%</span>`:''}</div></div><div class="detail-stock"><span></span>${stock} unidades disponíveis</div>${sizes.length?`<div class="detail-sizes"><strong>Tamanhos disponíveis</strong><div>${sizes.map(([size,qty],i)=>`<button type="button" class="${i===0?'selected':''}" data-size-choice="${esc(size)}"><b>${esc(size)}</b><small>${Number(qty)} un.</small></button>`).join('')}</div></div>`:''}<div class="detail-actions">${contact}<button class="detail-secondary" type="button" id="closeDetail">Continuar vendo produtos</button></div></section></div>`;dialog.showModal();const slider=dialogContent.querySelector('.detail-slider'),thumbs=[...dialogContent.querySelectorAll('[data-thumb]')],counter=dialogContent.querySelector('.detail-counter');let current=0;const goTo=index=>{if(!slider||!images.length)return;current=(index+images.length)%images.length;slider.scrollTo({left:slider.clientWidth*current,behavior:'smooth'});thumbs.forEach((t,i)=>t.classList.toggle('active',i===current));if(counter)counter.textContent=`${current+1}/${images.length}`};slider?.addEventListener('scroll',()=>{current=Math.round(slider.scrollLeft/(slider.clientWidth||1));thumbs.forEach((t,i)=>t.classList.toggle('active',i===current));if(counter)counter.textContent=`${current+1}/${images.length}`},{passive:true});thumbs.forEach((t,i)=>t.addEventListener('click',()=>goTo(i)));dialogContent.querySelector('.gallery-prev')?.addEventListener('click',()=>goTo(current-1));dialogContent.querySelector('.gallery-next')?.addEventListener('click',()=>goTo(current+1));dialogContent.querySelectorAll('[data-size-choice]').forEach(button=>button.addEventListener('click',()=>{dialogContent.querySelectorAll('[data-size-choice]').forEach(item=>item.classList.remove('selected'));button.classList.add('selected')}));dialogContent.querySelector('#closeDetail')?.addEventListener('click',()=>dialog.close());dialogContent.querySelector('#noContact')?.addEventListener('click',()=>alert('Este item ainda não possui WhatsApp ou link cadastrado.'))}
-try{const snapshot=await getDocs(collection(db,'ofertas'));items=snapshot.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.tipo==='produto').sort(compare);const cats=[...new Set(items.map(p=>p.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));category.innerHTML='<option value="">Todas as categorias</option>'+cats.map(item=>`<option>${esc(item)}</option>`).join('');render()}catch(error){console.error(error);resultCount.textContent='';grid.innerHTML='<div class="store-empty">Não foi possível carregar as mercadorias agora.</div>'}
-search.addEventListener('input',reset);category.addEventListener('change',reset);pagination.addEventListener('click',e=>{const button=e.target.closest('[data-page]');if(button&&!button.disabled)goToPage(button.dataset.page)});grid.addEventListener('click',e=>{const card=e.target.closest('[data-open-product]');if(card)openProduct(card.dataset.openProduct)});grid.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-open-product]')){e.preventDefault();openProduct(e.target.dataset.openProduct)}});document.getElementById('dialogClose').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+function goToPage(page){
+  const pages=Math.max(1,Math.ceil(filtered().length/PAGE_SIZE)),next=Math.min(Math.max(1,Number(page)||1),pages);
+  if(next===currentPage)return;
+  currentPage=next;
+  render();
+  document.querySelector('.store-results-head')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function whatsappUrl(product,size=''){
+  const phone=String(storeConfig.whatsappCompleto||'').replace(/\D/g,'');
+  if(phone.length<12||phone.length>13)return '';
+  const greeting=clean(storeConfig.whatsappMensagem)||'Olá! Tenho interesse neste produto:';
+  const message=[
+    greeting,
+    '',
+    `Produto: ${clean(product.nome)||'Produto'}`,
+    `Categoria: ${clean(product.categoria)||'WD Founder'}`,
+    `Valor: ${money(product.preco)}`,
+    ...(size?[`Tamanho: ${size}`]:[]),
+    '',
+    'Gostaria de mais informações e de finalizar meu pedido.'
+  ].join('\n');
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+}
+function openWhatsapp(product){
+  const hasSizes=Boolean(dialogContent.querySelector('[data-size-choice]'));
+  const size=clean(dialogContent.querySelector('[data-size-choice].selected b')?.textContent);
+  if(hasSizes&&!size){alert('Selecione um tamanho antes de continuar.');return}
+  const url=whatsappUrl(product,size);
+  if(!url){alert('O WhatsApp da loja ainda não foi configurado corretamente pelo administrador.');return}
+  location.href=url;
+}
+function openProduct(id){
+  const p=items.find(x=>x.id===id);
+  if(!p)return;
+  const images=imagesOf(p),sizes=sizeStockOf(p),discount=discountOf(p),stock=totalStockOf(p);
+  const gallery=images.length?`<div class="detail-gallery"><div class="detail-thumbs">${images.map((src,i)=>`<button type="button" data-thumb="${i}" class="${i===0?'active':''}"><img src="${esc(src)}" alt="Miniatura ${i+1}"></button>`).join('')}</div><div class="detail-main-media"><div class="detail-slider">${images.map((src,i)=>`<figure><img src="${esc(src)}" alt="${esc(p.nome||'Produto')} - foto ${i+1}"></figure>`).join('')}</div>${images.length>1?`<button class="gallery-arrow gallery-prev" type="button">‹</button><button class="gallery-arrow gallery-next" type="button">›</button><span class="detail-counter">1/${images.length}</span>`:''}</div></div>`:'<div class="detail-gallery no-image"><div class="detail-main-media"><span class="product-placeholder">WD</span></div></div>';
+  const contact='<button class="detail-primary" type="button" id="whatsappProductButton">Falar sobre este produto no WhatsApp</button>';
+  dialogContent.innerHTML=`<div class="product-detail-layout">${gallery}<section class="detail-info"><div class="detail-meta-row"><span class="product-category">${esc(p.categoria||'WD Founder')}</span>${p.selo?`<span class="detail-badge">${esc(p.selo)}</span>`:''}</div><h2>${esc(p.nome||'Mercadoria')}</h2><p class="detail-description">${esc(p.descricao||'Produto selecionado da coleção WD Founder.')}</p><div class="detail-price-block">${Number(p.precoAntigo||0)>Number(p.preco||0)?`<del>${money(p.precoAntigo)}</del>`:''}<div><strong>${money(p.preco)}</strong>${discount?`<span>-${discount}%</span>`:''}</div></div><div class="detail-stock"><span></span>${stock} unidades disponíveis</div>${sizes.length?`<div class="detail-sizes"><strong>Tamanhos disponíveis</strong><div>${sizes.map(([size,qty],i)=>`<button type="button" class="${i===0?'selected':''}" data-size-choice="${esc(size)}"><b>${esc(size)}</b><small>${Number(qty)} un.</small></button>`).join('')}</div></div>`:''}<div class="detail-actions">${contact}<button class="detail-secondary" type="button" id="closeDetail">Continuar vendo produtos</button></div></section></div>`;
+  dialog.showModal();
+  const slider=dialogContent.querySelector('.detail-slider'),thumbs=[...dialogContent.querySelectorAll('[data-thumb]')],counter=dialogContent.querySelector('.detail-counter');
+  let current=0;
+  const goTo=index=>{
+    if(!slider||!images.length)return;
+    current=(index+images.length)%images.length;
+    slider.scrollTo({left:slider.clientWidth*current,behavior:'smooth'});
+    thumbs.forEach((t,i)=>t.classList.toggle('active',i===current));
+    if(counter)counter.textContent=`${current+1}/${images.length}`;
+  };
+  slider?.addEventListener('scroll',()=>{
+    current=Math.round(slider.scrollLeft/(slider.clientWidth||1));
+    thumbs.forEach((t,i)=>t.classList.toggle('active',i===current));
+    if(counter)counter.textContent=`${current+1}/${images.length}`;
+  },{passive:true});
+  thumbs.forEach((t,i)=>t.addEventListener('click',()=>goTo(i)));
+  dialogContent.querySelector('.gallery-prev')?.addEventListener('click',()=>goTo(current-1));
+  dialogContent.querySelector('.gallery-next')?.addEventListener('click',()=>goTo(current+1));
+  dialogContent.querySelectorAll('[data-size-choice]').forEach(button=>button.addEventListener('click',()=>{
+    dialogContent.querySelectorAll('[data-size-choice]').forEach(item=>item.classList.remove('selected'));
+    button.classList.add('selected');
+  }));
+  dialogContent.querySelector('#whatsappProductButton')?.addEventListener('click',()=>openWhatsapp(p));
+  dialogContent.querySelector('#closeDetail')?.addEventListener('click',()=>dialog.close());
+}
+
+try{
+  const [productsSnapshot,configSnapshot]=await Promise.all([
+    getDocs(collection(db,'ofertas')),
+    getDoc(doc(db,'ofertas','__config_loja'))
+  ]);
+  storeConfig=configSnapshot.exists()?configSnapshot.data():{};
+  items=productsSnapshot.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.tipo==='produto').sort(compare);
+  const cats=[...new Set(items.map(p=>p.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  category.innerHTML='<option value="">Todas as categorias</option>'+cats.map(item=>`<option>${esc(item)}</option>`).join('');
+  render();
+}catch(error){
+  console.error(error);
+  resultCount.textContent='';
+  grid.innerHTML='<div class="store-empty">Não foi possível carregar as mercadorias agora.</div>';
+}
+
+search.addEventListener('input',reset);
+category.addEventListener('change',reset);
+pagination.addEventListener('click',e=>{const button=e.target.closest('[data-page]');if(button&&!button.disabled)goToPage(button.dataset.page)});
+grid.addEventListener('click',e=>{const card=e.target.closest('[data-open-product]');if(card)openProduct(card.dataset.openProduct)});
+grid.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-open-product]')){e.preventDefault();openProduct(e.target.dataset.openProduct)}});
+document.getElementById('dialogClose').addEventListener('click',()=>dialog.close());
+dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
