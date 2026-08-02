@@ -5,6 +5,7 @@ import { money,calcularCarteira } from './regras-fidelidade.js';
 const LEVELS=['MEMBRO','BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELITE','PRIME','FOUNDER'];
 const $=id=>document.getElementById(id);
 const parseMoney=raw=>Number(String(raw||'').replace('R$','').replace(/\./g,'').replace(',','.').trim());
+const digits=value=>String(value||'').replace(/\D/g,'');
 const shortUid=uid=>String(uid||'').slice(-6);
 const normal=v=>String(v||'').trim().toLowerCase();
 const roleLabel=role=>['admin','administrador','master'].includes(normal(role))?'ADMIN':'CLIENTE';
@@ -20,6 +21,10 @@ const correctionCredits=$('correctionCredits');
 const correctionReason=$('correctionReason');
 const correctionStatus=$('correctionStatus');
 const duplicateInfo=$('duplicateInfo');
+const whatsappDdd=$('storeWhatsappDdd');
+const whatsappNumber=$('storeWhatsappNumber');
+const whatsappGreeting=$('storeWhatsappGreeting');
+const whatsappStatus=$('storeWhatsappStatus');
 let clients=[];
 
 async function loadBenefits(){
@@ -33,6 +38,34 @@ async function saveBenefits(){
     await setDoc(doc(db,'niveis',level.value),{beneficios:field.value.split('\n').map(x=>x.trim()).filter(Boolean),atualizadoEm:serverTimestamp()},{merge:true});
     status.textContent='Benefícios salvos.';
   }catch(error){console.error(error);status.textContent='Não foi possível salvar.'}
+}
+
+async function loadStoreWhatsapp(){
+  if(!whatsappDdd||!whatsappNumber)return;
+  try{
+    const snap=await getDoc(doc(db,'configuracoes','loja'));
+    const data=snap.exists()?snap.data():{};
+    whatsappDdd.value=digits(data.whatsappDdd).slice(0,2);
+    whatsappNumber.value=digits(data.whatsappNumero).slice(0,9);
+    whatsappGreeting.value=data.whatsappMensagem||'Olá! Tenho interesse neste produto:';
+    whatsappStatus.textContent=snap.exists()?'Número atual carregado.':'Cadastre o número usado nos testes.';
+  }catch(error){console.error(error);whatsappStatus.textContent='Não foi possível carregar o WhatsApp.'}
+}
+
+async function saveStoreWhatsapp(){
+  const ddd=digits(whatsappDdd?.value).slice(0,2);
+  const numero=digits(whatsappNumber?.value).slice(0,9);
+  const mensagem=String(whatsappGreeting?.value||'').trim()||'Olá! Tenho interesse neste produto:';
+  if(ddd.length!==2)return whatsappStatus.textContent='Informe um DDD com 2 números.';
+  if(numero.length<8||numero.length>9)return whatsappStatus.textContent='Informe um número com 8 ou 9 dígitos.';
+  whatsappDdd.value=ddd;
+  whatsappNumber.value=numero;
+  whatsappStatus.textContent='Salvando...';
+  try{
+    await setDoc(doc(db,'configuracoes','loja'),{whatsappPais:'55',whatsappDdd:ddd,whatsappNumero:numero,whatsappCompleto:`55${ddd}${numero}`,whatsappMensagem:mensagem,atualizadoEm:serverTimestamp(),adminUid:auth.currentUser?.uid||''},{merge:true});
+    await audit('whatsapp_loja_atualizado',{ddd,finalNumero:numero.slice(-4)});
+    whatsappStatus.textContent=`WhatsApp salvo: +55 (${ddd}) ${numero}. Todos os produtos usarão este número.`;
+  }catch(error){console.error(error);whatsappStatus.textContent='Não foi possível salvar o WhatsApp.'}
 }
 
 function optionLabel(client){
@@ -106,6 +139,10 @@ $('saveBenefits').addEventListener('click',saveBenefits);
 correctionClient.addEventListener('change',renderCorrection);
 $('saveCorrection').addEventListener('click',saveCorrection);
 $('resetCustomer').addEventListener('click',resetCustomer);
+$('saveStoreWhatsapp')?.addEventListener('click',saveStoreWhatsapp);
+whatsappDdd?.addEventListener('input',()=>whatsappDdd.value=digits(whatsappDdd.value).slice(0,2));
+whatsappNumber?.addEventListener('input',()=>whatsappNumber.value=digits(whatsappNumber.value).slice(0,9));
 
 loadBenefits();
 loadClients();
+loadStoreWhatsapp();
