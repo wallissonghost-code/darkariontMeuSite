@@ -1,0 +1,69 @@
+/* Shell unificado WD Founder — membro e administração no mesmo painel */
+.spa-brand span{display:none!important}
+.spa-brand{min-height:72px;display:flex;align-items:center}
+
+.unified-admin-workspace{
+  position:relative;
+  width:100%;
+  min-height:100dvh;
+  background:var(--bg,#090a0c);
+  overflow:hidden;
+}
+.unified-admin-frame{
+  display:block;
+  width:100%;
+  min-height:100dvh;
+  height:100dvh;
+  border:0;
+  opacity:0;
+  background:transparent;
+  transition:opacity .16s ease;
+}
+.unified-admin-frame.is-ready{opacity:1}
+.unified-admin-loader{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  place-content:center;
+  justify-items:center;
+  gap:16px;
+  background:var(--bg,#090a0c);
+  color:var(--text,#f7f4ee);
+  transition:opacity .16s ease,visibility .16s ease;
+}
+.unified-admin-loader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.unified-admin-loader span{
+  width:34px;height:34px;border-radius:50%;
+  border:3px solid rgba(212,175,55,.18);
+  border-top-color:#d4af37;
+  animation:unifiedSpin .7s linear infinite;
+}
+.unified-admin-loader strong{font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+@keyframes unifiedSpin{to{transform:rotate(360deg)}}
+
+.spa-admin-links a.is-active{
+  color:#fff!important;
+  border-color:rgba(217,185,92,.24)!important;
+  background:linear-gradient(90deg,rgba(217,185,92,.15),rgba(217,185,92,.035))!important;
+}
+
+@media(min-width:769px){
+  body.unified-admin-active .spa-main{padding:0!important;overflow:hidden}
+  body.unified-admin-active .unified-admin-workspace{height:100dvh}
+  body.unified-admin-active .unified-admin-frame{height:100dvh}
+  .spa-brand strong{font-size:36px!important}
+}
+
+@media(max-width:768px){
+  .spa-brand{display:none!important}
+  .unified-admin-workspace{min-height:calc(100dvh - 84px);padding-bottom:84px}
+  .unified-admin-frame{height:calc(100dvh - 84px);min-height:calc(100dvh - 84px)}
+  body.unified-admin-active .spa-main{padding:0!important}
+  body.unified-admin-active .spa-bottom-nav{display:flex!important}
+}
+
+@media(min-width:769px) and (max-width:1180px){
+  .spa-shell{grid-template-columns:260px minmax(0,1fr)!important}
+  .spa-sidebar{width:260px!important}
+}
