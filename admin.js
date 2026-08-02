@@ -43,7 +43,7 @@ async function saveBenefits(){
 async function loadStoreWhatsapp(){
   if(!whatsappDdd||!whatsappNumber)return;
   try{
-    const snap=await getDoc(doc(db,'configuracoes','loja'));
+    const snap=await getDoc(doc(db,'ofertas','__config_loja'));
     const data=snap.exists()?snap.data():{};
     whatsappDdd.value=digits(data.whatsappDdd).slice(0,2);
     whatsappNumber.value=digits(data.whatsappNumero).slice(0,9);
@@ -62,7 +62,7 @@ async function saveStoreWhatsapp(){
   whatsappNumber.value=numero;
   whatsappStatus.textContent='Salvando...';
   try{
-    await setDoc(doc(db,'configuracoes','loja'),{whatsappPais:'55',whatsappDdd:ddd,whatsappNumero:numero,whatsappCompleto:`55${ddd}${numero}`,whatsappMensagem:mensagem,atualizadoEm:serverTimestamp(),adminUid:auth.currentUser?.uid||''},{merge:true});
+    await setDoc(doc(db,'ofertas','__config_loja'),{tipo:'configuracao',whatsappPais:'55',whatsappDdd:ddd,whatsappNumero:numero,whatsappCompleto:`55${ddd}${numero}`,whatsappMensagem:mensagem,ativo:false,atualizadoEm:serverTimestamp(),adminUid:auth.currentUser?.uid||''},{merge:true});
     await audit('whatsapp_loja_atualizado',{ddd,finalNumero:numero.slice(-4)});
     whatsappStatus.textContent=`WhatsApp salvo: +55 (${ddd}) ${numero}. Todos os produtos usarão este número.`;
   }catch(error){console.error(error);whatsappStatus.textContent='Não foi possível salvar o WhatsApp.'}
