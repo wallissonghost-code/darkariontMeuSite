@@ -1,7 +1,6 @@
 import { db } from './firebase.js';
 import { doc,getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-const dialog=document.getElementById('productDialog');
 const content=document.getElementById('dialogContent');
 const grid=document.getElementById('productsGrid');
 let currentProductId='';
@@ -42,17 +41,7 @@ async function openWhatsapp(){
   const price=clean(content?.querySelector('.detail-price-block strong')?.textContent)||'Consultar valor';
   const size=selectedSize();
   const greeting=clean(settings.whatsappMensagem)||'Olá! Tenho interesse neste produto:';
-  const message=[
-    greeting,
-    '',
-    `Produto: ${name}`,
-    `Valor: ${price}`,
-    `Tamanho: ${size}`,
-    '',
-    `Ver produto: ${productUrl()}`,
-    '',
-    'Gostaria de finalizar meu pedido.'
-  ].join('\n');
+  const message=[greeting,'',`Produto: ${name}`,`Valor: ${price}`,`Tamanho: ${size}`,'',`Ver produto: ${productUrl()}`,'','Gostaria de finalizar meu pedido.'].join('\n');
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,'_blank','noopener');
 }
 
@@ -61,7 +50,11 @@ function enhanceDialog(){
   if(!fallback)return;
   fallback.id='whatsappProductButton';
   fallback.textContent='Comprar pelo WhatsApp';
-  fallback.addEventListener('click',openWhatsapp,{once:false});
+  fallback.addEventListener('click',event=>{
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openWhatsapp();
+  },true);
 }
 
 const observer=new MutationObserver(enhanceDialog);
