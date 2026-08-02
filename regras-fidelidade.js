@@ -32,6 +32,26 @@ export function calcularFidelidade(totalGasto){
   return {vip:indice,nome:atual.nome,carimbos,valorCarimbo,totalGasto:total,faltam:Math.max(0,proximo.minimo-total),proximo};
 }
 
+export function totalEquivalenteNivel(vip=0,carimbos=0){
+  const nivel=Math.max(0,Math.min(10,Number(vip)||0));
+  if(nivel===10)return NIVEIS[10].minimo;
+  const atual=NIVEIS[nivel];
+  const proximo=NIVEIS[nivel+1];
+  const faixa=proximo.minimo-atual.minimo;
+  const selos=Math.max(0,Math.min(9,Number(carimbos)||0));
+  return atual.minimo+(faixa/10)*selos;
+}
+
+export function resolverFidelidade(data={},totalCalculado=null){
+  if(data.ajusteManualAtivo===true){
+    const vip=Math.max(0,Math.min(10,Number(data.vip)||0));
+    const carimbos=vip===10?10:Math.max(0,Math.min(9,Number(data.carimbos)||0));
+    const equivalente=totalEquivalenteNivel(vip,carimbos);
+    return {...calcularFidelidade(equivalente),vip,nome:NIVEIS[vip].nome,carimbos,totalGasto:Math.max(0,Number(data.totalGasto)||0),manual:true,totalEquivalente:equivalente};
+  }
+  return {...calcularFidelidade(totalCalculado??data.totalGasto),manual:false};
+}
+
 export function calcularCarteira(data={},novoVip=0){
   const vipAtual=Math.max(0,Math.min(10,Number(data.vip)||0));
   const baseSalva=Number(data.bonusBaseVip);
