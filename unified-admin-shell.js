@@ -8,11 +8,12 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.0.1';
+const BUILD='3.1.0';
 const main=document.querySelector('.spa-main');
 let frame=null;
 let loader=null;
 let currentTool='';
+let memberNavigationRequested=false;
 
 function toolFromLink(link){
   if(!link)return '';
@@ -53,10 +54,12 @@ function setAdminActive(tool){
 }
 
 function showMemberArea(){
-  if(!frame)return;
-  const workspace=frame.closest('.unified-admin-workspace');
-  workspace.hidden=true;
-  frame.classList.remove('is-ready');
+  memberNavigationRequested=false;
+  if(frame){
+    const workspace=frame.closest('.unified-admin-workspace');
+    workspace.hidden=true;
+    frame.classList.remove('is-ready');
+  }
   document.body.classList.remove('unified-admin-active');
   currentTool='';
   setAdminActive('');
@@ -64,6 +67,7 @@ function showMemberArea(){
 
 function openTool(tool,{push=true}={}){
   if(!ADMIN_ROUTES[tool])tool='panel';
+  memberNavigationRequested=false;
   ensureWorkspace();
   document.querySelectorAll('.spa-view').forEach(view=>{view.hidden=true;view.setAttribute('aria-hidden','true')});
   document.getElementById('spaError')?.remove();
@@ -87,27 +91,41 @@ function openTool(tool,{push=true}={}){
   window.scrollTo(0,0);
 }
 
-// Captura antes da navegação antiga para impedir a abertura de um segundo painel.
+// Ferramentas administrativas: impede a navegação para o shell antigo.
 document.addEventListener('click',event=>{
   const link=event.target.closest('a[href]');
   const tool=toolFromLink(link);
-  if(!tool)return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  openTool(tool);
+  if(tool){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openTool(tool);
+    return;
+  }
+
+  // Uma rota de membro é a única ação autorizada a encerrar a ferramenta atual.
+  const memberLink=event.target.closest('[data-spa-route]');
+  if(memberLink&&currentTool){
+    memberNavigationRequested=true;
+    showMemberArea();
+  }
 },true);
 
-// Ao navegar para uma tela de membro, fecha a ferramenta. Em abertura direta
-// de rota administrativa, mantém a ferramenta como prioridade.
+// O SPA dispara este evento também durante a inicialização. Isso não pode fechar
+// uma ferramenta que já está ativa; somente um clique explícito em rota de membro pode.
 document.addEventListener('wd-spa-route',()=>{
-  const tool=requestedAdminTool();
-  if(tool)requestAnimationFrame(()=>openTool(tool,{push:false}));
-  else showMemberArea();
+  if(memberNavigationRequested){
+    showMemberArea();
+    return;
+  }
+  const requested=requestedAdminTool();
+  if(currentTool)requestAnimationFrame(()=>openTool(currentTool,{push:false}));
+  else if(requested)requestAnimationFrame(()=>openTool(requested,{push:false}));
 });
 
-window.addEventListener('popstate',()=>{
-  const tool=requestedAdminTool();
-  if(tool)openTool(tool,{push:false});
+window.addEventListener('popstate',event=>{
+  const requested=requestedAdminTool();
+  if(event.state?.adminTool&&ADMIN_ROUTES[event.state.adminTool])openTool(event.state.adminTool,{push:false});
+  else if(requested)openTool(requested,{push:false});
   else showMemberArea();
 });
 
