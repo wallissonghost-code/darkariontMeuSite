@@ -1,7 +1,39 @@
 import { db } from './firebase.js';
-import { collection,getDocs } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { doc,getDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+import { resolverFidelidade } from './regras-fidelidade.js';
+
 const grid=document.getElementById('offersGrid');
-const defaults=[{categoria:'DROP EXCLUSIVO',titulo:'20% OFF',descricao:'Condição especial aplicada em coleções selecionadas.',botao:'Ver condição',ordem:1,ativo:true},{categoria:'BENEFÍCIO VIP',titulo:'FRETE GRÁTIS',descricao:'Disponível para membros elegíveis conforme o nível.',botao:'Consultar benefício',ordem:2,ativo:true},{categoria:'ACESSO PRIVADO',titulo:'PRÉ-LANÇAMENTO',descricao:'Antecipe o acesso às próximas coleções WD Founder.',botao:'Ver disponibilidade',ordem:3,ativo:true}];
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-function render(items){if(!grid)return;grid.innerHTML=items.filter(x=>x.ativo!==false&&x.tipo!=='produto').sort((a,b)=>(Number(a.ordem)||999)-(Number(b.ordem)||999)).map(x=>`<article class="oferta"><h2>${esc(x.categoria||'BENEFÍCIO')}</h2><h1>${esc(x.titulo||'Oferta')}</h1><p>${esc(x.descricao||'')}</p><button type="button">${esc(x.botao||'Ver benefício')}</button></article>`).join('')||'<article class="oferta"><h2>EM BREVE</h2><h1>Novos benefícios</h1><p>Não há condições ativas no momento.</p></article>'}
-try{const snap=await getDocs(collection(db,'ofertas'));const items=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.tipo!=='produto');render(items.length?items:defaults)}catch(e){console.error(e);render(defaults)}
+const LEVELS=['MEMBRO','BRONZE','SILVER','GOLD','PREMIUM','PLATINUM','SELECT','BLACK','ELITE','PRIME','FOUNDER'];
+let lastKey='';
+
+function render(vip,benefits){
+  if(!grid)return;
+  if(!benefits.length){
+    grid.innerHTML=`<article class="oferta"><h2>LV${vip} ${LEVELS[vip]}</h2><h1>Benefícios em breve</h1><p>A loja ainda não publicou condições para este nível.</p></article>`;
+    return;
+  }
+  grid.innerHTML=benefits.map((item,index)=>`<article class="oferta"><h2>LV${vip} · ${esc(LEVELS[vip])}</h2><h1>${esc(item)}</h1><p>Benefício disponível para membros deste nível.</p><button type="button" disabled aria-disabled="true">Benefício ativo</button></article>`).join('');
+}
+
+async function load(profile){
+  const fidelity=resolverFidelidade(profile);
+  const vip=fidelity.vip;
+  const key=`${vip}:${profile?.ajusteManualAtivo===true}`;
+  if(key===lastKey)return;
+  lastKey=key;
+  if(grid)grid.innerHTML='<article class="oferta"><h2>CARREGANDO</h2><h1>Benefícios</h1><p>Consultando as condições do seu nível.</p></article>';
+  try{
+    const snapshot=await getDoc(doc(db,'niveis',`lv${vip}`));
+    const benefits=snapshot.exists()&&Array.isArray(snapshot.data().beneficios)?snapshot.data().beneficios.map(x=>String(x||'').trim()).filter(Boolean):[];
+    render(vip,benefits);
+  }catch(error){
+    console.error('Não foi possível carregar os benefícios do nível:',error);
+    lastKey='';
+    if(grid)grid.innerHTML='<article class="oferta"><h2>INDISPONÍVEL</h2><h1>Não foi possível carregar</h1><p>Tente novamente em alguns instantes.</p></article>';
+  }
+}
+
+window.WDSession.subscribe(state=>{
+  if(state.status==='ready')load(state.profile||{});
+});
