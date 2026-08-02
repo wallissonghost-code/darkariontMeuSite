@@ -7,7 +7,7 @@ const routes={
   performance:'desempenho.html',
   delete:'excluir-cliente.html'
 };
-const BUILD='2.4.0';
+const BUILD='2.4.1';
 const nav=document.getElementById('adminAppNav');
 const frame=document.getElementById('adminAppFrame');
 const loader=document.getElementById('adminAppLoader');
@@ -23,12 +23,11 @@ const frameUrl=route=>`${routes[route]}?embeddedAdmin=1&v=${BUILD}`;
 
 function closeMenu(){document.body.classList.remove('admin-menu-open')}
 function updateActive(route){nav.querySelectorAll('[data-admin-route]').forEach(link=>{const active=link.dataset.adminRoute===route;link.classList.toggle('is-active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
-function prefetchRoute(route){const href=frameUrl(normalize(route));if(document.querySelector(`link[data-admin-prefetch="${route}"]`))return;const link=document.createElement('link');link.rel='prefetch';link.href=href;link.as='document';link.dataset.adminPrefetch=route;document.head.append(link)}
-function prefetchTools(active){const work=()=>Object.keys(routes).filter(route=>route!==active).forEach(prefetchRoute);if('requestIdleCallback'in window)requestIdleCallback(work,{timeout:900});else setTimeout(work,250)}
+function preloadTouchedRoute(route){const normalized=normalize(route),href=frameUrl(normalized);if(document.querySelector(`link[data-admin-prefetch="${normalized}"]`))return;const link=document.createElement('link');link.rel='prefetch';link.href=href;link.as='document';link.dataset.adminPrefetch=normalized;document.head.append(link)}
 function loadRoute(route,{push=true,force=false}={}){route=normalize(route);if(!authorized){pendingRoute={route,push,force};return}if(route===currentRoute&&!force)return;currentRoute=route;updateActive(route);closeMenu();frame.classList.remove('is-ready');loader.classList.remove('is-hidden');frame.src=frameUrl(route);if(push){const url=new URL(location.href);url.searchParams.set('tool',route);history.pushState({route},'',url)}}
-function startAuthorizedShell(){if(authorized)return;authorized=true;const next=pendingRoute||{route:routeFromUrl(),push:false};pendingRoute=null;loadRoute(next.route,{push:next.push,force:next.force});prefetchTools(next.route)}
+function startAuthorizedShell(){if(authorized)return;authorized=true;const next=pendingRoute||{route:routeFromUrl(),push:false};pendingRoute=null;loadRoute(next.route,{push:next.push,force:next.force})}
 
-nav.addEventListener('pointerdown',event=>{const link=event.target.closest('[data-admin-route]');if(!link)return;prefetchRoute(link.dataset.adminRoute);link.classList.add('is-pressed')},{passive:true});
+nav.addEventListener('pointerdown',event=>{const link=event.target.closest('[data-admin-route]');if(!link)return;preloadTouchedRoute(link.dataset.adminRoute);link.classList.add('is-pressed')},{passive:true});
 nav.addEventListener('pointerup',()=>nav.querySelectorAll('.is-pressed').forEach(link=>link.classList.remove('is-pressed')),{passive:true});
 nav.addEventListener('pointercancel',()=>nav.querySelectorAll('.is-pressed').forEach(link=>link.classList.remove('is-pressed')),{passive:true});
 nav.addEventListener('click',event=>{const link=event.target.closest('[data-admin-route]');if(!link)return;event.preventDefault();loadRoute(link.dataset.adminRoute)});
