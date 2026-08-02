@@ -16,40 +16,26 @@
 <body data-admin-page="true" data-admin-shell="true">
   <div class="admin-app-shell">
     <aside class="admin-app-nav" id="adminAppNav">
-      <div class="admin-app-brand">
-        <strong>WD</strong>
-        <span>FOUNDER ADMIN</span>
-      </div>
-
+      <div class="admin-app-brand"><strong>WD</strong><span>FOUNDER ADMIN</span></div>
       <a class="admin-member-return" href="app.html?page=home">← Voltar para área do membro</a>
-
       <nav class="admin-app-links" aria-label="Ferramentas administrativas">
         <a href="admin.html?tool=panel" data-admin-route="panel">Painel Admin</a>
         <a href="admin.html?tool=purchase" data-admin-route="purchase">Registrar compra</a>
         <a href="admin.html?tool=history" data-admin-route="history">Histórico de vendas</a>
-        <a href="admin.html?tool=stock" data-admin-route="stock">Estoque &amp; Produtos</a>
+        <a href="admin.html?tool=stock" data-admin-route="stock">Dashboard</a>
         <a href="admin.html?tool=store" data-admin-route="store">Publicar mercadorias</a>
         <a href="admin.html?tool=performance" data-admin-route="performance">Desempenho</a>
         <a href="admin.html?tool=delete" data-admin-route="delete">Excluir conta</a>
       </nav>
-
-      <div class="admin-app-footer">
-        <button type="button" data-action="logout">Sair da conta</button>
-      </div>
+      <div class="admin-app-footer"><button type="button" data-action="logout">Sair da conta</button></div>
     </aside>
-
     <button class="admin-app-trigger" id="adminAppTrigger" type="button" aria-label="Abrir menu administrativo">☰</button>
     <button class="admin-app-backdrop" id="adminAppBackdrop" type="button" aria-label="Fechar menu administrativo"></button>
-
     <main class="admin-app-main">
-      <div class="admin-app-loader" id="adminAppLoader">
-        <span></span>
-        <strong>Carregando ferramenta</strong>
-      </div>
+      <div class="admin-app-loader" id="adminAppLoader"><span></span><strong>Carregando ferramenta</strong></div>
       <iframe id="adminAppFrame" title="Ferramenta administrativa" loading="eager"></iframe>
     </main>
   </div>
-
   <script type="module" src="admin-bootstrap.js?v=2.3.1"></script>
   <script type="module" src="admin-shell.js?v=2.3.1"></script>
 </body>
