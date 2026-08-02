@@ -43,13 +43,16 @@ export function totalEquivalenteNivel(vip=0,carimbos=0){
 }
 
 export function resolverFidelidade(data={},totalCalculado=null){
-  if(data.ajusteManualAtivo===true){
-    const vip=Math.max(0,Math.min(10,Number(data.vip)||0));
-    const carimbos=vip===10?10:Math.max(0,Math.min(9,Number(data.carimbos)||0));
-    const equivalente=totalEquivalenteNivel(vip,carimbos);
-    return {...calcularFidelidade(equivalente),vip,nome:NIVEIS[vip].nome,carimbos,totalGasto:Math.max(0,Number(data.totalGasto)||0),manual:true,totalEquivalente:equivalente};
+  const totalBase=Math.max(0,Number(totalCalculado??data.totalGasto)||0);
+  const automatico=calcularFidelidade(totalBase);
+  const vipSalvo=Math.max(0,Math.min(10,Number(data.vip)||0));
+  const carimbosSalvos=vipSalvo===10?10:Math.max(0,Math.min(9,Number(data.carimbos)||0));
+  const ajusteLegado=Number.isFinite(Number(data.vip))&&(vipSalvo!==automatico.vip||carimbosSalvos!==automatico.carimbos);
+  if(data.ajusteManualAtivo===true||ajusteLegado){
+    const equivalente=totalEquivalenteNivel(vipSalvo,carimbosSalvos);
+    return {...calcularFidelidade(equivalente),vip:vipSalvo,nome:NIVEIS[vipSalvo].nome,carimbos:carimbosSalvos,totalGasto:Math.max(0,Number(data.totalGasto)||0),manual:true,manualLegado:data.ajusteManualAtivo!==true,totalEquivalente:equivalente};
   }
-  return {...calcularFidelidade(totalCalculado??data.totalGasto),manual:false};
+  return {...automatico,manual:false};
 }
 
 export function calcularCarteira(data={},novoVip=0){
