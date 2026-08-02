@@ -8,26 +8,29 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.1.0';
+const BUILD='3.2.0';
+const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
 let frame=null;
 let loader=null;
 let currentTool='';
 let memberNavigationRequested=false;
+let recoveryAttempts=0;
 
+function validTool(value){return ADMIN_ROUTES[value]?value:''}
 function toolFromLink(link){
   if(!link)return '';
   try{
     const url=new URL(link.href,location.href);
     if(!url.pathname.endsWith('/admin.html')&&!url.pathname.endsWith('admin.html'))return '';
-    const tool=url.searchParams.get('tool')||'panel';
-    return ADMIN_ROUTES[tool]?tool:'';
+    return validTool(url.searchParams.get('tool')||'panel');
   }catch{return ''}
 }
 
 function requestedAdminTool(){
-  const tool=new URL(location.href).searchParams.get('admin');
-  return ADMIN_ROUTES[tool]?tool:'';
+  const urlTool=validTool(new URL(location.href).searchParams.get('admin'));
+  if(urlTool)return urlTool;
+  return validTool(sessionStorage.getItem(ACTIVE_TOOL_KEY));
 }
 
 function ensureWorkspace(){
@@ -40,6 +43,18 @@ function ensureWorkspace(){
   frame=workspace.querySelector('iframe');
   loader=workspace.querySelector('.unified-admin-loader');
   frame.addEventListener('load',()=>{
+    let loadedFile='';
+    try{loadedFile=frame.contentWindow.location.pathname.split('/').pop()||''}catch{}
+    const expected=currentTool?ADMIN_ROUTES[currentTool]:'';
+    if(expected&&loadedFile&&loadedFile!==expected){
+      if(recoveryAttempts<2){
+        recoveryAttempts+=1;
+        frame.classList.remove('is-ready');
+        loader.classList.remove('is-hidden');
+        setTimeout(()=>{frame.src=`${expected}?embeddedAdmin=1&v=${BUILD}&retry=${recoveryAttempts}`},350);
+        return;
+      }
+    }else recoveryAttempts=0;
     frame.classList.add('is-ready');
     requestAnimationFrame(()=>loader.classList.add('is-hidden'));
   });
@@ -53,8 +68,9 @@ function setAdminActive(tool){
   });
 }
 
-function showMemberArea(){
+function showMemberArea({explicit=false}={}){
   memberNavigationRequested=false;
+  if(explicit)sessionStorage.removeItem(ACTIVE_TOOL_KEY);
   if(frame){
     const workspace=frame.closest('.unified-admin-workspace');
     workspace.hidden=true;
@@ -66,8 +82,9 @@ function showMemberArea(){
 }
 
 function openTool(tool,{push=true}={}){
-  if(!ADMIN_ROUTES[tool])tool='panel';
+  tool=validTool(tool)||'panel';
   memberNavigationRequested=false;
+  sessionStorage.setItem(ACTIVE_TOOL_KEY,tool);
   ensureWorkspace();
   document.querySelectorAll('.spa-view').forEach(view=>{view.hidden=true;view.setAttribute('aria-hidden','true')});
   document.getElementById('spaError')?.remove();
@@ -79,6 +96,7 @@ function openTool(tool,{push=true}={}){
   document.querySelector('[data-admin-tools-trigger]')?.setAttribute('aria-expanded','false');
   if(currentTool!==tool){
     currentTool=tool;
+    recoveryAttempts=0;
     frame.classList.remove('is-ready');
     loader.classList.remove('is-hidden');
     frame.src=`${ADMIN_ROUTES[tool]}?embeddedAdmin=1&v=${BUILD}`;
@@ -91,7 +109,6 @@ function openTool(tool,{push=true}={}){
   window.scrollTo(0,0);
 }
 
-// Ferramentas administrativas: impede a navegação para o shell antigo.
 document.addEventListener('click',event=>{
   const link=event.target.closest('a[href]');
   const tool=toolFromLink(link);
@@ -102,19 +119,16 @@ document.addEventListener('click',event=>{
     return;
   }
 
-  // Uma rota de membro é a única ação autorizada a encerrar a ferramenta atual.
   const memberLink=event.target.closest('[data-spa-route]');
   if(memberLink&&currentTool){
     memberNavigationRequested=true;
-    showMemberArea();
+    showMemberArea({explicit:true});
   }
 },true);
 
-// O SPA dispara este evento também durante a inicialização. Isso não pode fechar
-// uma ferramenta que já está ativa; somente um clique explícito em rota de membro pode.
 document.addEventListener('wd-spa-route',()=>{
   if(memberNavigationRequested){
-    showMemberArea();
+    showMemberArea({explicit:true});
     return;
   }
   const requested=requestedAdminTool();
@@ -123,10 +137,11 @@ document.addEventListener('wd-spa-route',()=>{
 });
 
 window.addEventListener('popstate',event=>{
-  const requested=requestedAdminTool();
-  if(event.state?.adminTool&&ADMIN_ROUTES[event.state.adminTool])openTool(event.state.adminTool,{push:false});
-  else if(requested)openTool(requested,{push:false});
-  else showMemberArea();
+  const stateTool=validTool(event.state?.adminTool);
+  const urlTool=validTool(new URL(location.href).searchParams.get('admin'));
+  if(stateTool)openTool(stateTool,{push:false});
+  else if(urlTool)openTool(urlTool,{push:false});
+  else showMemberArea({explicit:true});
 });
 
 function openInitialAdmin(){
