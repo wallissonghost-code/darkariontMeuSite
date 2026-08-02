@@ -4,11 +4,15 @@ import { getIdTokenResult } from 'https://www.gstatic.com/firebasejs/12.16.0/fir
 
 const FIXED_ADMIN_UIDS=new Set(['WAPN8cPkPGP2mwiQ8FNbIGyUaUl1']);
 const ADMIN_ROLES=new Set(['admin','administrador','master']);
+const isEmbedded=new URLSearchParams(location.search).get('embeddedAdmin')==='1'&&window.top!==window;
 
 function redirectOut(){
   const target='app.html?page=home';
-  if(window.top && window.top!==window) window.top.location.replace(target);
-  else window.location.replace(target);
+  if(isEmbedded){
+    window.location.replace(target);
+    return;
+  }
+  window.location.replace(target);
 }
 
 async function hasAdminAccess(user,profile){
@@ -48,7 +52,7 @@ async function waitForSession(){
       settled=true;
       unsubscribe?.();
       resolve(window.WDSession.state);
-    },2500);
+    },15000);
   });
 }
 
@@ -58,13 +62,13 @@ export const adminReady=(async()=>{
 
   if(state.status!=='ready'||!state.user){
     document.documentElement.dataset.adminGuard='signed-out';
-    redirectOut();
+    if(!isEmbedded)redirectOut();
     throw new Error('Sessão não restaurada para a área administrativa.');
   }
 
   if(!(await hasAdminAccess(state.user,state.profile))){
     document.documentElement.dataset.adminGuard='denied';
-    redirectOut();
+    if(!isEmbedded)redirectOut();
     throw new Error('Acesso administrativo negado.');
   }
 
