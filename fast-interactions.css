@@ -1,0 +1,25 @@
+/* Resposta imediata de toque, especialmente no Safari/iPhone. */
+a,button,[role="button"],input,select,textarea,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+a,button,[role="button"]{cursor:pointer}
+button:disabled,[aria-disabled="true"]{cursor:default}
+
+/* Feedback visual leve sem animações caras. */
+a:active,button:active,[role="button"]:active,.is-pressed{transform:scale(.985);opacity:.88}
+input,select,textarea,button,a{transition-duration:.12s!important}
+
+/* Evita seleção acidental que pode atrasar o clique no iOS. */
+.spa-bottom-nav,.spa-nav,.admin-app-nav,.spa-admin-tools-panel,.wd-member-nav{-webkit-user-select:none;user-select:none}
+
+/* Durante navegação, reduz repinturas e blur pesado. */
+body[data-spa-navigating="true"] .spa-view{contain:layout paint}
+body[data-spa-navigating="true"] .spa-loader{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+@media(max-width:768px){
+  .spa-bottom-nav,.admin-app-trigger,.spa-admin-nav-button{will-change:transform}
+  .spa-page-content{animation-duration:.09s!important}
+  .spa-loader{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
