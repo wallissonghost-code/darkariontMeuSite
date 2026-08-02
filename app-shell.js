@@ -2,7 +2,7 @@ import './app-session.js';
 import { auth } from './firebase.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 
-const BUILD='2.3.1';
+const BUILD='2.3.2';
 const body=document.body;
 const params=new URLSearchParams(location.search);
 const isSpaShell=body.dataset.spaShell==='true';
@@ -19,7 +19,7 @@ const ADMIN_TOOLS=[
   ['performance','desempenho.html','Desempenho','Indicadores, vendas e distribuição VIP','⌁'],
   ['delete','excluir-cliente.html','Excluir conta','Remover perfis cadastrados com segurança','×']
 ];
-let saindo=false;
+let saindo=false,adminEmbeddedReady=false;
 
 function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=`${href}?v=${BUILD}`;document.head.append(link)}
 if(!isSpaShell&&!isAdminShell){carregarCss('app-ui.css');carregarCss('dark-mode.css');carregarCss('ios-navigation-performance.css');if(!isAdminEmbedded)carregarCss('navigation.css')}
@@ -56,12 +56,16 @@ window.sair=sair;document.addEventListener('click',event=>{const button=event.ta
 
 if(body.dataset.adminPage==='true'){try{const {requireAdmin}=await import(`./admin-guard.js?v=${BUILD}`);await requireAdmin()}catch(error){console.error('Rota administrativa bloqueada:',error);throw error}}
 
+function avisarAdminEmbutidoPronto(){if(!isAdminEmbedded||adminEmbeddedReady)return;adminEmbeddedReady=true;requestAnimationFrame(()=>requestAnimationFrame(()=>window.parent?.postMessage({type:'wd-admin-embedded-ready',page:paginaAtual()},location.origin)))}
 function prepararAdminEmbutido(){
-  document.querySelectorAll('.menu,.wd-admin-sidebar,.wd-admin-mobile-trigger,.wd-admin-backdrop').forEach(element=>element.remove());
-  const painel=document.querySelector('.painel');if(painel){painel.style.display='block';painel.style.minHeight='100dvh'}
+  document.querySelectorAll('.menu,.wd-admin-sidebar,.wd-admin-mobile-trigger,.wd-admin-backdrop,[data-spa-admin-tools],[data-admin-tools-trigger]').forEach(element=>element.remove());
+  body.classList.remove('wd-admin-layout','wd-admin-menu-open','menu-open','spa-admin-open');
+  const painel=document.querySelector('.painel');if(painel){painel.style.display='block';painel.style.gridTemplateColumns='minmax(0,1fr)';painel.style.width='100%';painel.style.minHeight='100dvh'}
   const conteudo=document.querySelector('.conteudo');if(conteudo){conteudo.style.width='100%';conteudo.style.maxWidth='none';conteudo.style.margin='0';conteudo.style.paddingTop='24px';conteudo.style.paddingBottom='40px'}
-  body.style.padding='0';body.style.minHeight='100dvh';body.style.overflowX='hidden';
+  body.style.padding='0';body.style.margin='0';body.style.minHeight='100dvh';body.style.overflowX='hidden';
+  avisarAdminEmbutidoPronto();
 }
+window.addEventListener('message',event=>{if(event.origin!==location.origin)return;if(event.data?.type==='wd-admin-shell-request-ready'&&adminEmbeddedReady)window.parent?.postMessage({type:'wd-admin-embedded-ready',page:paginaAtual()},location.origin)});
 
 function renderReady(state){
   const {user,profile}=state,admin=isAdmin(user,profile),role=String(profile?.role||'cliente').toLowerCase(),temaLocal=localStorage.getItem(`wd-theme:${user.uid}`)||localStorage.getItem('wd-theme'),tema=temaValido(profile?.tema)?profile.tema:(temaValido(temaLocal)?temaLocal:'light');
