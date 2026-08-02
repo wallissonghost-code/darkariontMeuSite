@@ -8,7 +8,7 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.0.0';
+const BUILD='3.0.1';
 const main=document.querySelector('.spa-main');
 let frame=null;
 let loader=null;
@@ -22,6 +22,11 @@ function toolFromLink(link){
     const tool=url.searchParams.get('tool')||'panel';
     return ADMIN_ROUTES[tool]?tool:'';
   }catch{return ''}
+}
+
+function requestedAdminTool(){
+  const tool=new URL(location.href).searchParams.get('admin');
+  return ADMIN_ROUTES[tool]?tool:'';
 }
 
 function ensureWorkspace(){
@@ -92,18 +97,23 @@ document.addEventListener('click',event=>{
   openTool(tool);
 },true);
 
-document.addEventListener('wd-spa-route',()=>showMemberArea());
+// Ao navegar para uma tela de membro, fecha a ferramenta. Em abertura direta
+// de rota administrativa, mantém a ferramenta como prioridade.
+document.addEventListener('wd-spa-route',()=>{
+  const tool=requestedAdminTool();
+  if(tool)requestAnimationFrame(()=>openTool(tool,{push:false}));
+  else showMemberArea();
+});
 
-window.addEventListener('popstate',event=>{
-  const url=new URL(location.href);
-  const tool=url.searchParams.get('admin');
-  if(tool&&ADMIN_ROUTES[tool])openTool(tool,{push:false});
+window.addEventListener('popstate',()=>{
+  const tool=requestedAdminTool();
+  if(tool)openTool(tool,{push:false});
   else showMemberArea();
 });
 
 function openInitialAdmin(){
-  const tool=new URL(location.href).searchParams.get('admin');
-  if(tool&&ADMIN_ROUTES[tool])openTool(tool,{push:false});
+  const tool=requestedAdminTool();
+  if(tool)setTimeout(()=>openTool(tool,{push:false}),0);
 }
 
 if(document.documentElement.dataset.authState==='ready')openInitialAdmin();
