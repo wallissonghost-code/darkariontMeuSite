@@ -1,11 +1,21 @@
 // Inicializa Publicar mercadorias somente depois que a sessão administrativa estiver pronta.
+const esperar=(ms)=>new Promise(resolve=>setTimeout(resolve,ms));
+
+async function aguardarSessao(limiteMs=8000){
+  const inicio=Date.now();
+  while(!window.WDSession?.ready){
+    if(Date.now()-inicio>limiteMs)throw new Error('Sessão não foi criada a tempo.');
+    await esperar(50);
+  }
+  return window.WDSession.ready;
+}
+
 async function iniciarPublicacao(){
   const status=document.getElementById('productStatus');
   try{
-    if(!window.WDSession?.ready)throw new Error('Sessão ainda não inicializada.');
-    const state=await window.WDSession.ready;
+    const state=await aguardarSessao();
     if(state?.status!=='ready')throw new Error('Não foi possível confirmar a sessão administrativa.');
-    await import('./mercadorias-admin.js?v=20260801-2335');
+    await import('./mercadorias-admin.js?v=20260801-2337');
   }catch(error){
     console.error('[WD] Falha ao iniciar Publicar mercadorias:',error);
     if(status){
