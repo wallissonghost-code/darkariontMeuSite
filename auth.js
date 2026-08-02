@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile
 import { doc,getDoc,serverTimestamp,setDoc } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
 const formLogin=document.getElementById('formLogin'),formCadastro=document.getElementById('formCadastro'),mensagem=document.getElementById('mensagem'),googleButton=document.getElementById('googleLogin');
-const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+const provider=new GoogleAuthProvider();
 let loginFinalizado=false;
 
 function mostrarMensagem(texto,erro=false){if(!mensagem)return;mensagem.textContent=texto;mensagem.className=erro?'mensagem erro':'mensagem sucesso'}
@@ -19,15 +19,16 @@ try{
   if(redirectResult?.user){
     mostrarMensagem('Acesso confirmado. Abrindo sua conta...');
     await concluirLogin(redirectResult.user);
-  }else if(sessionStorage.getItem('wd-google-redirect')==='1'&&auth.currentUser){
-    mostrarMensagem('Acesso confirmado. Abrindo sua conta...');
+  }else if(auth.currentUser){
+    // A persistência local já restaurou a sessão. Não peça senha novamente.
+    mostrarMensagem('Sessão restaurada. Abrindo sua conta...');
     await concluirLogin(auth.currentUser);
   }else if(sessionStorage.getItem('wd-google-redirect')==='1'){
     sessionStorage.removeItem('wd-google-redirect');
     setLoading(googleButton,false);
   }
 }catch(error){
-  console.error('Erro no retorno Google:',error);
+  console.error('Erro ao restaurar sessão:',error);
   sessionStorage.removeItem('wd-google-redirect');
   mostrarMensagem(traduzirErro(error.code),true);
   setLoading(googleButton,false);
