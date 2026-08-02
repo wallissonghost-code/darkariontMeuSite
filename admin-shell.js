@@ -7,7 +7,7 @@ const routes={
   performance:'desempenho.html',
   delete:'excluir-cliente.html'
 };
-const BUILD='2.4.1';
+const BUILD='2.4.2';
 const nav=document.getElementById('adminAppNav');
 const frame=document.getElementById('adminAppFrame');
 const loader=document.getElementById('adminAppLoader');
