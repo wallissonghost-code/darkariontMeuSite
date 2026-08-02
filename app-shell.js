@@ -2,7 +2,7 @@ import './app-session.js';
 import { auth } from './firebase.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 
-const BUILD='2.3.0';
+const BUILD='2.3.1';
 const body=document.body;
 const params=new URLSearchParams(location.search);
 const isSpaShell=body.dataset.spaShell==='true';
@@ -14,7 +14,7 @@ const ADMIN_TOOLS=[
   ['panel','perfil-admin.html','Painel Admin','Configurações, clientes, níveis e benefícios','✦'],
   ['purchase','registrar-compra.html','Registrar compra','Lançar vendas, bônus e evolução VIP','＋'],
   ['history','historico-vendas.html','Histórico de vendas','Consultar movimentos e realizar estornos','◷'],
-  ['stock','estoque.html','Estoque & Produtos','Produtos, custos, preços e quantidades','▦'],
+  ['stock','estoque.html','Dashboard','Estoque, custos, margem e lucro esperado','▦'],
   ['store','mercadorias-admin.html','Publicar mercadorias','Gerenciar a vitrine exibida aos membros','◇'],
   ['performance','desempenho.html','Desempenho','Indicadores, vendas e distribuição VIP','⌁'],
   ['delete','excluir-cliente.html','Excluir conta','Remover perfis cadastrados com segurança','×']
@@ -22,7 +22,7 @@ const ADMIN_TOOLS=[
 let saindo=false;
 
 function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=`${href}?v=${BUILD}`;document.head.append(link)}
-if(!isSpaShell&&!isAdminShell){carregarCss('app-ui.css');carregarCss('dark-mode.css');if(!isAdminEmbedded)carregarCss('navigation.css')}
+if(!isSpaShell&&!isAdminShell){carregarCss('app-ui.css');carregarCss('dark-mode.css');carregarCss('ios-navigation-performance.css');if(!isAdminEmbedded)carregarCss('navigation.css')}
 if(isAdminEmbedded){body.classList.add('wd-admin-embedded');document.documentElement.dataset.embeddedAdmin='true'}
 
 const temaValido=value=>value==='dark'||value==='light';
