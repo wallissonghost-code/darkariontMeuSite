@@ -37,7 +37,8 @@ async function saveBenefits(){
 
 function optionLabel(client){
   const you=client.id===auth.currentUser?.uid?' · VOCÊ':'';
-  return `${client.nome||client.email||'Cliente'} — LV${Math.max(0,Math.min(10,Number(client.vip)||0))} · ${roleLabel(client.role)} · ${client.email||'sem e-mail'} · ID ${shortUid(client.id)}${you}`;
+  const manual=client.ajusteManualAtivo===true?' · AJUSTE MANUAL':'';
+  return `${client.nome||client.email||'Cliente'} — LV${Math.max(0,Math.min(10,Number(client.vip)||0))} · ${roleLabel(client.role)}${manual} · ${client.email||'sem e-mail'} · ID ${shortUid(client.id)}${you}`;
 }
 
 function renderCorrection(){
@@ -45,9 +46,10 @@ function renderCorrection(){
   if(!client){duplicateInfo.innerHTML='<span>Selecione um cliente.</span>';return}
   const vip=Math.max(0,Math.min(10,Number(client.vip)||0));
   correctionVip.value=String(vip);
-  correctionStamps.value=String(Math.max(0,Math.min(10,Number(client.carimbos)||0)));
+  correctionStamps.value=String(Math.max(0,Math.min(vip===10?10:9,Number(client.carimbos)||0)));
   correctionCredits.value=Number(client.creditos||0).toFixed(2).replace('.',',');
-  duplicateInfo.innerHTML=`<strong>${client.nome||client.email||'Cliente'}</strong><span>${client.email||'Sem e-mail'} · ${roleLabel(client.role)} · ID ${shortUid(client.id)}</span><span>LV${vip} ${LEVELS[vip]} · Total ${money(client.totalGasto||0)} · Bônus ${money(client.creditos||0)}</span>`;
+  const manual=client.ajusteManualAtivo===true?' · Ajuste manual ativo':'';
+  duplicateInfo.innerHTML=`<strong>${client.nome||client.email||'Cliente'}</strong><span>${client.email||'Sem e-mail'} · ${roleLabel(client.role)} · ID ${shortUid(client.id)}</span><span>LV${vip} ${LEVELS[vip]} · Total histórico ${money(client.totalGasto||0)} · Bônus ${money(client.creditos||0)}${manual}</span>`;
 }
 
 async function loadClients(){
@@ -68,7 +70,7 @@ async function saveCorrection(){
   const client=clients.find(item=>item.id===correctionClient.value);
   if(!client)return correctionStatus.textContent='Selecione um cliente.';
   const vip=Math.max(0,Math.min(10,Number(correctionVip.value)||0));
-  const carimbos=Math.max(0,Math.min(10,Number(correctionStamps.value)||0));
+  const carimbos=vip===10?10:Math.max(0,Math.min(9,Number(correctionStamps.value)||0));
   const creditos=parseMoney(correctionCredits.value);
   const motivo=correctionReason.value.trim();
   if(!Number.isFinite(creditos)||creditos<0)return correctionStatus.textContent='Informe um bônus válido.';
@@ -76,9 +78,9 @@ async function saveCorrection(){
   try{
     const carteira=calcularCarteira(client,vip);
     const bonusManual=Math.max(0,creditos-carteira.bonusNivel);
-    await updateDoc(doc(db,'usuarios',client.id),{vip,carimbos,bonusBaseVip:carteira.bonusBaseVip,bonusNivel:carteira.bonusNivel,bonusManual,creditos,atualizadoEm:serverTimestamp()});
-    await audit('conta_corrigida',{clienteId:client.id,motivo,depois:{vip,carimbos,creditos,bonusManual,bonusNivel:carteira.bonusNivel}});
-    correctionStatus.textContent='Conta atualizada.';
+    await updateDoc(doc(db,'usuarios',client.id),{vip,carimbos,ajusteManualAtivo:true,ajusteManualMotivo:motivo,ajusteManualEm:serverTimestamp(),bonusBaseVip:carteira.bonusBaseVip,bonusNivel:carteira.bonusNivel,bonusManual,creditos,atualizadoEm:serverTimestamp()});
+    await audit('conta_corrigida',{clienteId:client.id,motivo,depois:{vip,carimbos,creditos,bonusManual,bonusNivel:carteira.bonusNivel,ajusteManualAtivo:true}});
+    correctionStatus.textContent='Conta atualizada. O nível manual agora tem prioridade sobre o histórico.';
     correctionReason.value='';
     await loadClients();
   }catch(error){console.error(error);correctionStatus.textContent='Não foi possível atualizar.'}
@@ -89,11 +91,11 @@ async function resetCustomer(){
   const motivo=correctionReason.value.trim();
   if(!client)return correctionStatus.textContent='Selecione um cliente.';
   if(motivo.length<3)return correctionStatus.textContent='Informe o motivo.';
-  if(!confirm(`Zerar progresso e bônus de ${client.nome||client.email}?`))return;
+  if(!confirm(`Zerar progresso e bônus de ${client.nome||client.email}? O histórico de compras será preservado.`))return;
   try{
-    await updateDoc(doc(db,'usuarios',client.id),{vip:0,carimbos:0,totalGasto:0,bonusBaseVip:0,bonusNivel:0,bonusManual:0,creditos:0,atualizadoEm:serverTimestamp()});
-    await audit('conta_zerada',{clienteId:client.id,motivo});
-    correctionStatus.textContent='Conta zerada.';
+    await updateDoc(doc(db,'usuarios',client.id),{vip:0,carimbos:0,totalGasto:0,bonusBaseVip:0,bonusNivel:0,bonusManual:0,creditos:0,ajusteManualAtivo:true,ajusteManualMotivo:motivo,ajusteManualEm:serverTimestamp(),atualizadoEm:serverTimestamp()});
+    await audit('conta_zerada',{clienteId:client.id,motivo,historicoPreservado:true,ajusteManualAtivo:true});
+    correctionStatus.textContent='Conta zerada. O histórico foi preservado e não elevará o nível novamente.';
     correctionReason.value='';
     await loadClients();
   }catch(error){console.error(error);correctionStatus.textContent='Não foi possível zerar.'}
