@@ -10,7 +10,8 @@ const creditInput=$('quickCredit');
 const status=$('quickStatus');
 const productSelect=$('productSelect');
 const productSize=$('productSize');
-let clients=[],products=[],cart=[],submitting=false,loaded=false;
+const saleItems=$('saleItems');
+let clients=[],products=[],cart=[],submitting=false,loaded=false,loadingPromise=null;
 
 const parseMoney=raw=>Number(String(raw||'').replace('R$','').replace(/\./g,'').replace(',','.').trim());
 const shortUid=uid=>String(uid||'').slice(-6);
@@ -28,10 +29,8 @@ function cartCost(){return cart.reduce((sum,item)=>sum+item.precoCusto*item.quan
 function valores(){const manual=parseMoney(valueInput.value),cartValue=cartTotal(),total=cartValue>0?cartValue:(Number.isFinite(manual)&&manual>0?manual:0),credit=parseMoney(creditInput?.value);return{total,credito:Number.isFinite(credit)&&credit>0?credit:0}}
 
 function renderCart(){
-  const root=$('saleItems');
-  if(!root)return;
-  root.innerHTML=cart.length?cart.map((item,index)=>`<div class="sale-item"><div><strong>${item.nome}</strong><span>${item.categoria||'Produto'}${item.tamanho?` · Tam. ${item.tamanho}`:''} · ${item.quantidade} × ${money(item.precoVenda)}</span></div><strong>${money(item.quantidade*item.precoVenda)}</strong><button type="button" data-remove="${index}" aria-label="Remover item">×</button></div>`).join(''):'<div class="empty-items">Nenhum item adicionado. Você ainda pode lançar um valor manual.</div>';
-  root.querySelectorAll('[data-remove]').forEach(button=>button.addEventListener('click',()=>{cart.splice(Number(button.dataset.remove),1);valueInput.value=cart.length?cartTotal().toFixed(2).replace('.',','):'';renderCart();render()}));
+  if(!saleItems)return;
+  saleItems.innerHTML=cart.length?cart.map((item,index)=>`<div class="sale-item"><div><strong>${item.nome}</strong><span>${item.categoria||'Produto'}${item.tamanho?` · Tam. ${item.tamanho}`:''} · ${item.quantidade} × ${money(item.precoVenda)}</span></div><strong>${money(item.quantidade*item.precoVenda)}</strong><button type="button" data-remove="${index}" aria-label="Remover item">×</button></div>`).join(''):'<div class="empty-items">Nenhum item adicionado. Você ainda pode lançar um valor manual.</div>';
   valueInput.readOnly=cart.length>0;
   if(cart.length)valueInput.value=cartTotal().toFixed(2).replace('.',',');
 }
@@ -58,26 +57,35 @@ function updateSizeOptions(){
   productSize.innerHTML=sizes.map(item=>`<option value="${item.size}">${item.size} · ${item.qty} un.</option>`).join('');
 }
 
-async function loadData(){
-  if(loaded)return;
-  loaded=true;
+function renderProductOptions(selected=''){
+  products=products.filter(product=>product.ativo!==false&&totalStock(product)>0).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  productSelect.innerHTML='<option value="">Selecione uma mercadoria</option>'+products.map(product=>`<option value="${product.id}">${product.nome||'Produto'} · ${product.categoria||'Sem categoria'} · ${money(product.preco)} · estoque ${totalStock(product)}</option>`).join('');
+  if(products.some(product=>product.id===selected))productSelect.value=selected;
+  updateSizeOptions();
+}
+
+async function loadData({force=false}={}){
+  if(loaded&&!force)return;
+  if(loadingPromise)return loadingPromise;
   status.textContent='Carregando dados...';
-  try{
-    const [usersResult,productsResult]=await Promise.allSettled([getDocs(collection(db,'usuarios')),getDocs(collection(db,'ofertas'))]);
-    if(usersResult.status!=='fulfilled')throw usersResult.reason;
-    if(productsResult.status!=='fulfilled')throw productsResult.reason;
-    clients=usersResult.value.docs.map(item=>({id:item.id,...item.data()})).sort((a,b)=>(a.nome||a.email||'').localeCompare(b.nome||b.email||''));
-    products=productsResult.value.docs.map(item=>({id:item.id,...item.data()})).filter(product=>product.tipo==='produto'&&product.ativo!==false&&totalStock(product)>0).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-    select.innerHTML='<option value="">Selecione um membro</option>'+clients.map(client=>{const result=progressoAtual(client);return `<option value="${client.id}">${client.nome||client.email||'Membro'} · LV${result.vip} ${result.nome}${result.manual?' · MANUAL':''} · ${client.email||'sem e-mail'}</option>`}).join('');
-    productSelect.innerHTML='<option value="">Selecione uma mercadoria</option>'+products.map(product=>`<option value="${product.id}">${product.nome||'Produto'} · ${product.categoria||'Sem categoria'} · ${money(product.preco)} · estoque ${totalStock(product)}</option>`).join('');
-    updateSizeOptions();renderCart();render();status.textContent='';
-  }catch(error){
-    console.error('Falha ao abrir Registrar compra:',error);
-    loaded=false;
-    status.textContent='Não foi possível carregar os dados. Toque aqui para tentar novamente.';
-    status.style.cursor='pointer';
-    status.onclick=()=>{status.onclick=null;status.style.cursor='';loadData()};
-  }
+  loadingPromise=(async()=>{
+    try{
+      const [usersSnap,productsSnap]=await Promise.all([getDocs(collection(db,'usuarios')),getDocs(collection(db,'ofertas'))]);
+      clients=usersSnap.docs.map(item=>({id:item.id,...item.data()})).sort((a,b)=>(a.nome||a.email||'').localeCompare(b.nome||b.email||''));
+      products=productsSnap.docs.map(item=>({id:item.id,...item.data()})).filter(product=>product.tipo==='produto');
+      select.innerHTML='<option value="">Selecione um membro</option>'+clients.map(client=>{const result=progressoAtual(client);return `<option value="${client.id}">${client.nome||client.email||'Membro'} · LV${result.vip} ${result.nome}${result.manual?' · MANUAL':''} · ${client.email||'sem e-mail'}</option>`}).join('');
+      renderProductOptions();renderCart();render();status.textContent='';loaded=true;
+    }catch(error){
+      console.error('Falha ao abrir Registrar compra:',error);
+      loaded=false;
+      status.textContent='Não foi possível carregar os dados. Toque aqui para tentar novamente.';
+      status.style.cursor='pointer';
+      status.onclick=()=>{status.onclick=null;status.style.cursor='';loadData({force:true})};
+    }finally{
+      loadingPromise=null;
+    }
+  })();
+  return loadingPromise;
 }
 
 function addProduct(){
@@ -89,28 +97,50 @@ function addProduct(){
   status.textContent='';renderCart();render();
 }
 
+function applyLocalStockSale(items){
+  const grouped=new Map();
+  items.forEach(item=>{const group=grouped.get(item.id)||[];group.push(item);grouped.set(item.id,group)});
+  grouped.forEach((soldItems,productId)=>{
+    const product=products.find(entry=>entry.id===productId);
+    if(!product)return;
+    const map={...stockMap(product)};
+    let sold=0;
+    soldItems.forEach(item=>{sold+=item.quantidade;if(item.tamanho)map[item.tamanho]=Math.max(0,Number(map[item.tamanho]||0)-item.quantidade)});
+    product.estoquePorTamanho=map;
+    product.estoque=Object.keys(map).length?Object.values(map).reduce((sum,qty)=>sum+Math.max(0,Number(qty)||0),0):Math.max(0,totalStock(product)-sold);
+    product.vendidos=(Number(product.vendidos)||0)+sold;
+  });
+}
+
 async function submit(){
   if(submitting)return;
   const client=clients.find(item=>item.id===select.value);if(!client)return status.textContent='Selecione um membro.';
   const {total,credito}=valores();if(!total)return status.textContent='Informe um valor válido.';
   const saldoAntes=Math.max(0,Number(client.creditos)||0),creditoUsado=Math.min(credito,total,saldoAntes);if(credito>saldoAntes)return status.textContent='O bônus usado é maior que o saldo disponível.';if(credito>total)return status.textContent='O bônus não pode ser maior que o total da compra.';
   for(const item of cart){const product=products.find(entry=>entry.id===item.id);if(!product)return status.textContent=`Produto ${item.nome} não encontrado. Atualize a tela.`;const available=item.tamanho?Number(stockMap(product)[item.tamanho]||0):totalStock(product);if(available<item.quantidade)return status.textContent=`Estoque insuficiente para ${item.nome}${item.tamanho?` (${item.tamanho})`:''}. Atualize a página.`}
+  const saleSnapshot=cart.map(item=>({...item}));
   const valorPago=Math.max(0,total-creditoUsado),totalAntes=totalCliente(client.id),{atual:antes,depois}=progressoDepois(client,valorPago),totalDepoisReal=totalAntes+valorPago,bonusGerado=bonusDaEvolucao(antes.vip,depois.vip),saldoDepois=Math.max(0,saldoAntes-creditoUsado+bonusGerado),custoTotal=cartCost(),lucroEstimado=valorPago-custoTotal;
   submitting=true;const button=$('quickSubmit'),purchaseRef=doc(collection(db,'compras')),walletRef=doc(collection(db,'carteira_movimentos')),logRef=doc(collection(db,'logs')),batch=writeBatch(db);button.disabled=true;button.textContent='Registrando...';status.textContent='Confirmando movimentação...';
   try{
     batch.update(doc(db,'usuarios',client.id),{vip:depois.vip,carimbos:depois.carimbos,totalGasto:totalDepoisReal,creditos:saldoDepois,ajusteManualAtivo:client.ajusteManualAtivo===true,atualizadoEm:serverTimestamp()});
-    const grouped=new Map();cart.forEach(item=>{const group=grouped.get(item.id)||[];group.push(item);grouped.set(item.id,group)});
+    const grouped=new Map();saleSnapshot.forEach(item=>{const group=grouped.get(item.id)||[];group.push(item);grouped.set(item.id,group)});
     for(const [productId,items] of grouped){const product=products.find(entry=>entry.id===productId),map={...stockMap(product)};let sold=0;for(const item of items){sold+=item.quantidade;if(item.tamanho)map[item.tamanho]=Math.max(0,Number(map[item.tamanho]||0)-item.quantidade)}const nextStock=Object.keys(map).length?Object.values(map).reduce((sum,qty)=>sum+Math.max(0,Number(qty)||0),0):Math.max(0,totalStock(product)-sold);batch.update(doc(db,'ofertas',productId),{estoque:nextStock,estoquePorTamanho:map,vendidos:(Number(product.vendidos)||0)+sold,atualizadoEm:serverTimestamp()})}
-    batch.set(purchaseRef,{clienteId:client.id,clienteNome:client.nome||'',clienteEmail:client.email||'',telefone:client.telefone||'',valor:total,valorBruto:total,valorPago,valorFidelidade:valorPago,creditoUsado,custoTotal,lucroEstimado,itens:cart.map(item=>({produtoId:item.id,nome:item.nome,categoria:item.categoria,tamanho:item.tamanho,quantidade:item.quantidade,precoVenda:item.precoVenda,precoCusto:item.precoCusto})),saldoBonusAntes:saldoAntes,saldoBonusDepois:saldoDepois,totalAntes,totalDepois:totalDepoisReal,carimbosGerados:carimbosGerados(antes,depois),carimbosAntes:antes.carimbos,carimbosDepois:depois.carimbos,vipAntes:antes.vip,vipDepois:depois.vip,ajusteManualAtivo:antes.manual===true,bonusGerado,criadoEm:serverTimestamp()});
+    batch.set(purchaseRef,{clienteId:client.id,clienteNome:client.nome||'',clienteEmail:client.email||'',telefone:client.telefone||'',valor:total,valorBruto:total,valorPago,valorFidelidade:valorPago,creditoUsado,custoTotal,lucroEstimado,itens:saleSnapshot.map(item=>({produtoId:item.id,nome:item.nome,categoria:item.categoria,tamanho:item.tamanho,quantidade:item.quantidade,precoVenda:item.precoVenda,precoCusto:item.precoCusto})),saldoBonusAntes:saldoAntes,saldoBonusDepois:saldoDepois,totalAntes,totalDepois:totalDepoisReal,carimbosGerados:carimbosGerados(antes,depois),carimbosAntes:antes.carimbos,carimbosDepois:depois.carimbos,vipAntes:antes.vip,vipDepois:depois.vip,ajusteManualAtivo:antes.manual===true,bonusGerado,criadoEm:serverTimestamp()});
     batch.set(walletRef,{clienteId:client.id,compraId:purchaseRef.id,tipo:'compra',creditoUsado,bonusGerado,saldoAntes,saldoDepois,descricao:`Compra de ${money(total)}`,criadoEm:serverTimestamp()});
     batch.set(logRef,{tipo:'compra_registrada',clienteId:client.id,clienteNome:client.nome||client.email||'',compraId:purchaseRef.id,valorTotal:total,valorPago,valorFidelidade:valorPago,creditoUsado,custoTotal,lucroEstimado,ajusteManualAtivo:antes.manual===true,admin:{uid:auth.currentUser?.uid||'',email:auth.currentUser?.email||''},criadoEm:serverTimestamp()});
     await batch.commit();
-    Object.assign(client,{vip:depois.vip,carimbos:depois.carimbos,totalGasto:totalDepoisReal,creditos:saldoDepois});atualizarOpcao(client,depois);
-    status.textContent='Venda registrada. Estoque, tamanhos, nível e Dashboard foram atualizados.';valueInput.value='';if(creditInput)creditInput.value='';cart=[];renderCart();render();loaded=false;await loadData();
+    Object.assign(client,{vip:depois.vip,carimbos:depois.carimbos,totalGasto:totalDepoisReal,creditos:saldoDepois});
+    applyLocalStockSale(saleSnapshot);
+    atualizarOpcao(client,depois);
+    const selectedProduct=productSelect.value;
+    valueInput.value='';if(creditInput)creditInput.value='';cart=[];
+    renderProductOptions(selectedProduct);renderCart();render();
+    status.textContent='Venda registrada. Estoque, tamanhos, nível e Dashboard foram atualizados.';
   }catch(error){console.error(error);status.textContent='Não foi possível registrar. Nenhum dado parcial foi salvo.'}
   finally{submitting=false;button.disabled=false;button.textContent='Confirmar movimentação'}
 }
 
+saleItems?.addEventListener('click',event=>{const button=event.target.closest('[data-remove]');if(!button)return;cart.splice(Number(button.dataset.remove),1);valueInput.value=cart.length?cartTotal().toFixed(2).replace('.',','):'';renderCart();render()});
 select?.addEventListener('change',render);
 valueInput?.addEventListener('input',render);
 creditInput?.addEventListener('input',render);
