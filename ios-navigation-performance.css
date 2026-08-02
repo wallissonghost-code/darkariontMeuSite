@@ -1,12 +1,50 @@
-/* Ajustes de desempenho sem alterar a identidade visual */
-[data-spa-route],.spa-admin-nav-button,.spa-admin-tools-grid a,.spa-nav a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-[data-spa-route].is-pressed{transform:scale(.975);opacity:.9}
-.spa-bottom-nav a,.spa-admin-nav-button{transition:transform .1s ease,opacity .1s ease,color .14s ease,background-color .14s ease}
+/* Desempenho e resposta imediata sem alterar a identidade visual. */
+a,button,[role="button"],input,select,textarea,label,[data-spa-route],.spa-admin-nav-button,.spa-admin-tools-grid a,.spa-nav a{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+a,button,[role="button"]{cursor:pointer}
+button:disabled,[aria-disabled="true"]{cursor:default}
+
+/* Feedback imediato e barato para o toque. */
+[data-spa-route].is-pressed,a:active,button:active,[role="button"]:active{
+  transform:scale(.985);
+  opacity:.9;
+}
+.spa-bottom-nav a,.spa-admin-nav-button,.spa-admin-tools-grid a,.admin-app-links a,button,a{
+  transition-duration:.11s!important;
+}
+
+/* Evita seleção acidental e repinturas caras durante a navegação. */
+.spa-bottom-nav,.spa-nav,.admin-app-nav,.spa-admin-tools-panel,.wd-member-nav{
+  -webkit-user-select:none;
+  user-select:none;
+}
 .spa-view{contain:layout style}
+body[data-spa-navigating="true"] .spa-view{contain:layout paint}
+body[data-spa-navigating="true"] .spa-loader{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+
 @media(max-width:768px){
-  .spa-loader{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:rgba(9,10,12,.94)}
+  .spa-loader{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    background:rgba(9,10,12,.94);
+  }
   html:not([data-theme="dark"]) .spa-loader{background:rgba(245,242,235,.95)}
   .spa-bottom-nav{will-change:auto}
-  .spa-page-content{animation-duration:.12s}
+  .spa-page-content{animation-duration:.09s!important}
+  .spa-bottom-nav a,.spa-admin-nav-button,.admin-app-trigger{will-change:transform}
 }
-@media(prefers-reduced-motion:reduce){[data-spa-route].is-pressed{transform:none}.spa-bottom-nav a,.spa-admin-nav-button{transition:none}}
+
+@media(prefers-reduced-motion:reduce){
+  [data-spa-route].is-pressed,a:active,button:active,[role="button"]:active{transform:none}
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
