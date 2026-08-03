@@ -1,4 +1,4 @@
-/* Desempenho e resposta imediata sem alterar a identidade visual. */
+/* Desempenho e resposta imediata da navegação, sem alterar a identidade visual. */
 a,button,[role="button"],input,select,textarea,label,[data-spa-route],.spa-admin-nav-button,.spa-admin-tools-grid a,.spa-nav a{
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
@@ -6,16 +6,19 @@ a,button,[role="button"],input,select,textarea,label,[data-spa-route],.spa-admin
 a,button,[role="button"]{cursor:pointer}
 button:disabled,[aria-disabled="true"]{cursor:default}
 
-/* Feedback imediato e barato para o toque. */
-[data-spa-route].is-pressed,a:active,button:active,[role="button"]:active{
-  transform:scale(.985);
-  opacity:.9;
+/* Feedback de toque somente nos controles de navegação. Evita repintar formulários e cards. */
+.spa-bottom-nav [data-spa-route].is-pressed,
+.spa-bottom-nav .spa-admin-nav-button.is-pressed,
+.spa-admin-tools-grid a:active,
+.spa-nav a:active{
+  transform:scale(.975);
+  opacity:.88;
 }
-.spa-bottom-nav a,.spa-admin-nav-button,.spa-admin-tools-grid a,.admin-app-links a,button,a{
-  transition-duration:.11s!important;
+.spa-bottom-nav a,.spa-admin-nav-button,.spa-admin-tools-grid a,.admin-app-links a,.spa-nav a{
+  transition:color .1s ease,background-color .1s ease,border-color .1s ease,opacity .1s ease,transform .1s ease!important;
 }
 
-/* Evita seleção acidental e repinturas caras durante a navegação. */
+/* Evita seleção acidental e limita o custo de layout durante a troca de tela. */
 .spa-bottom-nav,.spa-nav,.admin-app-nav,.spa-admin-tools-panel,.wd-member-nav{
   -webkit-user-select:none;
   user-select:none;
@@ -34,13 +37,20 @@ body[data-spa-navigating="true"] .spa-loader{
     background:rgba(9,10,12,.94);
   }
   html:not([data-theme="dark"]) .spa-loader{background:rgba(245,242,235,.95)}
-  .spa-bottom-nav{will-change:auto}
-  .spa-page-content{animation-duration:.09s!important}
-  .spa-bottom-nav a,.spa-admin-nav-button,.admin-app-trigger{will-change:transform}
+  .spa-bottom-nav{
+    will-change:auto!important;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+  }
+  .spa-page-content{animation-duration:.08s!important}
+  .spa-bottom-nav a,.spa-admin-nav-button,.admin-app-trigger{will-change:auto!important}
+  body[data-spa-navigating="true"] .spa-bottom-nav a,
+  body[data-spa-navigating="true"] .spa-admin-nav-button{pointer-events:none}
 }
 
 @media(prefers-reduced-motion:reduce){
-  [data-spa-route].is-pressed,a:active,button:active,[role="button"]:active{transform:none}
+  .spa-bottom-nav [data-spa-route].is-pressed,.spa-bottom-nav .spa-admin-nav-button.is-pressed,.spa-admin-tools-grid a:active,.spa-nav a:active{transform:none}
   *,*::before,*::after{
     scroll-behavior:auto!important;
     animation-duration:.01ms!important;
