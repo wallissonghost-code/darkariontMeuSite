@@ -1,0 +1,41 @@
+/* WD Founder — iframe administrativo acompanha o conteúdo real.
+   Elimina altura fixa, rolagem interna e área vazia elástica no Safari. */
+body.unified-admin-active .spa-main,
+body.unified-admin-active .unified-admin-workspace{
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+}
+body.unified-admin-active .unified-admin-frame{
+  display:block!important;
+  width:100%!important;
+  height:1px;
+  min-height:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  resize:none!important;
+}
+@media(max-width:768px){
+  body.unified-admin-active{
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-bottom:calc(70px + env(safe-area-inset-bottom))!important;
+  }
+  body.unified-admin-active .spa-shell{
+    height:auto!important;
+    min-height:calc(100dvh - 70px - env(safe-area-inset-bottom))!important;
+    overflow:visible!important;
+  }
+  body.unified-admin-active .spa-main{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  body.unified-admin-active .unified-admin-workspace{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+}
