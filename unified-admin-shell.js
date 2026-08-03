@@ -8,7 +8,7 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.5.0';
+const BUILD='3.5.1';
 const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
 let frame=null;
@@ -39,13 +39,24 @@ function forceEmbeddedLayout(){
     const doc=frame.contentDocument;
     if(!doc?.documentElement||!doc.body)return;
     doc.documentElement.dataset.embeddedAdmin='true';
+    const parentTheme=document.documentElement.dataset.theme==='dark'?'dark':'light';
+    doc.documentElement.dataset.theme=parentTheme;
+    doc.documentElement.style.colorScheme=parentTheme;
+    let themeLink=doc.getElementById('wd-theme-coherence-v2');
+    if(!themeLink){
+      themeLink=doc.createElement('link');
+      themeLink.id='wd-theme-coherence-v2';
+      themeLink.rel='stylesheet';
+      themeLink.href=`theme-coherence-v2.css?v=${BUILD}`;
+      doc.head.append(themeLink);
+    }
     let style=doc.getElementById('wd-parent-embedded-layout');
     if(!style){
       style=doc.createElement('style');
       style.id='wd-parent-embedded-layout';
       style.textContent=`
         html,body{margin:0!important;padding:0!important;min-height:100%!important;overflow-x:hidden!important;}
-        body{background:var(--bg,#090a0c)!important;}
+        body{background:var(--wd-page,var(--bg,#090a0c))!important;color:var(--wd-text,var(--ink,#f7f4ed))!important;}
         .painel{display:block!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;grid-template-columns:minmax(0,1fr)!important;}
         .conteudo{box-sizing:border-box!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:28px clamp(22px,4vw,52px) 80px!important;}
         .purchase-page,.admin-page,.dashboard-page,.store-admin-page{width:100%!important;max-width:1120px!important;margin:0 auto!important;padding-top:0!important;}
@@ -64,6 +75,12 @@ function forceEmbeddedLayout(){
     doc.querySelector('.conteudo')?.style.setProperty('margin','0','important');
   }catch(error){console.warn('Não foi possível ajustar o layout embutido:',error)}
 }
+
+function syncEmbeddedTheme(){
+  if(!frame?.contentDocument)return;
+  forceEmbeddedLayout();
+}
+document.addEventListener('wd-theme-ready',syncEmbeddedTheme);
 
 function ensureWorkspace(){
   if(frame)return;
