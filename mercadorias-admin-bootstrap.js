@@ -15,7 +15,7 @@ async function iniciarPublicacao(){
   try{
     const state=await aguardarSessao();
     if(state?.status!=='ready')throw new Error('Não foi possível confirmar a sessão administrativa.');
-    await import('./mercadorias-admin.js?v=20260801-2337');
+    await import('./mercadorias-admin.js?v=20260802-2345');
   }catch(error){
     console.error('[WD] Falha ao iniciar Publicar mercadorias:',error);
     if(status){
