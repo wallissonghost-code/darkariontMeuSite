@@ -59,7 +59,18 @@
   :root{--wd-mobile-nav-height:calc(70px + env(safe-area-inset-bottom))}
   .spa-brand{display:none!important}
 
-  /* A ferramenta ocupa exatamente o espaço acima da barra. Sem faixa/preenchimento duplicado. */
+  /* O spa.css já reserva a barra inferior no body. No Admin removemos essa reserva
+     e controlamos a altura apenas aqui, evitando a faixa preta duplicada. */
+  body.unified-admin-active{
+    padding-bottom:0!important;
+    min-height:100dvh!important;
+  }
+  body.unified-admin-active .spa-shell{
+    min-height:100dvh!important;
+    height:100dvh!important;
+    overflow:hidden!important;
+  }
+
   body.unified-admin-active .spa-main{
     padding:0!important;
     min-height:calc(100dvh - var(--wd-mobile-nav-height))!important;
