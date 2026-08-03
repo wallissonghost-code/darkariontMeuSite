@@ -2,7 +2,7 @@ import './app-session.js';
 import { auth } from './firebase.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 
-const BUILD='2.3.2';
+const BUILD='2.4.0';
 const body=document.body;
 const params=new URLSearchParams(location.search);
 const isSpaShell=body.dataset.spaShell==='true';
@@ -57,12 +57,39 @@ window.sair=sair;document.addEventListener('click',event=>{const button=event.ta
 if(body.dataset.adminPage==='true'){try{const {requireAdmin}=await import(`./admin-guard.js?v=${BUILD}`);await requireAdmin()}catch(error){console.error('Rota administrativa bloqueada:',error);throw error}}
 
 function avisarAdminEmbutidoPronto(){if(!isAdminEmbedded||adminEmbeddedReady)return;adminEmbeddedReady=true;requestAnimationFrame(()=>requestAnimationFrame(()=>window.parent?.postMessage({type:'wd-admin-embedded-ready',page:paginaAtual()},location.origin)))}
+function aplicarLayoutAdminEmbutido(){
+  let style=document.getElementById('wd-admin-embedded-layout');
+  if(!style){
+    style=document.createElement('style');
+    style.id='wd-admin-embedded-layout';
+    style.textContent=`
+      html[data-embedded-admin="true"],html[data-embedded-admin="true"] body{margin:0!important;padding:0!important;min-height:100%!important;background:var(--bg,#090a0c)!important;}
+      html[data-embedded-admin="true"] body{overflow-x:hidden!important;}
+      html[data-embedded-admin="true"] .painel{display:block!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;grid-template-columns:minmax(0,1fr)!important;}
+      html[data-embedded-admin="true"] .conteudo{box-sizing:border-box!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:clamp(18px,3vw,34px) clamp(18px,4vw,48px) 120px!important;}
+      html[data-embedded-admin="true"] .purchase-page,
+      html[data-embedded-admin="true"] .admin-page,
+      html[data-embedded-admin="true"] .dashboard-page,
+      html[data-embedded-admin="true"] .store-admin-page{width:100%!important;max-width:1100px!important;margin:0 auto!important;padding-top:0!important;}
+      html[data-embedded-admin="true"] .purchase-head,
+      html[data-embedded-admin="true"] .admin-head,
+      html[data-embedded-admin="true"] .page-head{margin-top:0!important;padding-top:0!important;}
+      @media(max-width:768px){
+        html[data-embedded-admin="true"] .conteudo{padding:18px 16px 110px!important;}
+        html[data-embedded-admin="true"] .purchase-head{margin:0 0 20px!important;}
+        html[data-embedded-admin="true"] .purchase-head h1{font-size:clamp(38px,11vw,54px)!important;line-height:.98!important;}
+      }
+    `;
+    document.head.append(style);
+  }
+}
 function prepararAdminEmbutido(){
   document.querySelectorAll('.menu,.wd-admin-sidebar,.wd-admin-mobile-trigger,.wd-admin-backdrop,[data-spa-admin-tools],[data-admin-tools-trigger]').forEach(element=>element.remove());
   body.classList.remove('wd-admin-layout','wd-admin-menu-open','menu-open','spa-admin-open');
-  const painel=document.querySelector('.painel');if(painel){painel.style.display='block';painel.style.gridTemplateColumns='minmax(0,1fr)';painel.style.width='100%';painel.style.minHeight='100dvh'}
-  const conteudo=document.querySelector('.conteudo');if(conteudo){conteudo.style.width='100%';conteudo.style.maxWidth='none';conteudo.style.margin='0';conteudo.style.paddingTop='24px';conteudo.style.paddingBottom='40px'}
-  body.style.padding='0';body.style.margin='0';body.style.minHeight='100dvh';body.style.overflowX='hidden';
+  aplicarLayoutAdminEmbutido();
+  const painel=document.querySelector('.painel');if(painel){painel.style.setProperty('display','block','important');painel.style.setProperty('grid-template-columns','minmax(0,1fr)','important');painel.style.setProperty('width','100%','important');painel.style.setProperty('min-height','100dvh','important');painel.style.setProperty('margin','0','important')}
+  const conteudo=document.querySelector('.conteudo');if(conteudo){conteudo.style.setProperty('width','100%','important');conteudo.style.setProperty('max-width','none','important');conteudo.style.setProperty('margin','0','important')}
+  body.style.setProperty('padding','0','important');body.style.setProperty('margin','0','important');body.style.setProperty('min-height','100dvh','important');body.style.setProperty('overflow-x','hidden','important');
   avisarAdminEmbutidoPronto();
 }
 window.addEventListener('message',event=>{if(event.origin!==location.origin)return;if(event.data?.type==='wd-admin-shell-request-ready'&&adminEmbeddedReady)window.parent?.postMessage({type:'wd-admin-embedded-ready',page:paginaAtual()},location.origin)});
