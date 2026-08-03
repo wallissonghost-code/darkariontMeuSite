@@ -1,0 +1,72 @@
+/* Correções multiplataforma WD Founder — Safari/iOS, Android e desktop */
+html,body{max-width:100%;overflow-x:hidden}
+.spa-main,.spa-view,.spa-page-content,.dashboard-page,.cartao-page,.card-shell{min-width:0;max-width:100%;overflow-x:clip}
+
+/* Mantém efeitos e texturas dentro do cartão no Safari/WebKit */
+.home-card,.vip-card{
+  box-sizing:border-box;
+  max-width:100%;
+  overflow:hidden!important;
+  contain:paint;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  -webkit-mask-image:-webkit-radial-gradient(white,black);
+}
+.home-card-glow,.home-card-texture,.home-card:before,.home-card:after,
+.vip-card:before,.vip-card:after{
+  max-width:none;
+  pointer-events:none;
+  will-change:transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+@supports not (overflow:clip){
+  .spa-main,.spa-view,.spa-page-content,.dashboard-page,.cartao-page,.card-shell{overflow-x:hidden}
+}
+
+/* Um único ícone real: desativa caracteres e pseudo-ícones antigos */
+.wd-admin-icon-synced{
+  text-indent:0!important;
+  font-size:0!important;
+  line-height:0!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  text-shadow:none!important;
+}
+.wd-admin-icon-synced:before,.wd-admin-icon-synced:after{content:none!important;display:none!important}
+.wd-admin-icon-synced svg{
+  display:block;
+  width:19px;
+  height:19px;
+  overflow:visible;
+  fill:none;
+  stroke:currentColor;
+  color:#b6bac2;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.spa-admin-links a:hover .wd-admin-icon-synced svg,
+.spa-admin-links a.is-active .wd-admin-icon-synced svg,
+.spa-admin-tools-grid a:hover .wd-admin-icon-synced svg,
+.spa-admin-tools-grid a:active .wd-admin-icon-synced svg{color:#ecd986}
+.spa-admin-links a>span.wd-admin-icon-synced,
+.spa-admin-tool-icon.wd-admin-icon-synced{
+  display:grid!important;
+  place-items:center!important;
+}
+
+/* Evita composição diferente de sombras no Safari */
+@media(max-width:768px){
+  .dashboard-page,.cartao-page{padding-inline:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right));box-sizing:border-box}
+  .home-card,.vip-card{isolation:isolate}
+  .home-card.founder-card,.vip-card.founder{
+    box-shadow:0 22px 54px rgba(0,0,0,.62),0 0 28px rgba(255,196,0,.12),inset 0 1px rgba(255,241,173,.45)!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .home-card-glow,.home-card-texture,.vip-card:before{will-change:auto}
+}
