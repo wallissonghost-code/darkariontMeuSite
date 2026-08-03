@@ -8,7 +8,7 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.4.0';
+const BUILD='3.4.1';
 const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
 let frame=null;
@@ -95,14 +95,30 @@ function ensureWorkspace(){
   });
 }
 
+function clearMemberActiveState(){
+  document.querySelectorAll('[data-spa-route]').forEach(link=>{
+    link.classList.remove('is-active');
+    link.removeAttribute('aria-current');
+  });
+}
+
 function setAdminActive(tool){
+  const adminIsActive=Boolean(tool);
+  if(adminIsActive)clearMemberActiveState();
+
   document.querySelectorAll('.spa-admin-links a,.spa-admin-tools-grid a').forEach(link=>{
     const active=toolFromLink(link)===tool;
     link.classList.toggle('is-active',active);
     if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   });
+
   const mobileAdmin=document.querySelector('[data-admin-tools-trigger]');
-  if(mobileAdmin)mobileAdmin.classList.toggle('is-current',Boolean(tool));
+  if(mobileAdmin){
+    mobileAdmin.classList.toggle('is-current',adminIsActive);
+    mobileAdmin.classList.toggle('is-active',adminIsActive);
+    if(adminIsActive)mobileAdmin.setAttribute('aria-current','page');
+    else mobileAdmin.removeAttribute('aria-current');
+  }
 }
 
 function showMemberArea({explicit=false}={}){
