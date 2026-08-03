@@ -8,7 +8,7 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.4.1';
+const BUILD='3.5.0';
 const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
 let frame=null;
@@ -18,6 +18,7 @@ let memberNavigationRequested=false;
 let recoveryAttempts=0;
 
 function validTool(value){return ADMIN_ROUTES[value]?value:''}
+function validMemberRoute(value){return ['home','store','card','account'].includes(value)?value:'home'}
 function toolFromLink(link){
   if(!link)return '';
   try{
@@ -102,6 +103,29 @@ function clearMemberActiveState(){
   });
 }
 
+function setMemberActiveState(route){
+  route=validMemberRoute(route);
+  document.querySelectorAll('[data-spa-route]').forEach(link=>{
+    const active=link.dataset.spaRoute===route;
+    link.classList.toggle('is-active',active);
+    if(active)link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
+  });
+}
+
+function restoreMemberView(route){
+  route=validMemberRoute(route);
+  let restored=false;
+  document.querySelectorAll('.spa-view').forEach(view=>{
+    const visible=view.dataset.route===route;
+    view.hidden=!visible;
+    view.setAttribute('aria-hidden',visible?'false':'true');
+    if(visible)restored=true;
+  });
+  setMemberActiveState(route);
+  return restored;
+}
+
 function setAdminActive(tool){
   const adminIsActive=Boolean(tool);
   if(adminIsActive)clearMemberActiveState();
@@ -121,8 +145,8 @@ function setAdminActive(tool){
   }
 }
 
-function showMemberArea({explicit=false}={}){
-  memberNavigationRequested=false;
+function showMemberArea({explicit=false,route='home'}={}){
+  route=validMemberRoute(route);
   if(explicit)sessionStorage.removeItem(ACTIVE_TOOL_KEY);
   if(frame){
     const workspace=frame.closest('.unified-admin-workspace');
@@ -132,6 +156,15 @@ function showMemberArea({explicit=false}={}){
   document.body.classList.remove('unified-admin-active');
   currentTool='';
   setAdminActive('');
+  restoreMemberView(route);
+  memberNavigationRequested=false;
+
+  const url=new URL(location.href);
+  if(url.searchParams.has('admin')){
+    const memberUrl=new URL('app.html',location.href);
+    memberUrl.searchParams.set('page',route);
+    history.replaceState({route},'',`${memberUrl.pathname}${memberUrl.search}`);
+  }
 }
 
 function openTool(tool,{push=true}={}){
@@ -175,13 +208,13 @@ document.addEventListener('click',event=>{
   const memberLink=event.target.closest('[data-spa-route]');
   if(memberLink&&currentTool){
     memberNavigationRequested=true;
-    showMemberArea({explicit:true});
+    showMemberArea({explicit:true,route:memberLink.dataset.spaRoute});
   }
 },true);
 
-document.addEventListener('wd-spa-route',()=>{
+document.addEventListener('wd-spa-route',event=>{
   if(memberNavigationRequested){
-    showMemberArea({explicit:true});
+    showMemberArea({explicit:true,route:event.detail?.route||'home'});
     return;
   }
   const requested=requestedAdminTool();
@@ -194,7 +227,7 @@ window.addEventListener('popstate',event=>{
   const urlTool=validTool(new URL(location.href).searchParams.get('admin'));
   if(stateTool)openTool(stateTool,{push:false});
   else if(urlTool)openTool(urlTool,{push:false});
-  else showMemberArea({explicit:true});
+  else showMemberArea({explicit:true,route:event.state?.route||new URL(location.href).searchParams.get('page')||'home'});
 });
 
 function openInitialAdmin(){
