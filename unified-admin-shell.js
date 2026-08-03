@@ -8,7 +8,7 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.2.0';
+const BUILD='3.4.0';
 const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
 let frame=null;
@@ -33,6 +33,37 @@ function requestedAdminTool(){
   return validTool(sessionStorage.getItem(ACTIVE_TOOL_KEY));
 }
 
+function forceEmbeddedLayout(){
+  try{
+    const doc=frame.contentDocument;
+    if(!doc?.documentElement||!doc.body)return;
+    doc.documentElement.dataset.embeddedAdmin='true';
+    let style=doc.getElementById('wd-parent-embedded-layout');
+    if(!style){
+      style=doc.createElement('style');
+      style.id='wd-parent-embedded-layout';
+      style.textContent=`
+        html,body{margin:0!important;padding:0!important;min-height:100%!important;overflow-x:hidden!important;}
+        body{background:var(--bg,#090a0c)!important;}
+        .painel{display:block!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;grid-template-columns:minmax(0,1fr)!important;}
+        .conteudo{box-sizing:border-box!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:28px clamp(22px,4vw,52px) 80px!important;}
+        .purchase-page,.admin-page,.dashboard-page,.store-admin-page{width:100%!important;max-width:1120px!important;margin:0 auto!important;padding-top:0!important;}
+        .purchase-head,.admin-head,.page-head{margin-top:0!important;padding-top:0!important;}
+        @media(max-width:768px){
+          .conteudo{padding:16px 16px 108px!important;}
+          .purchase-page,.admin-page,.dashboard-page,.store-admin-page{max-width:none!important;}
+          .purchase-head{margin:0 0 20px!important;padding:0!important;}
+          .purchase-head h1{font-size:clamp(38px,11vw,54px)!important;line-height:.98!important;margin-top:8px!important;}
+        }
+      `;
+      doc.head.append(style);
+    }
+    doc.body.style.setProperty('margin','0','important');
+    doc.body.style.setProperty('padding','0','important');
+    doc.querySelector('.conteudo')?.style.setProperty('margin','0','important');
+  }catch(error){console.warn('Não foi possível ajustar o layout embutido:',error)}
+}
+
 function ensureWorkspace(){
   if(frame)return;
   const workspace=document.createElement('section');
@@ -55,8 +86,12 @@ function ensureWorkspace(){
         return;
       }
     }else recoveryAttempts=0;
-    frame.classList.add('is-ready');
-    requestAnimationFrame(()=>loader.classList.add('is-hidden'));
+    forceEmbeddedLayout();
+    requestAnimationFrame(()=>{
+      forceEmbeddedLayout();
+      frame.classList.add('is-ready');
+      loader.classList.add('is-hidden');
+    });
   });
 }
 
@@ -66,6 +101,8 @@ function setAdminActive(tool){
     link.classList.toggle('is-active',active);
     if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   });
+  const mobileAdmin=document.querySelector('[data-admin-tools-trigger]');
+  if(mobileAdmin)mobileAdmin.classList.toggle('is-current',Boolean(tool));
 }
 
 function showMemberArea({explicit=false}={}){
@@ -100,7 +137,7 @@ function openTool(tool,{push=true}={}){
     frame.classList.remove('is-ready');
     loader.classList.remove('is-hidden');
     frame.src=`${ADMIN_ROUTES[tool]}?embeddedAdmin=1&v=${BUILD}`;
-  }
+  }else forceEmbeddedLayout();
   if(push){
     const url=new URL('app.html',location.href);
     url.searchParams.set('admin',tool);
