@@ -56,10 +56,33 @@
 }
 
 @media(max-width:768px){
+  :root{--wd-mobile-nav-height:calc(70px + env(safe-area-inset-bottom))}
   .spa-brand{display:none!important}
-  .unified-admin-workspace{min-height:calc(100dvh - 84px);padding-bottom:84px}
-  .unified-admin-frame{height:calc(100dvh - 84px);min-height:calc(100dvh - 84px)}
-  body.unified-admin-active .spa-main{padding:0!important}
+
+  /* A ferramenta ocupa exatamente o espaço acima da barra. Sem faixa/preenchimento duplicado. */
+  body.unified-admin-active .spa-main{
+    padding:0!important;
+    min-height:calc(100dvh - var(--wd-mobile-nav-height))!important;
+    height:calc(100dvh - var(--wd-mobile-nav-height))!important;
+    overflow:hidden!important;
+  }
+  body.unified-admin-active .unified-admin-workspace{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    padding:0!important;
+    margin:0!important;
+    background:var(--bg,#090a0c);
+  }
+  body.unified-admin-active .unified-admin-frame{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  body.unified-admin-active .unified-admin-loader{inset:0!important}
   body.unified-admin-active .spa-bottom-nav{display:grid!important}
 
   .spa-bottom-nav.has-admin{
@@ -92,9 +115,7 @@
     color:#92959b!important;
     background:transparent!important;
   }
-  body.unified-admin-active .spa-bottom-nav>a:before{
-    display:none!important;
-  }
+  body.unified-admin-active .spa-bottom-nav>a:before{display:none!important}
   body.unified-admin-active .spa-admin-nav-button{
     color:#f4f1e9!important;
     background:transparent!important;
