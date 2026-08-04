@@ -8,7 +8,7 @@ const ADMIN_ROUTES={
   delete:'excluir-cliente.html'
 };
 
-const BUILD='3.5.1';
+const BUILD='3.6.0';
 const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
 let frame=null;
@@ -34,53 +34,19 @@ function requestedAdminTool(){
   return validTool(sessionStorage.getItem(ACTIVE_TOOL_KEY));
 }
 
-function forceEmbeddedLayout(){
+function syncFrameTheme(){
   try{
-    const doc=frame.contentDocument;
-    if(!doc?.documentElement||!doc.body)return;
-    doc.documentElement.dataset.embeddedAdmin='true';
-    const parentTheme=document.documentElement.dataset.theme==='dark'?'dark':'light';
-    doc.documentElement.dataset.theme=parentTheme;
-    doc.documentElement.style.colorScheme=parentTheme;
-    let themeLink=doc.getElementById('wd-theme-coherence-v2');
-    if(!themeLink){
-      themeLink=doc.createElement('link');
-      themeLink.id='wd-theme-coherence-v2';
-      themeLink.rel='stylesheet';
-      themeLink.href=`theme-coherence-v2.css?v=${BUILD}`;
-      doc.head.append(themeLink);
-    }
-    let style=doc.getElementById('wd-parent-embedded-layout');
-    if(!style){
-      style=doc.createElement('style');
-      style.id='wd-parent-embedded-layout';
-      style.textContent=`
-        html,body{margin:0!important;padding:0!important;min-height:100%!important;overflow-x:hidden!important;}
-        body{background:var(--wd-page,var(--bg,#090a0c))!important;color:var(--wd-text,var(--ink,#f7f4ed))!important;}
-        .painel{display:block!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;grid-template-columns:minmax(0,1fr)!important;}
-        .conteudo{box-sizing:border-box!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:28px clamp(22px,4vw,52px) 80px!important;}
-        .purchase-page,.admin-page,.dashboard-page,.store-admin-page{width:100%!important;max-width:1120px!important;margin:0 auto!important;padding-top:0!important;}
-        .purchase-head,.admin-head,.page-head{margin-top:0!important;padding-top:0!important;}
-        @media(max-width:768px){
-          .conteudo{padding:16px 16px 108px!important;}
-          .purchase-page,.admin-page,.dashboard-page,.store-admin-page{max-width:none!important;}
-          .purchase-head{margin:0 0 20px!important;padding:0!important;}
-          .purchase-head h1{font-size:clamp(38px,11vw,54px)!important;line-height:.98!important;margin-top:8px!important;}
-        }
-      `;
-      doc.head.append(style);
-    }
-    doc.body.style.setProperty('margin','0','important');
-    doc.body.style.setProperty('padding','0','important');
-    doc.querySelector('.conteudo')?.style.setProperty('margin','0','important');
-  }catch(error){console.warn('Não foi possível ajustar o layout embutido:',error)}
+    const doc=frame?.contentDocument;
+    if(!doc?.documentElement)return;
+    const theme=document.documentElement.dataset.theme==='dark'?'dark':'light';
+    doc.documentElement.dataset.theme=theme;
+    doc.documentElement.style.colorScheme=theme;
+    doc.dispatchEvent(new CustomEvent('wd-parent-theme',{detail:{theme}}));
+  }catch(error){
+    console.warn('Não foi possível sincronizar o tema da ferramenta:',error);
+  }
 }
-
-function syncEmbeddedTheme(){
-  if(!frame?.contentDocument)return;
-  forceEmbeddedLayout();
-}
-document.addEventListener('wd-theme-ready',syncEmbeddedTheme);
+document.addEventListener('wd-theme-ready',syncFrameTheme);
 
 function ensureWorkspace(){
   if(frame)return;
@@ -91,22 +57,28 @@ function ensureWorkspace(){
   main.append(workspace);
   frame=workspace.querySelector('iframe');
   loader=workspace.querySelector('.unified-admin-loader');
+
   frame.addEventListener('load',()=>{
     let loadedFile='';
     try{loadedFile=frame.contentWindow.location.pathname.split('/').pop()||''}catch{}
     const expected=currentTool?ADMIN_ROUTES[currentTool]:'';
+
     if(expected&&loadedFile&&loadedFile!==expected){
       if(recoveryAttempts<2){
         recoveryAttempts+=1;
         frame.classList.remove('is-ready');
         loader.classList.remove('is-hidden');
-        setTimeout(()=>{frame.src=`${expected}?embeddedAdmin=1&v=${BUILD}&retry=${recoveryAttempts}`},350);
+        setTimeout(()=>{
+          frame.src=`${expected}?embeddedAdmin=1&v=${BUILD}&retry=${recoveryAttempts}`;
+        },250);
         return;
       }
-    }else recoveryAttempts=0;
-    forceEmbeddedLayout();
+    }else{
+      recoveryAttempts=0;
+    }
+
+    syncFrameTheme();
     requestAnimationFrame(()=>{
-      forceEmbeddedLayout();
       frame.classList.add('is-ready');
       loader.classList.add('is-hidden');
     });
@@ -150,7 +122,8 @@ function setAdminActive(tool){
   document.querySelectorAll('.spa-admin-links a,.spa-admin-tools-grid a').forEach(link=>{
     const active=toolFromLink(link)===tool;
     link.classList.toggle('is-active',active);
-    if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+    if(active)link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
   });
 
   const mobileAdmin=document.querySelector('[data-admin-tools-trigger]');
@@ -165,11 +138,13 @@ function setAdminActive(tool){
 function showMemberArea({explicit=false,route='home'}={}){
   route=validMemberRoute(route);
   if(explicit)sessionStorage.removeItem(ACTIVE_TOOL_KEY);
+
   if(frame){
     const workspace=frame.closest('.unified-admin-workspace');
     workspace.hidden=true;
     frame.classList.remove('is-ready');
   }
+
   document.body.classList.remove('unified-admin-active');
   currentTool='';
   setAdminActive('');
@@ -189,27 +164,36 @@ function openTool(tool,{push=true}={}){
   memberNavigationRequested=false;
   sessionStorage.setItem(ACTIVE_TOOL_KEY,tool);
   ensureWorkspace();
-  document.querySelectorAll('.spa-view').forEach(view=>{view.hidden=true;view.setAttribute('aria-hidden','true')});
+
+  document.querySelectorAll('.spa-view').forEach(view=>{
+    view.hidden=true;
+    view.setAttribute('aria-hidden','true');
+  });
   document.getElementById('spaError')?.remove();
+
   const workspace=frame.closest('.unified-admin-workspace');
   workspace.hidden=false;
   document.body.classList.add('unified-admin-active');
   setAdminActive(tool);
   document.body.classList.remove('spa-admin-open');
   document.querySelector('[data-admin-tools-trigger]')?.setAttribute('aria-expanded','false');
+
   if(currentTool!==tool){
     currentTool=tool;
     recoveryAttempts=0;
     frame.classList.remove('is-ready');
     loader.classList.remove('is-hidden');
     frame.src=`${ADMIN_ROUTES[tool]}?embeddedAdmin=1&v=${BUILD}`;
-  }else forceEmbeddedLayout();
+  }else{
+    syncFrameTheme();
+  }
+
   if(push){
     const url=new URL('app.html',location.href);
     url.searchParams.set('admin',tool);
     history.pushState({adminTool:tool},'',`${url.pathname}${url.search}`);
   }
-  window.scrollTo(0,0);
+  window.scrollTo({top:0,left:0,behavior:'auto'});
 }
 
 document.addEventListener('click',event=>{
