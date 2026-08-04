@@ -1,7 +1,7 @@
-const RELEASE='wd-founder-3.9.4';
+const RELEASE='wd-founder-3.9.5';
 const STATIC_CACHE=`${RELEASE}-static`,RUNTIME_CACHE=`${RELEASE}-runtime`,OFFLINE_FALLBACK='index.html';
 const PRECACHE=['./','./index.html','./app.html','./404.html','./manifest.webmanifest','./version.json','./production-hardening.css','./production-hardening.js'];
-self.addEventListener('install',event=>event.waitUntil(caches.open(STATIC_CACHE).then(cache=>cache.addAll(PRECACHE)).then(()=>self.skipWaiting())));
+self.addEventListener('install',event=>event.waitUntil(caches.open(STATIC_CACHE).then(cache=>cache.addAll(PRECACHE))));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith('wd-founder-')&&!key.startsWith(RELEASE)).map(key=>caches.delete(key)));await self.clients.claim()})()));
 function html(request,url){return request.mode==='navigate'||request.destination==='document'||url.pathname.endsWith('.html')||url.pathname.includes('/views/')}
 function critical(url){return /\/(app-updater|app-shell|spa|perfil|rank|rank-access-gate|rank-overlay-safety|store-controller|unified-admin-shell|rank-admin|production-hardening)\.js$/.test(url.pathname)||/\/(production-hardening|visual-premium-391|rank-profile-final-392|theme-audit-382|theme-card-identity-383|navigation-performance-381)\.css$/.test(url.pathname)}
