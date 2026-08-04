@@ -1,4 +1,4 @@
-/* WD Founder — controlador único das ferramentas administrativas embutidas. */
+/* WD Founder — controlador único e multiplataforma das ferramentas administrativas embutidas. */
 (() => {
   const FRAME_SELECTOR = '.unified-admin-frame';
   const LEGACY_SELECTOR = [
@@ -6,15 +6,26 @@
     '.wd-member-nav','.client-bottom-nav','.app-bottom-nav','.mobile-menu-trigger',
     '.menu-backdrop'
   ].join(',');
+  const CONFLICTING_STYLES = [
+    'wd-admin-embedded-layout','wd-parent-embedded-layout','wd-embedded-stabilizer-style',
+    'wd-final-admin-autosize','wd-admin-embedded-core-old'
+  ];
+  const PAGE_ROOTS = [
+    '.purchase-page','.admin-page','.dashboard-page','.store-admin-page',
+    '.performance-page','.history-page','.delete-page','.account-delete-page'
+  ].join(',');
+
   const states = new WeakMap();
   let touching = false;
+  let touchReleaseTimer = 0;
 
   function stateFor(frame) {
     if (!states.has(frame)) {
       states.set(frame, {
         raf: 0,
         resizeObserver: null,
-        mutationObserver: null,
+        contentObserver: null,
+        headObserver: null,
         lastHeight: 0,
         pending: false
       });
@@ -26,18 +37,13 @@
     try { return frame.contentDocument || null; } catch { return null; }
   }
 
-  function removeLegacy(doc) {
+  function removeConflicts(doc) {
+    CONFLICTING_STYLES.forEach(id => doc.getElementById(id)?.remove());
     doc.querySelectorAll(LEGACY_SELECTOR).forEach(node => node.remove());
     doc.body?.classList.remove(
       'wd-admin-layout','wd-admin-menu-open','wd-member-layout','menu-open',
-      'client-menu-disabled','spa-admin-open'
+      'client-menu-disabled','spa-admin-open','spa-admin-opened'
     );
-    [
-      'wd-admin-embedded-layout',
-      'wd-parent-embedded-layout',
-      'wd-embedded-stabilizer-style',
-      'wd-final-admin-autosize'
-    ].forEach(id => doc.getElementById(id)?.remove());
   }
 
   function forceAutoBox(element, { overflow = 'visible', padding = null } = {}) {
@@ -52,7 +58,7 @@
     if (padding !== null) element.style.setProperty('padding', padding, 'important');
   }
 
-  function installStyle(doc) {
+  function installCoreStyle(doc) {
     let style = doc.getElementById('wd-admin-embedded-core');
     if (style) return;
     style = doc.createElement('style');
@@ -61,7 +67,7 @@
       html[data-embedded-admin="true"],html[data-embedded-admin="true"] body{
         margin:0!important;padding:0!important;height:auto!important;min-height:0!important;
         max-height:none!important;overflow:hidden!important;overscroll-behavior:none!important;
-        background:transparent!important;
+        background:transparent!important;-webkit-text-size-adjust:100%;
       }
       html[data-embedded-admin="true"] .painel{
         display:block!important;width:100%!important;max-width:none!important;height:auto!important;
@@ -73,25 +79,30 @@
         min-height:0!important;margin:0!important;padding:28px clamp(22px,4vw,52px) 32px!important;
         background:transparent!important;overflow:visible!important;
       }
+      html[data-embedded-admin="true"] ${PAGE_ROOTS}{
+        width:100%!important;max-width:1120px!important;height:auto!important;min-height:0!important;
+        margin-left:auto!important;margin-right:auto!important;padding-top:0!important;
+      }
       html[data-embedded-admin="true"] ${LEGACY_SELECTOR}{display:none!important}
       @media(max-width:768px){
-        html[data-embedded-admin="true"] .conteudo{padding:16px 16px 24px!important}
+        html[data-embedded-admin="true"] .conteudo{padding:16px 16px 22px!important}
+        html[data-embedded-admin="true"] ${PAGE_ROOTS}{max-width:none!important}
       }
     `;
     doc.head.append(style);
   }
 
-  function prepare(frame) {
+  function normalizeDocument(frame) {
     const doc = safeDocument(frame);
-    if (!doc?.documentElement || !doc.body) return null;
+    if (!doc?.documentElement || !doc.body || !doc.head) return null;
 
     doc.documentElement.dataset.embeddedAdmin = 'true';
     doc.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-    removeLegacy(doc);
-    installStyle(doc);
+    doc.documentElement.style.colorScheme = doc.documentElement.dataset.theme;
 
-    /* O app-shell antigo injeta min-height:100dvh inline com !important.
-       Precisamos neutralizar diretamente no elemento, pois uma folha CSS não vence inline !important. */
+    removeConflicts(doc);
+    installCoreStyle(doc);
+
     forceAutoBox(doc.documentElement, { overflow: 'hidden', padding: '0' });
     forceAutoBox(doc.body, { overflow: 'hidden', padding: '0' });
 
@@ -110,7 +121,7 @@
       const mobile = matchMedia('(max-width:768px)').matches;
       forceAutoBox(content, {
         overflow: 'visible',
-        padding: mobile ? '16px 16px 24px' : '28px clamp(22px,4vw,52px) 32px'
+        padding: mobile ? '16px 16px 22px' : '28px clamp(22px,4vw,52px) 32px'
       });
       content.style.setProperty('box-sizing', 'border-box', 'important');
       content.style.setProperty('width', '100%', 'important');
@@ -118,15 +129,22 @@
       content.style.setProperty('background', 'transparent', 'important');
     }
 
+    doc.querySelectorAll(PAGE_ROOTS).forEach(root => {
+      forceAutoBox(root, { overflow: 'visible' });
+      root.style.setProperty('width', '100%', 'important');
+    });
+
     frame.setAttribute('scrolling', 'no');
     frame.style.setProperty('overflow', 'hidden', 'important');
     frame.style.setProperty('border', '0', 'important');
     frame.style.setProperty('min-height', '0', 'important');
     frame.style.setProperty('max-height', 'none', 'important');
+    frame.style.setProperty('display', 'block', 'important');
+    frame.style.setProperty('width', '100%', 'important');
     return doc;
   }
 
-  function isMeasurable(element, view) {
+  function isVisibleElement(element, view) {
     if (!(element instanceof view.HTMLElement)) return false;
     const style = view.getComputedStyle(element);
     if (style.display === 'none' || style.visibility === 'hidden' || style.position === 'fixed') return false;
@@ -136,34 +154,36 @@
 
   function contentHeight(doc) {
     const view = doc.defaultView;
+    const bodyRect = doc.body.getBoundingClientRect();
     const content = doc.querySelector('.conteudo') || doc.body;
-    const origin = doc.body.getBoundingClientRect().top;
-    let maxBottom = content.getBoundingClientRect().bottom;
+    let maxBottom = bodyRect.top;
 
-    /* Mede o último ponto visual real. Não usa body.scrollHeight/root.scrollHeight,
-       porque esses valores incluem min-height antigo e criavam centenas de pixels vazios. */
-    content.querySelectorAll('*').forEach(element => {
-      if (!isMeasurable(element, view)) return;
-      const rect = element.getBoundingClientRect();
-      maxBottom = Math.max(maxBottom, rect.bottom);
+    const candidates = [content, ...content.children];
+    candidates.forEach(element => {
+      if (!isVisibleElement(element, view)) return;
+      maxBottom = Math.max(maxBottom, element.getBoundingClientRect().bottom);
+      Array.from(element.children || []).forEach(child => {
+        if (isVisibleElement(child, view)) maxBottom = Math.max(maxBottom, child.getBoundingClientRect().bottom);
+      });
     });
 
-    const measured = Math.ceil(maxBottom - origin + 2);
-    const minimum = Math.ceil(content.getBoundingClientRect().height + content.getBoundingClientRect().top - origin);
-    return Math.max(measured, minimum, 1);
+    const lastVisible = Array.from(content.querySelectorAll('*')).reverse().find(element => isVisibleElement(element, view));
+    if (lastVisible) maxBottom = Math.max(maxBottom, lastVisible.getBoundingClientRect().bottom);
+
+    return Math.max(1, Math.ceil(maxBottom - bodyRect.top + 2));
   }
 
-  function resize(frame) {
+  function resize(frame, force = false) {
     const state = stateFor(frame);
-    if (touching) { state.pending = true; return; }
+    if (touching && !force) { state.pending = true; return; }
     if (!frame.isConnected || frame.closest('[hidden]')) return;
 
-    const doc = prepare(frame);
+    const doc = normalizeDocument(frame);
     if (!doc) return;
 
     const next = contentHeight(doc);
     if (!Number.isFinite(next) || next < 1) return;
-    if (Math.abs(next - state.lastHeight) < 2) return;
+    if (!force && Math.abs(next - state.lastHeight) < 2) return;
 
     state.lastHeight = next;
     frame.style.setProperty('height', `${next}px`, 'important');
@@ -173,44 +193,56 @@
       workspace.style.setProperty('height', 'auto', 'important');
       workspace.style.setProperty('min-height', '0', 'important');
       workspace.style.setProperty('overflow', 'visible', 'important');
-      workspace.style.setProperty('padding-bottom', '0', 'important');
+      workspace.style.setProperty('padding', '0', 'important');
+      workspace.style.setProperty('margin', '0', 'important');
     }
   }
 
-  function schedule(frame) {
+  function schedule(frame, force = false) {
     const state = stateFor(frame);
     if (state.raf) cancelAnimationFrame(state.raf);
     state.raf = requestAnimationFrame(() => {
       state.raf = 0;
-      resize(frame);
+      resize(frame, force);
     });
   }
 
   function connect(frame) {
-    const doc = prepare(frame);
+    const doc = normalizeDocument(frame);
     if (!doc) return;
 
     const state = stateFor(frame);
     state.resizeObserver?.disconnect();
-    state.mutationObserver?.disconnect();
+    state.contentObserver?.disconnect();
+    state.headObserver?.disconnect();
     state.lastHeight = 0;
 
-    state.resizeObserver = new ResizeObserver(() => schedule(frame));
     const content = doc.querySelector('.conteudo') || doc.body;
+    state.resizeObserver = new ResizeObserver(() => schedule(frame));
     state.resizeObserver.observe(content);
 
-    state.mutationObserver = new MutationObserver(() => schedule(frame));
-    state.mutationObserver.observe(content, {
+    state.contentObserver = new MutationObserver(() => schedule(frame));
+    state.contentObserver.observe(content, {
       childList: true,
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['class', 'hidden', 'open', 'style']
+      attributeFilter: ['class','hidden','open','style']
     });
 
-    schedule(frame);
-    setTimeout(() => schedule(frame), 120);
-    setTimeout(() => schedule(frame), 500);
+    state.headObserver = new MutationObserver(() => {
+      const hadConflict = CONFLICTING_STYLES.some(id => doc.getElementById(id));
+      if (hadConflict) {
+        removeConflicts(doc);
+        installCoreStyle(doc);
+        schedule(frame, true);
+      }
+    });
+    state.headObserver.observe(doc.head, { childList: true, subtree: true });
+
+    schedule(frame, true);
+    setTimeout(() => schedule(frame, true), 120);
+    setTimeout(() => schedule(frame, true), 600);
   }
 
   function watch(frame) {
@@ -224,26 +256,41 @@
     document.querySelectorAll(FRAME_SELECTOR).forEach(watch);
   }
 
-  new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
+  function beginTouch() {
+    touching = true;
+    clearTimeout(touchReleaseTimer);
+    touchReleaseTimer = setTimeout(endTouch, 900);
+  }
 
-  addEventListener('touchstart', () => { touching = true; }, { passive: true });
-  const finishTouch = () => {
+  function endTouch() {
+    clearTimeout(touchReleaseTimer);
     touching = false;
     document.querySelectorAll(FRAME_SELECTOR).forEach(frame => {
       const state = stateFor(frame);
       if (state.pending) {
         state.pending = false;
-        schedule(frame);
+        schedule(frame, true);
       }
     });
-  };
-  addEventListener('touchend', finishTouch, { passive: true });
-  addEventListener('touchcancel', finishTouch, { passive: true });
+  }
+
+  new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
+  addEventListener('touchstart', beginTouch, { passive: true });
+  addEventListener('touchmove', beginTouch, { passive: true });
+  addEventListener('touchend', endTouch, { passive: true });
+  addEventListener('touchcancel', endTouch, { passive: true });
+  addEventListener('pointerup', endTouch, { passive: true });
   addEventListener('orientationchange', () => {
-    setTimeout(() => document.querySelectorAll(FRAME_SELECTOR).forEach(schedule), 180);
+    setTimeout(() => document.querySelectorAll(FRAME_SELECTOR).forEach(frame => schedule(frame, true)), 220);
+  }, { passive: true });
+  addEventListener('resize', () => {
+    if (!touching) document.querySelectorAll(FRAME_SELECTOR).forEach(frame => schedule(frame));
   }, { passive: true });
   document.addEventListener('wd-theme-ready', () => {
-    document.querySelectorAll(FRAME_SELECTOR).forEach(schedule);
+    document.querySelectorAll(FRAME_SELECTOR).forEach(frame => schedule(frame, true));
+  });
+  document.addEventListener('wd-spa-route', () => {
+    requestAnimationFrame(() => document.querySelectorAll(FRAME_SELECTOR).forEach(frame => schedule(frame, true)));
   });
 
   scan();
