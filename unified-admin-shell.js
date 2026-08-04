@@ -6,16 +6,13 @@ const ADMIN_ROUTES={
   store:'mercadorias-admin.html',
   performance:'desempenho.html',
   rewards:'rank-admin.html',
+  frames:'bordas-admin.html',
   delete:'excluir-cliente.html'
 };
-const BUILD='3.8.1';
+const BUILD='3.10.0';
 const ACTIVE_TOOL_KEY='wd-active-admin-tool';
 const main=document.querySelector('.spa-main');
-let frame=null;
-let loader=null;
-let currentTool='';
-let memberNavigationRequested=false;
-let recoveryAttempts=0;
+let frame=null,loader=null,currentTool='',memberNavigationRequested=false,recoveryAttempts=0;
 function validTool(value){return ADMIN_ROUTES[value]?value:''}
 function validMemberRoute(value){return ['home','store','rank','card','account'].includes(value)?value:'home'}
 function toolFromLink(link){if(!link)return '';try{const url=new URL(link.href,location.href);if(url.pathname.endsWith('/admin.html')||url.pathname.endsWith('admin.html'))return validTool(url.searchParams.get('tool')||'panel');const direct=Object.entries(ADMIN_ROUTES).find(([,file])=>url.pathname.endsWith(`/${file}`)||url.pathname.endsWith(file));return direct?.[0]||''}catch{return ''}}
