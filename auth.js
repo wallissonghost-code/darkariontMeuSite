@@ -4,58 +4,28 @@ import { doc,getDoc,serverTimestamp,setDoc } from 'https://www.gstatic.com/fireb
 
 const formLogin=document.getElementById('formLogin'),formCadastro=document.getElementById('formCadastro'),mensagem=document.getElementById('mensagem'),googleButton=document.getElementById('googleLogin');
 const provider=new GoogleAuthProvider();
+const SESSION_HINT='wd-session-hint';
 let loginFinalizado=false;
 
 function mostrarMensagem(texto,erro=false){if(!mensagem)return;mensagem.textContent=texto;mensagem.className=erro?'mensagem erro':'mensagem sucesso'}
 function traduzirErro(codigo){const erros={'auth/invalid-email':'Digite um e-mail válido.','auth/invalid-credential':'E-mail ou senha incorretos.','auth/email-already-in-use':'Este e-mail já possui uma conta. Tente entrar.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/too-many-requests':'Muitas tentativas. Aguarde e tente novamente.','auth/network-request-failed':'Falha de conexão. Confira sua internet.','auth/operation-not-allowed':'Ative esse método de login no Firebase Authentication.','auth/unauthorized-domain':'Autorize wallissonghost-code.github.io nos domínios do Firebase Authentication.','auth/popup-blocked':'O navegador bloqueou a janela do Google. Tente novamente.','auth/popup-closed-by-user':'A janela do Google foi fechada antes de concluir.','auth/cancelled-popup-request':'A tentativa anterior foi cancelada. Tente novamente.','permission-denied':'O Firestore bloqueou o cadastro. Confira e publique as regras.'};return erros[codigo]||`Não foi possível entrar (${codigo||'erro desconhecido'}).`}
 function limparEstadoMembro(){sessionStorage.removeItem('currentUser_member');Object.keys(localStorage).forEach(key=>{if(key.startsWith('wd-user:')||key.startsWith('wd-profile:'))localStorage.removeItem(key)})}
+function salvarDicaSessao(user){try{localStorage.setItem(SESSION_HINT,JSON.stringify({uid:user.uid,email:user.email||'',at:Date.now()}))}catch{}}
 async function garantirPerfil(user){const ref=doc(db,'usuarios',user.uid),snap=await getDoc(ref);if(snap.exists())return snap.data();const nome=user.displayName||'Cliente Founder';await setDoc(ref,{nome,email:user.email||'',foto:user.photoURL||'',role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp(),atualizadoEm:serverTimestamp()});return {nome,role:'cliente'}}
-async function concluirLogin(user){if(!user||loginFinalizado)return;loginFinalizado=true;sessionStorage.removeItem('wd-google-redirect');limparEstadoMembro();await garantirPerfil(user);sessionStorage.setItem('currentUser_member',user.uid);location.replace('app.html?page=home')}
+async function concluirLogin(user){if(!user||loginFinalizado)return;loginFinalizado=true;sessionStorage.removeItem('wd-google-redirect');limparEstadoMembro();salvarDicaSessao(user);sessionStorage.setItem('currentUser_member',user.uid);location.replace('app.html?page=home');garantirPerfil(user).catch(error=>console.warn('Perfil será sincronizado ao abrir o app:',error))}
 function setLoading(button,loading,text='Entrando...'){if(!button)return;button.disabled=loading;if(loading){if(!button.dataset.original)button.dataset.original=button.innerHTML;button.textContent=text}else if(button.dataset.original)button.innerHTML=button.dataset.original}
 
 await authReady;
 try{
   const redirectResult=await getRedirectResult(auth);
-  if(redirectResult?.user){
-    mostrarMensagem('Acesso confirmado. Abrindo sua conta...');
-    await concluirLogin(redirectResult.user);
-  }else if(auth.currentUser){
-    // A persistência local já restaurou a sessão. Não peça senha novamente.
-    mostrarMensagem('Sessão restaurada. Abrindo sua conta...');
-    await concluirLogin(auth.currentUser);
-  }else if(sessionStorage.getItem('wd-google-redirect')==='1'){
-    sessionStorage.removeItem('wd-google-redirect');
-    setLoading(googleButton,false);
-  }
-}catch(error){
-  console.error('Erro ao restaurar sessão:',error);
-  sessionStorage.removeItem('wd-google-redirect');
-  mostrarMensagem(traduzirErro(error.code),true);
-  setLoading(googleButton,false);
-}
+  if(redirectResult?.user){mostrarMensagem('Acesso confirmado. Abrindo sua conta...');await concluirLogin(redirectResult.user)}
+  else if(auth.currentUser){mostrarMensagem('Sessão restaurada. Abrindo sua conta...');await concluirLogin(auth.currentUser)}
+  else if(sessionStorage.getItem('wd-google-redirect')==='1'){sessionStorage.removeItem('wd-google-redirect');setLoading(googleButton,false)}
+}catch(error){console.error('Erro ao restaurar sessão:',error);sessionStorage.removeItem('wd-google-redirect');mostrarMensagem(traduzirErro(error.code),true);setLoading(googleButton,false)}
 
 if(formLogin)formLogin.addEventListener('submit',async event=>{event.preventDefault();const email=document.getElementById('email').value.trim(),senha=document.getElementById('senha').value,botao=formLogin.querySelector('.primary-button');setLoading(botao,true,'Entrando...');mostrarMensagem('');try{const credencial=await signInWithEmailAndPassword(auth,email,senha);await concluirLogin(credencial.user)}catch(error){console.error('Erro no login:',error);mostrarMensagem(traduzirErro(error.code),true);setLoading(botao,false)}});
 
-if(googleButton)googleButton.addEventListener('click',async()=>{
-  setLoading(googleButton,true,'Conectando ao Google...');
-  mostrarMensagem('');
-  try{
-    const result=await signInWithPopup(auth,provider);
-    mostrarMensagem('Acesso confirmado. Abrindo sua conta...');
-    await concluirLogin(result.user);
-  }catch(error){
-    console.error('Erro no Google:',error);
-    if(error.code==='auth/popup-blocked'){
-      try{
-        sessionStorage.setItem('wd-google-redirect','1');
-        await signInWithRedirect(auth,provider);
-        return;
-      }catch(redirectError){error=redirectError}
-    }
-    mostrarMensagem(traduzirErro(error.code),true);
-    setLoading(googleButton,false);
-  }
-});
+if(googleButton)googleButton.addEventListener('click',async()=>{setLoading(googleButton,true,'Conectando ao Google...');mostrarMensagem('');try{const result=await signInWithPopup(auth,provider);mostrarMensagem('Acesso confirmado. Abrindo sua conta...');await concluirLogin(result.user)}catch(error){console.error('Erro no Google:',error);if(error.code==='auth/popup-blocked'){try{sessionStorage.setItem('wd-google-redirect','1');await signInWithRedirect(auth,provider);return}catch(redirectError){error=redirectError}}mostrarMensagem(traduzirErro(error.code),true);setLoading(googleButton,false)}});
 
 document.getElementById('togglePassword')?.addEventListener('click',event=>{const input=document.getElementById('senha'),show=input.type==='password';input.type=show?'text':'password';event.currentTarget.textContent=show?'Ocultar':'Ver';event.currentTarget.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha')});
 if(formCadastro)formCadastro.addEventListener('submit',async event=>{event.preventDefault();const nome=document.getElementById('nome').value.trim(),email=document.getElementById('email').value.trim(),senha=document.getElementById('senha').value,confirmar=document.getElementById('confirmar').value,botao=formCadastro.querySelector('button[type="submit"]');if(nome.length<2)return mostrarMensagem('Digite seu nome completo.',true);if(senha!==confirmar)return mostrarMensagem('As senhas não são iguais.',true);setLoading(botao,true,'Criando conta...');mostrarMensagem('');try{const credencial=await createUserWithEmailAndPassword(auth,email,senha);await updateProfile(credencial.user,{displayName:nome});await setDoc(doc(db,'usuarios',credencial.user.uid),{nome,email,role:'cliente',vip:0,carimbos:0,creditos:0,criadoEm:serverTimestamp(),atualizadoEm:serverTimestamp()});await concluirLogin(credencial.user)}catch(error){console.error('Erro no cadastro:',error);mostrarMensagem(traduzirErro(error.code),true);setLoading(botao,false)}});
