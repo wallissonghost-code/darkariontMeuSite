@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /app.html
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /*-admin.html
+Disallow: /perfil-admin.html
+Disallow: /registrar-compra.html
+Disallow: /historico-vendas.html
+Disallow: /estoque.html
+Disallow: /desempenho.html
+Disallow: /excluir-cliente.html
+Sitemap: https://wallissonghost-code.github.io/darkariontMeuSite/sitemap.xml
