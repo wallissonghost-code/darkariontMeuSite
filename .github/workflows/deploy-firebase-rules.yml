@@ -1,0 +1,45 @@
+name: Deploy Firebase Rules
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - firestore.rules
+      - storage.rules
+      - firebase.json
+      - .firebaserc
+      - .github/workflows/deploy-firebase-rules.yml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Configure Firebase credentials
+        shell: bash
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WD_FOUNDER }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "Secret FIREBASE_SERVICE_ACCOUNT_WD_FOUNDER não configurado."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+
+      - name: Deploy Firestore and Storage rules
+        run: firebase deploy --project wd-founder --only firestore:rules,storage --non-interactive
