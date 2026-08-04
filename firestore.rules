@@ -1,69 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(uid) {
-      return signedIn() && request.auth.uid == uid;
-    }
-
-    function isFixedAdmin() {
-      return signedIn()
-        && request.auth.uid == 'WAPN8cPkPGP2mwiQ8FNbIGyUaUl1';
-    }
-
-    function hasAdminClaim() {
-      return signedIn() && (
-        request.auth.token.admin == true ||
-        request.auth.token.role == 'admin'
-      );
-    }
-
-    // Compatibilidade temporária com o modelo atual.
-    // Depois de configurar Custom Claims, esta função pode ser removida.
-    function hasLegacyAdminRole() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role
-          in ['admin', 'administrador', 'master'];
-    }
-
-    function isAdmin() {
-      return isFixedAdmin() || hasAdminClaim() || hasLegacyAdminRole();
-    }
-
-    function validTheme(value) {
-      return value in ['light', 'dark'];
-    }
-
-    function validOwnProfileUpdate() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'nome',
-          'telefone',
-          'tema',
-          'atualizadoEm'
-        ])
+    function signedIn(){return request.auth != null;}
+    function isOwner(uid){return signedIn() && request.auth.uid == uid;}
+    function isFixedAdmin(){return signedIn() && request.auth.uid == 'WAPN8cPkPGP2mwiQ8FNbIGyUaUl1';}
+    function hasAdminClaim(){return signedIn() && (request.auth.token.admin == true || request.auth.token.role == 'admin');}
+    function hasLegacyAdminRole(){return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in ['admin','administrador','master'];}
+    function isAdmin(){return isFixedAdmin() || hasAdminClaim() || hasLegacyAdminRole();}
+    function validTheme(value){return value in ['light','dark'];}
+    function validPhoto(value){return value is string && value.size() <= 2048;}
+    function validOwnProfileUpdate(){
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','tema','foto','atualizadoEm'])
         && request.resource.data.nome is string
         && request.resource.data.nome.size() >= 2
         && request.resource.data.nome.size() <= 120
         && request.resource.data.telefone is string
         && request.resource.data.telefone.size() <= 30
-        && validTheme(request.resource.data.tema);
+        && validTheme(request.resource.data.tema)
+        && (!request.resource.data.keys().hasAny(['foto']) || validPhoto(request.resource.data.foto));
     }
 
     match /usuarios/{uid} {
       allow get: if isOwner(uid) || isAdmin();
       allow list: if isAdmin();
-
       allow create: if isOwner(uid)
-        && request.resource.data.keys().hasOnly([
-          'nome', 'email', 'telefone', 'role', 'vip', 'carimbos',
-          'creditos', 'totalGasto', 'bonusBaseVip', 'bonusNivel',
-          'bonusManual', 'tema', 'criadoEm', 'atualizadoEm'
-        ])
+        && request.resource.data.keys().hasOnly(['nome','email','telefone','role','vip','carimbos','creditos','totalGasto','bonusBaseVip','bonusNivel','bonusManual','tema','foto','criadoEm','atualizadoEm'])
         && request.resource.data.nome is string
         && request.resource.data.nome.size() >= 2
         && request.resource.data.nome.size() <= 120
@@ -75,70 +36,23 @@ service cloud.firestore {
         && request.resource.data.carimbos == 0
         && request.resource.data.creditos == 0
         && request.resource.data.totalGasto == 0
-        && validTheme(request.resource.data.tema);
-
+        && validTheme(request.resource.data.tema)
+        && (!request.resource.data.keys().hasAny(['foto']) || validPhoto(request.resource.data.foto));
       allow update: if isAdmin() || (isOwner(uid) && validOwnProfileUpdate());
       allow delete: if isAdmin();
     }
 
-    match /compras/{compraId} {
-      allow get, list: if isAdmin() || (
-        signedIn() && resource.data.clienteId == request.auth.uid
-      );
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /produtos/{produtoId} {
-      allow read, write: if isAdmin();
-    }
-
-    match /estoque_movimentos/{movimentoId} {
-      allow read, write: if isAdmin();
-    }
-
-    match /produtosVitrine/{produtoId} {
-      allow read, write: if isAdmin();
-    }
-
-    match /carteira_movimentos/{movimentoId} {
-      allow get, list: if isAdmin() || (
-        signedIn() && resource.data.clienteId == request.auth.uid
-      );
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /niveis/{nivelId} {
-      allow read: if signedIn();
-      allow write: if isAdmin();
-    }
-
-    match /ofertas/{ofertaId} {
-      allow read: if signedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /configuracoes/{configId} {
-      allow read, write: if isAdmin();
-    }
-
-    match /configuracoes_nivel/{configId} {
-      allow read, write: if isAdmin();
-    }
-
-    match /notificacoes/{notificacaoId} {
-      allow get, list: if isAdmin() || (
-        signedIn() && resource.data.clienteId == request.auth.uid
-      );
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /logs/{logId} {
-      allow read, create: if isAdmin();
-      allow update, delete: if false;
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /compras/{id}{allow get,list: if isAdmin() || (signedIn() && resource.data.clienteId == request.auth.uid);allow create,update,delete: if isAdmin();}
+    match /produtos/{id}{allow read,write: if isAdmin();}
+    match /estoque_movimentos/{id}{allow read,write: if isAdmin();}
+    match /produtosVitrine/{id}{allow read,write: if isAdmin();}
+    match /carteira_movimentos/{id}{allow get,list: if isAdmin() || (signedIn() && resource.data.clienteId == request.auth.uid);allow create,update,delete: if isAdmin();}
+    match /niveis/{id}{allow read: if signedIn();allow write: if isAdmin();}
+    match /ofertas/{id}{allow read: if signedIn();allow create,update,delete: if isAdmin();}
+    match /configuracoes/{id}{allow read,write: if isAdmin();}
+    match /configuracoes_nivel/{id}{allow read,write: if isAdmin();}
+    match /notificacoes/{id}{allow get,list: if isAdmin() || (signedIn() && resource.data.clienteId == request.auth.uid);allow create,update,delete: if isAdmin();}
+    match /logs/{id}{allow read,create: if isAdmin();allow update,delete: if false;}
+    match /{document=**}{allow read,write: if false;}
   }
 }
