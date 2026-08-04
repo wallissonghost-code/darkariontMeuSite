@@ -1,79 +1,13 @@
-const LOCAL_VERSION='3.4.0';
+const LOCAL_VERSION='3.4.1';
 const VERSION_KEY='wd-app-version';
 const RELOAD_KEY='wd-app-reloading';
 const CHECK_INTERVAL=5*60*1000;
 let applyingUpdate=false;
-
 function sameVersion(value){return String(value||'').trim()===LOCAL_VERSION}
-function cleanReload(){
-  if(applyingUpdate)return;
-  applyingUpdate=true;
-  sessionStorage.setItem(RELOAD_KEY,'1');
-  const url=new URL(location.href);
-  url.searchParams.delete('release');
-  url.searchParams.set('_wd',Date.now().toString(36));
-  location.replace(url.toString());
-}
-
-async function clearLegacyCaches(){
-  if(!('caches'in window))return;
-  const keys=await caches.keys();
-  await Promise.all(keys.filter(key=>key.startsWith('wd-founder-')&&!key.includes(LOCAL_VERSION)).map(key=>caches.delete(key)));
-}
-
-async function registerWorker(){
-  if(!('serviceWorker'in navigator))return null;
-  const registration=await navigator.serviceWorker.register(`./sw.js?v=${LOCAL_VERSION}`,{scope:'./',updateViaCache:'none'});
-  registration.waiting?.postMessage({type:'SKIP_WAITING'});
-  await registration.update().catch(()=>{});
-  return registration;
-}
-
-async function publishedVersion(){
-  const response=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
-  if(!response.ok)throw new Error(`version ${response.status}`);
-  return response.json();
-}
-
-async function checkForUpdate({reload=true}={}){
-  try{
-    const remote=await publishedVersion();
-    const version=String(remote.version||'').trim();
-    if(!version)return false;
-    localStorage.setItem(VERSION_KEY,version);
-    if(!sameVersion(version)&&reload){
-      await clearLegacyCaches();
-      const registration=await navigator.serviceWorker?.getRegistration('./');
-      registration?.waiting?.postMessage({type:'SKIP_WAITING'});
-      cleanReload();
-      return true;
-    }
-  }catch(error){
-    console.warn('Verificação de versão indisponível:',error);
-  }
-  return false;
-}
-
-(async()=>{
-  const wasReloading=sessionStorage.getItem(RELOAD_KEY)==='1';
-  sessionStorage.removeItem(RELOAD_KEY);
-  try{
-    await clearLegacyCaches();
-    const registration=await registerWorker();
-    navigator.serviceWorker?.addEventListener('controllerchange',()=>{if(!wasReloading)cleanReload()},{once:true});
-    registration?.addEventListener('updatefound',()=>{
-      const worker=registration.installing;
-      worker?.addEventListener('statechange',()=>{
-        if(worker.state==='installed'&&navigator.serviceWorker.controller)worker.postMessage({type:'SKIP_WAITING'});
-      });
-    });
-  }catch(error){
-    console.warn('Service Worker não pôde ser ativado:',error);
-  }
-  await checkForUpdate({reload:true});
-  setInterval(()=>checkForUpdate({reload:true}),CHECK_INTERVAL);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate({reload:true})});
-  window.addEventListener('online',()=>checkForUpdate({reload:true}));
-})();
-
+function cleanReload(){if(applyingUpdate)return;applyingUpdate=true;sessionStorage.setItem(RELOAD_KEY,'1');const url=new URL(location.href);url.searchParams.delete('release');url.searchParams.set('_wd',Date.now().toString(36));location.replace(url.toString())}
+async function clearLegacyCaches(){if(!('caches'in window))return;const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith('wd-founder-')&&!key.includes(LOCAL_VERSION)).map(key=>caches.delete(key)))}
+async function registerWorker(){if(!('serviceWorker'in navigator))return null;const registration=await navigator.serviceWorker.register(`./sw.js?v=${LOCAL_VERSION}`,{scope:'./',updateViaCache:'none'});registration.waiting?.postMessage({type:'SKIP_WAITING'});await registration.update().catch(()=>{});return registration}
+async function publishedVersion(){const response=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});if(!response.ok)throw new Error(`version ${response.status}`);return response.json()}
+async function checkForUpdate({reload=true}={}){try{const remote=await publishedVersion();const version=String(remote.version||'').trim();if(!version)return false;localStorage.setItem(VERSION_KEY,version);if(!sameVersion(version)&&reload){await clearLegacyCaches();const registration=await navigator.serviceWorker?.getRegistration('./');registration?.waiting?.postMessage({type:'SKIP_WAITING'});cleanReload();return true}}catch(error){console.warn('Verificação de versão indisponível:',error)}return false}
+(async()=>{const wasReloading=sessionStorage.getItem(RELOAD_KEY)==='1';sessionStorage.removeItem(RELOAD_KEY);try{await clearLegacyCaches();const registration=await registerWorker();navigator.serviceWorker?.addEventListener('controllerchange',()=>{if(!wasReloading)cleanReload()},{once:true});registration?.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)worker.postMessage({type:'SKIP_WAITING'})})})}catch(error){console.warn('Service Worker não pôde ser ativado:',error)}await checkForUpdate({reload:true});setInterval(()=>checkForUpdate({reload:true}),CHECK_INTERVAL);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate({reload:true})});window.addEventListener('online',()=>checkForUpdate({reload:true}))})();
 window.WDAppVersion={version:LOCAL_VERSION,check:()=>checkForUpdate({reload:true}),clearCaches:clearLegacyCaches};
