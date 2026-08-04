@@ -1,0 +1,6 @@
+const VERSION='3.5.1';
+function css(path,id){if(document.getElementById(id))return;const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`./${path}?v=${VERSION}`;document.head.append(link)}
+function icon(){return '<svg class="nav-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10"></path><path d="M9 20v-4h6v4"></path><path d="M8 4h8v4a4 4 0 0 1-8 0z"></path><path d="M8 6H5v1a4 4 0 0 0 4 4"></path><path d="M16 6h3v1a4 4 0 0 1-4 4"></path></svg>'}
+function add(nav,mobile=false){if(!nav||nav.querySelector('[data-spa-route="rank"]'))return;const link=document.createElement('a');link.href='app.html?page=rank';link.dataset.spaRoute='rank';link.className='rank-nav-link';link.innerHTML=`${icon()}<small>Rank</small>`;const account=nav.querySelector('[data-spa-route="account"]');if(account)nav.insertBefore(link,account);else nav.append(link)}
+function install(){css('rank-navigation.css','wd-rank-navigation-css');css('founder-theme-fix.css','wd-founder-theme-fix-css');add(document.querySelector('.spa-nav'));add(document.querySelector('.spa-bottom-nav'),true)}
+install();new MutationObserver(install).observe(document.documentElement,{childList:true,subtree:true});
