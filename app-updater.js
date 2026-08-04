@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.5.3';
+const LOCAL_VERSION='3.6.0';
 const VERSION_KEY='wd-app-version';
 const RELOAD_KEY='wd-app-reloading';
 const CHECK_INTERVAL=5*60*1000;
@@ -12,5 +12,4 @@ async function checkForUpdate({reload=true}={}){try{const remote=await published
 (async()=>{const wasReloading=sessionStorage.getItem(RELOAD_KEY)==='1';sessionStorage.removeItem(RELOAD_KEY);try{await clearLegacyCaches();const registration=await registerWorker();navigator.serviceWorker?.addEventListener('controllerchange',()=>{if(!wasReloading)cleanReload()},{once:true});registration?.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)worker.postMessage({type:'SKIP_WAITING'})})})}catch(error){console.warn('Service Worker não pôde ser ativado:',error)}await checkForUpdate({reload:true});setInterval(()=>checkForUpdate({reload:true}),CHECK_INTERVAL);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate({reload:true})});window.addEventListener('online',()=>checkForUpdate({reload:true}))})();
 import(`./profile-photo-member-fix.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Correção de foto não pôde ser carregada:',error));
 import(`./profile-photo-stability.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Estabilização da foto não pôde ser carregada:',error));
-import(`./store-ui-v4.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Aprimoramento visual da vitrine não pôde ser carregado:',error));
 window.WDAppVersion={version:LOCAL_VERSION,check:()=>checkForUpdate({reload:true}),clearCaches:clearLegacyCaches};
