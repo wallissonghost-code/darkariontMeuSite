@@ -1,4 +1,4 @@
-const RELEASE='wd-founder-3.7.6';
+const RELEASE='wd-founder-3.8.0';
 const STATIC_CACHE=`${RELEASE}-static`;
 const RUNTIME_CACHE=`${RELEASE}-runtime`;
 const OFFLINE_FALLBACK='index.html';
@@ -6,7 +6,7 @@ const PRECACHE=['./','./index.html','./app.html','./version.json'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(STATIC_CACHE).then(cache=>cache.addAll(PRECACHE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith('wd-founder-')&&!key.startsWith(RELEASE)).map(key=>caches.delete(key)));await self.clients.claim()})())});
 function isHtmlRequest(request,url){return request.mode==='navigate'||request.destination==='document'||url.pathname.endsWith('.html')||url.pathname.includes('/views/')}
-function isCriticalAsset(url){return /\/(app-updater|app-shell|spa|rank|rank-nav-ensure|route-view-stability|store-controller)\.js$/.test(url.pathname)||/\/(ui-stability-3-7-2|account-founder-v2|account-founder-final-375|store-rank-final-376)\.css$/.test(url.pathname)}
+function isCriticalAsset(url){return /\/(app-updater|app-shell|spa|rank|rank-access-gate|rank-nav-ensure|route-view-stability|store-controller|admin-rank-tool-inject|rank-admin)\.js$/.test(url.pathname)||/\/(ui-stability-3-7-2|account-founder-v2|account-founder-final-375|store-rank-final-376|rank-access-rewards|rank-admin)\.css$/.test(url.pathname)}
 async function networkFirst(request){const cache=await caches.open(RUNTIME_CACHE);try{const response=await fetch(request,{cache:'no-store'});if(response?.ok)await cache.put(request,response.clone());return response}catch(error){return(await cache.match(request))||(await caches.match(OFFLINE_FALLBACK))||Response.error()}}
 async function staleWhileRevalidate(request){const cache=await caches.open(RUNTIME_CACHE);const cached=await cache.match(request);const network=fetch(request,{cache:'no-cache'}).then(async response=>{if(response?.ok)await cache.put(request,response.clone());return response}).catch(()=>null);return cached||(await network)||Response.error()}
 self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(url.pathname.endsWith('/version.json')||url.pathname.endsWith('/sw.js')||isHtmlRequest(request,url)||isCriticalAsset(url)){event.respondWith(networkFirst(request));return}event.respondWith(staleWhileRevalidate(request))});
