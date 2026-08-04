@@ -5,12 +5,26 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    function owns(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function validProfilePhoto() {
+      return request.resource != null
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg', 'image/webp'];
+    }
+
+    match /usuarios/{uid}/perfil.jpg {
+      allow read: if signedIn();
+      allow create, update: if owns(uid) && validProfilePhoto();
+      allow delete: if owns(uid);
+    }
+
     match /usuarios/{uid}/perfil.webp {
       allow read: if signedIn();
-      allow write: if signedIn()
-        && request.auth.uid == uid
-        && request.resource.size < 2 * 1024 * 1024
-        && request.resource.contentType == 'image/webp';
+      allow create, update: if owns(uid) && validProfilePhoto();
+      allow delete: if owns(uid);
     }
 
     match /{allPaths=**} {
