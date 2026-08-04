@@ -1,0 +1,48 @@
+/* WD Founder 3.8.3 — identidade fixa dos cartões e correções finais */
+
+/* Cartões VIP não mudam de paleta com o tema; apenas o entorno muda. */
+.home-card{
+  background:radial-gradient(circle at 14% 10%,rgba(255,255,255,.16),transparent 24%),radial-gradient(circle at 80% 88%,rgba(0,0,0,.28),transparent 34%),linear-gradient(132deg,var(--a),var(--b) 52%,var(--c))!important;
+  color:var(--text)!important;
+  border-color:color-mix(in srgb,var(--edge) 38%,transparent)!important;
+}
+.home-card .home-card-top strong,
+.home-card .home-club-label,
+.home-card #homeMemberTier,
+.home-card .home-card-level>span,
+.home-card .home-card-level>strong,
+.home-card .home-card-level>p,
+.home-card .home-card-progress span,
+.home-card .home-card-progress strong,
+.home-card .home-card-footer span,
+.home-card .home-card-footer strong{color:var(--text)!important;-webkit-text-fill-color:var(--text)!important}
+.home-card .home-card-badge{color:var(--text)!important;border-color:color-mix(in srgb,var(--edge) 58%,transparent)!important;background:rgba(0,0,0,.14)!important}
+.home-card.light-card .home-card-badge{background:rgba(255,255,255,.26)!important}
+.home-card .progress-track{background:rgba(255,255,255,.24)!important;border-color:rgba(255,255,255,.2)!important}
+.home-card .progress-track>span{background:linear-gradient(90deg,#fff1a1,#d9a800)!important}
+.home-card .primary-link{background:linear-gradient(135deg,#f5d86f,#bd870e)!important;color:#171107!important;-webkit-text-fill-color:#171107!important}
+.home-card .secondary-link{background:rgba(0,0,0,.12)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text)!important;border-color:color-mix(in srgb,var(--edge) 52%,transparent)!important}
+.home-card.light-card .secondary-link{background:rgba(255,255,255,.24)!important}
+
+/* Founder sempre ônix e ouro, inclusive no modo claro. */
+.home-card[data-vip="10"],.home-card.founder-card{
+  --a:#242424!important;--b:#080808!important;--c:#000000!important;--edge:#FFD700!important;--shadow:rgba(212,175,55,.34)!important;--text:#fff8df!important;
+  background:radial-gradient(circle at 12% 8%,rgba(255,215,0,.16),transparent 26%),radial-gradient(circle at 82% 86%,rgba(212,175,55,.09),transparent 34%),linear-gradient(135deg,#242424,#080808 54%,#000)!important;
+  box-shadow:0 42px 105px rgba(0,0,0,.48),0 0 0 1px rgba(255,215,0,.28),inset 0 1px rgba(255,255,255,.12)!important;
+}
+.home-card[data-vip="10"] .home-card-badge,.home-card.founder-card .home-card-badge{background:rgba(255,215,0,.08)!important;color:#fff2a8!important;border-color:rgba(255,215,0,.48)!important}
+.home-card[data-vip="10"] .secondary-link,.home-card.founder-card .secondary-link{background:rgba(255,215,0,.06)!important;color:#f5d86f!important;-webkit-text-fill-color:#f5d86f!important;border-color:rgba(255,215,0,.34)!important}
+
+/* O atributo hidden precisa vencer o display do overlay. */
+.rank-unlock-celebration[hidden]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+.rank-unlock-celebration{touch-action:manipulation;cursor:pointer}
+
+/* Durante a troca de rota, resposta visual imediata sem animações pesadas. */
+body[data-spa-navigating="true"] .spa-bottom-nav a,
+body[data-spa-navigating="true"] .spa-sidebar a{transition:none!important}
+body[data-spa-navigating="true"] .spa-main{contain:layout paint style}
+
+@media(max-width:700px){
+  .home-card{transform:none!important}
+  .home-card .home-card-glow{animation:none!important}
+}
