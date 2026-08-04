@@ -1,4 +1,4 @@
-const BUILD='3.2.2';
+const BUILD='3.3.1';
 const routes={
   home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},
   card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},
@@ -20,7 +20,7 @@ function showPreparedRoute(route){const existing=views.get(route);if(!existing)r
 function preloadModule(modulePath){const href=new URL(`${modulePath}?v=${BUILD}`,location.href).href;if(modulePreloads.has(href))return;modulePreloads.add(href);const link=document.createElement('link');link.rel='modulepreload';link.href=href;document.head.append(link)}
 function preloadRouteModules(route){routes[route]?.modules.forEach(preloadModule)}
 async function importModules(route){await Promise.all(routes[route].modules.map(modulePath=>import(`${modulePath}?v=${BUILD}`)))}
-async function fetchViewHtml(route){if(htmlCache.has(route))return htmlCache.get(route);const response=await fetch(`${routes[route].view}?v=${BUILD}`,{cache:'force-cache'});if(!response.ok)throw new Error(`Tela não encontrada (${response.status})`);const html=await response.text();htmlCache.set(route,html);return html}
+async function fetchViewHtml(route){if(htmlCache.has(route))return htmlCache.get(route);const response=await fetch(`${routes[route].view}?v=${BUILD}`,{cache:'no-store'});if(!response.ok)throw new Error(`Tela não encontrada (${response.status})`);const html=await response.text();htmlCache.set(route,html);return html}
 async function createView(route){if(views.has(route))return views.get(route);if(loading.has(route))return loading.get(route);const promise=(async()=>{preloadRouteModules(route);const html=await fetchViewHtml(route),section=document.createElement('section');section.className='spa-view';section.dataset.route=route;section.hidden=true;section.innerHTML=html;content.append(section);views.set(route,section);await importModules(route);section.dataset.ready='true';return section})().finally(()=>loading.delete(route));loading.set(route,promise);return promise}
 function showError(route,error){console.error(`Falha ao abrir ${route}:`,error);document.getElementById('spaError')?.remove();const box=document.createElement('section');box.id='spaError';box.className='spa-error';box.innerHTML='<h2>Não foi possível abrir esta tela</h2><p>Verifique sua conexão e tente novamente.</p><button type="button">Tentar novamente</button>';box.querySelector('button').addEventListener('click',()=>{box.remove();navigate(route,{replace:true,force:true})});content.append(box)}
 
