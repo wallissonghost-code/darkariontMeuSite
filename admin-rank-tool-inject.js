@@ -1,3 +1,5 @@
 function makeLink(compact=false){const link=document.createElement('a');link.href='rank-admin.html';link.dataset.rankRewardsTool='true';link.innerHTML=compact?'<span>♛</span><small>Premiações</small>':'<span class="spa-admin-tool-icon">♛</span><div><strong>Premiações do Rank</strong><small>Editar prêmios semanais e mensais</small></div><b>›</b>';return link}
 function ensure(){const panel=document.querySelector('.spa-admin-tools-grid');if(panel&&!panel.querySelector('[data-rank-rewards-tool]'))panel.append(makeLink(false));const desktop=document.querySelector('.spa-admin-links');if(desktop&&!desktop.querySelector('[data-rank-rewards-tool]'))desktop.append(makeLink(true))}
-ensure();document.addEventListener('wd-role-ready',ensure);new MutationObserver(ensure).observe(document.body,{childList:true,subtree:true});
+ensure();
+document.addEventListener('wd-role-ready',ensure);
+document.addEventListener('wd-admin-tools-ready',ensure);
