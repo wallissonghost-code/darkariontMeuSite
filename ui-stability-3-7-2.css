@@ -1,0 +1,100 @@
+/* WD Founder 3.7.2 — correções de estabilidade visual */
+
+/* Ferramentas administrativas — contraste coerente */
+html[data-theme="light"] .spa-admin-tools-panel{
+  background:linear-gradient(160deg,#fffdf8 0%,#f5efe2 100%)!important;
+  color:#181510!important;
+  border-color:rgba(104,77,19,.18)!important;
+  box-shadow:0 28px 90px rgba(69,50,15,.24)!important;
+}
+html[data-theme="light"] .spa-admin-tools-head{
+  border-bottom-color:rgba(104,77,19,.14)!important;
+}
+html[data-theme="light"] .spa-admin-tools-head span{color:#a27a19!important}
+html[data-theme="light"] .spa-admin-tools-head h2{color:#17140f!important}
+html[data-theme="light"] .spa-admin-tools-head p{color:#716a5f!important}
+html[data-theme="light"] .spa-admin-tools-head button{
+  background:#f3ede1!important;color:#181510!important;border-color:rgba(104,77,19,.18)!important;
+}
+html[data-theme="light"] .spa-admin-tools-grid a{
+  background:rgba(255,255,255,.92)!important;
+  color:#17140f!important;
+  border-color:rgba(104,77,19,.14)!important;
+  box-shadow:0 10px 26px rgba(84,62,17,.08)!important;
+}
+html[data-theme="light"] .spa-admin-tools-grid a strong{color:#17140f!important}
+html[data-theme="light"] .spa-admin-tools-grid a small{color:#746d62!important}
+html[data-theme="light"] .spa-admin-tool-icon{
+  background:linear-gradient(145deg,#f6dea0,#c9921c)!important;
+  color:#171006!important;
+}
+html[data-theme="light"] .spa-admin-tools-grid a>b{color:#a57712!important}
+html[data-theme="light"] .spa-admin-tools-backdrop{background:rgba(34,27,15,.34)!important;backdrop-filter:blur(12px)!important}
+
+/* Conta Founder — topo reorganizado */
+.profile-page[data-vip="10"] .profile-cover{min-height:0!important}
+.profile-page[data-vip="10"] .profile-identity{
+  display:grid!important;
+  grid-template-columns:118px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:24px!important;
+}
+.profile-page[data-vip="10"] .profile-meta{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+}
+.profile-page[data-vip="10"] .profile-meta h2{
+  position:relative!important;
+  z-index:2!important;
+  width:100%!important;
+  margin:0!important;
+  color:#fff8dc!important;
+  font-size:clamp(28px,4vw,44px)!important;
+  line-height:1.03!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.profile-page[data-vip="10"] .profile-meta p{
+  width:100%!important;
+  margin:9px 0 0!important;
+  color:#c9c1ae!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.profile-page[data-vip="10"] .profile-badge{
+  display:inline-flex!important;
+  align-self:flex-start!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:15px 0 0!important;
+  position:static!important;
+  transform:none!important;
+}
+.profile-page[data-vip="10"] .profile-kicker{white-space:nowrap!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important}
+
+@media(max-width:700px){
+  .profile-page[data-vip="10"] .profile-cover{padding:22px 16px 26px!important}
+  .profile-page[data-vip="10"] .profile-identity{grid-template-columns:102px minmax(0,1fr)!important;gap:16px!important}
+  .profile-page[data-vip="10"] .profile-avatar-wrap{width:102px!important;height:102px!important}
+  .profile-page[data-vip="10"] .profile-meta h2{font-size:clamp(23px,6.6vw,31px)!important}
+  .profile-page[data-vip="10"] .profile-meta p{font-size:13px!important}
+  .profile-page[data-vip="10"] .profile-badge{padding:8px 12px!important;font-size:8px!important;letter-spacing:.14em!important}
+}
+@media(max-width:390px){
+  .profile-page[data-vip="10"] .profile-identity{grid-template-columns:86px minmax(0,1fr)!important;gap:13px!important}
+  .profile-page[data-vip="10"] .profile-avatar-wrap{width:86px!important;height:86px!important}
+  .profile-page[data-vip="10"] .profile-meta h2{font-size:22px!important}
+  .profile-page[data-vip="10"] .profile-kicker{font-size:7px!important;letter-spacing:.15em!important}
+  .profile-page[data-vip="10"] .profile-badge{font-size:7px!important;padding:7px 9px!important}
+}
+
+/* Navegação com Rank consistente para membros e admin */
+.spa-bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.spa-bottom-nav.has-admin{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+.spa-bottom-nav a,.spa-bottom-nav button{min-width:0!important}
+.spa-bottom-nav small{max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
