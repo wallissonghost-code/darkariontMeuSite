@@ -1,8 +1,9 @@
-const BUILD='3.6.1';
+const BUILD='3.7.0';
 
 const routes={
   home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},
   store:{title:'Mercadorias',view:'views/store.html',modules:['./store-controller.js']},
+  rank:{title:'Rank',view:'views/rank.html',modules:['./rank.js']},
   card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},
   account:{title:'Minha conta',view:'views/account.html',modules:['./perfil.js']}
 };
@@ -10,6 +11,7 @@ const routes={
 const aliases={
   'home.html':'home',
   'mercadorias.html':'store',
+  'rank.html':'rank',
   'cartao.html':'card',
   'ofertas.html':'card',
   'perfil.html':'account'
@@ -48,9 +50,7 @@ async function fetchView(route){
   if(!response.ok)throw new Error(`Tela não encontrada (${response.status})`);
   return response.text();
 }
-async function loadModules(route){
-  for(const modulePath of routes[route].modules){await import(`${modulePath}?v=${BUILD}`)}
-}
+async function loadModules(route){for(const modulePath of routes[route].modules){await import(`${modulePath}?v=${BUILD}`)}}
 async function createView(route){
   if(views.has(route))return views.get(route);
   if(loading.has(route))return loading.get(route);
@@ -111,6 +111,7 @@ function loadPremiumStyles(){
   loadStyle(`member-commerce.css?v=${BUILD}`,'data-member-commerce');
   loadStyle(`theme-coherence.css?v=${BUILD}`,'data-theme-coherence');
   loadStyle(`store-premium-v5.css?v=${BUILD}`,'data-store-premium-v5');
+  loadStyle(`rank-premium.css?v=${BUILD}`,'data-rank-premium');
 }
 
 loadPremiumStyles();
