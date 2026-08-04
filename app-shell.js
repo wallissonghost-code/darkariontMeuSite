@@ -2,7 +2,7 @@ import './app-session.js';
 import { auth } from './firebase.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 
-const BUILD='3.7.4';
+const BUILD='3.7.6';
 const body=document.body;
 const params=new URLSearchParams(location.search);
 const isSpaShell=body.dataset.spaShell==='true';
@@ -19,10 +19,7 @@ const ADMIN_TOOLS=[
   ['performance','desempenho.html','Desempenho','Indicadores, vendas e distribuição VIP','⌁'],
   ['delete','excluir-cliente.html','Excluir conta','Remover perfis cadastrados com segurança','×']
 ];
-
-let saindo=false;
-let embeddedReadySent=false;
-
+let saindo=false;let embeddedReadySent=false;
 function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=`${href}?v=${BUILD}`;document.head.append(link)}
 if(!isSpaShell&&!isAdminShell){carregarCss('app-ui.css');carregarCss('dark-mode.css');carregarCss('ios-navigation-performance.css');if(!isAdminEmbedded)carregarCss('navigation.css')}
 if(isAdminEmbedded){body.classList.add('wd-admin-embedded');document.documentElement.dataset.embeddedAdmin='true'}
