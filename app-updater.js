@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.4.1';
+const LOCAL_VERSION='3.4.2';
 const VERSION_KEY='wd-app-version';
 const RELOAD_KEY='wd-app-reloading';
 const CHECK_INTERVAL=5*60*1000;
@@ -10,4 +10,5 @@ async function registerWorker(){if(!('serviceWorker'in navigator))return null;co
 async function publishedVersion(){const response=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});if(!response.ok)throw new Error(`version ${response.status}`);return response.json()}
 async function checkForUpdate({reload=true}={}){try{const remote=await publishedVersion();const version=String(remote.version||'').trim();if(!version)return false;localStorage.setItem(VERSION_KEY,version);if(!sameVersion(version)&&reload){await clearLegacyCaches();const registration=await navigator.serviceWorker?.getRegistration('./');registration?.waiting?.postMessage({type:'SKIP_WAITING'});cleanReload();return true}}catch(error){console.warn('Verificação de versão indisponível:',error)}return false}
 (async()=>{const wasReloading=sessionStorage.getItem(RELOAD_KEY)==='1';sessionStorage.removeItem(RELOAD_KEY);try{await clearLegacyCaches();const registration=await registerWorker();navigator.serviceWorker?.addEventListener('controllerchange',()=>{if(!wasReloading)cleanReload()},{once:true});registration?.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)worker.postMessage({type:'SKIP_WAITING'})})})}catch(error){console.warn('Service Worker não pôde ser ativado:',error)}await checkForUpdate({reload:true});setInterval(()=>checkForUpdate({reload:true}),CHECK_INTERVAL);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate({reload:true})});window.addEventListener('online',()=>checkForUpdate({reload:true}))})();
+import(`./profile-photo-member-fix.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Correção de foto não pôde ser carregada:',error));
 window.WDAppVersion={version:LOCAL_VERSION,check:()=>checkForUpdate({reload:true}),clearCaches:clearLegacyCaches};
