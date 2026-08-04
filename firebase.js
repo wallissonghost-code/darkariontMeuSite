@@ -2,6 +2,7 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCi9ZE7vqI5SmolqFmXVRxl7jmVsssGiGE",
@@ -27,6 +28,7 @@ const app = getApps().some(item => item.name === '[DEFAULT]')
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // A persistência só é definida nas telas em que o usuário realmente entra.
 // Reaplicar setPersistence durante cada navegação pode criar estados transitórios
@@ -39,4 +41,4 @@ const authReady = isLoginPage
 
 const sessionScope = isAdminContext ? 'admin-page' : 'member-page';
 
-export { app, auth, db, authReady, isAdminContext, sessionScope };
+export { app, auth, db, storage, authReady, isAdminContext, sessionScope };
