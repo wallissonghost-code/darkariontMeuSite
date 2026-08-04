@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.4.9';
+const LOCAL_VERSION='3.5.0';
 const VERSION_KEY='wd-app-version';
 const RELOAD_KEY='wd-app-reloading';
 const CHECK_INTERVAL=5*60*1000;
@@ -13,4 +13,5 @@ async function checkForUpdate({reload=true}={}){try{const remote=await published
 import(`./profile-photo-member-fix.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Correção de foto não pôde ser carregada:',error));
 import(`./profile-photo-stability.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Estabilização da foto não pôde ser carregada:',error));
 import(`./store-ui-v4.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Aprimoramento da vitrine não pôde ser carregado:',error));
+import(`./store-product-open-fix.js?v=${LOCAL_VERSION}`).catch(error=>console.error('Correção de abertura de produtos não pôde ser carregada:',error));
 window.WDAppVersion={version:LOCAL_VERSION,check:()=>checkForUpdate({reload:true}),clearCaches:clearLegacyCaches};
