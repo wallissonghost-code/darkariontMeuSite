@@ -1,0 +1,13 @@
+{
+  "name": "WD Founder",
+  "short_name": "WD Founder",
+  "description": "Clube digital de benefícios, fidelidade e experiência VIP.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08090b",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "lifestyle"]
+}
