@@ -1,4 +1,4 @@
-const BUILD='3.9.3';
+const BUILD='3.9.4';
 const routes={home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},store:{title:'Mercadorias',view:'views/store.html',modules:['./store-controller.js']},rank:{title:'Rank',view:'views/rank.html',modules:['./rank.js']},card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},account:{title:'Minha conta',view:'views/account.html',modules:['./perfil.js']}};
 const aliases={'home.html':'home','mercadorias.html':'store','rank.html':'rank','cartao.html':'card','ofertas.html':'card','perfil.html':'account'};
 const content=document.getElementById('conteudo'),loader=document.getElementById('spaLoader'),views=new Map(),viewPromises=new Map(),modulePromises=new Map();let currentRoute='',sessionReady=false,navigationId=0,loaderTimer=0;
