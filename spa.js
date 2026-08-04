@@ -1,4 +1,4 @@
-const BUILD='3.2.1';
+const BUILD='3.2.2';
 const routes={
   home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},
   card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},
