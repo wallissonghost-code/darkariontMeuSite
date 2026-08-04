@@ -7,5 +7,14 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation}
 button,a,[role="button"]{min-height:44px}
 [aria-busy="true"]{cursor:progress}
 [hidden]{display:none!important}
+
+/* Abertura discreta do PWA: remove o painel pesado de carregamento. */
+.spa-loader{position:fixed!important;inset:0!important;z-index:999999!important;display:grid!important;place-items:center!important;background:#090a0c!important;pointer-events:none!important}
+.spa-loader-box{width:74px!important;height:74px!important;min-width:0!important;padding:0!important;border:1px solid rgba(212,175,55,.34)!important;border-radius:24px!important;background:linear-gradient(145deg,#19170f,#090a0c)!important;box-shadow:0 14px 48px rgba(0,0,0,.3),0 0 32px rgba(212,175,55,.10)!important;display:grid!important;place-items:center!important}
+.spa-loader-box strong{display:none!important}
+.spa-spinner{width:34px!important;height:34px!important;border:0!important;border-radius:12px!important;background:linear-gradient(145deg,#f2d66f,#9b6b08)!important;box-shadow:0 0 22px rgba(212,175,55,.35)!important;animation:wdStartupPulse .75s ease-in-out infinite alternate!important}
+@keyframes wdStartupPulse{from{transform:scale(.88);opacity:.72}to{transform:scale(1);opacity:1}}
+.wd-auth-ready .spa-loader{opacity:0!important;visibility:hidden!important;transition:opacity .16s ease,visibility .16s ease!important}
+
 @media(max-width:420px){body{overflow-wrap:anywhere}.spa-view{min-width:0}.spa-bottom-nav a,.spa-bottom-nav button{min-width:0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
