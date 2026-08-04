@@ -2,7 +2,7 @@ import './app-session.js';
 import { auth } from './firebase.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 
-const BUILD='3.4.5';
+const BUILD='3.7.4';
 const body=document.body;
 const params=new URLSearchParams(location.search);
 const isSpaShell=body.dataset.spaShell==='true';
@@ -37,7 +37,7 @@ function iniciais(nome){return String(nome||'WD').trim().split(/\s+/).slice(0,2)
 function isAdmin(user,profile){const role=String(profile?.role||'cliente').toLowerCase();return FIXED_ADMIN_UIDS.has(user?.uid)||ADMIN_ROLES.has(role)}
 function redirectMemberHome(){sessionStorage.removeItem('wd-active-admin-tool');const url=new URL('app.html',location.href);url.searchParams.set('page','home');location.replace(`${url.pathname}${url.search}`)}
 function limparNavegacaoAnterior(){document.querySelectorAll('.wd-member-nav,.wd-admin-sidebar,.wd-admin-mobile-trigger,.wd-admin-backdrop,.client-bottom-nav,.app-bottom-nav,.mobile-menu-trigger,.menu-backdrop').forEach(el=>el.remove());body.classList.remove('wd-member-layout','wd-admin-layout','wd-admin-menu-open','menu-open','client-menu-disabled')}
-function montarMenuCliente(dados={}){if(isSpaShell||isAdminShell||isAdminEmbedded)return;limparNavegacaoAnterior();body.classList.add('wd-member-layout');const current=paginaAtual(),avatar=iniciais(dados.nome||window.WDSession?.user?.displayName||'WD');const items=[['home.html','⌂','Início',''],['cartao.html','▣','Cartão',''],['mercadorias.html','◇','Mercadorias',''],['perfil.html',avatar,'Conta','avatar']];const nav=document.createElement('nav');nav.className='wd-member-nav';nav.setAttribute('aria-label','Navegação principal');nav.innerHTML=items.map(([href,icon,label,type])=>`<a href="${href}" class="${current===href?'is-active':''}" ${current===href?'aria-current="page"':''}><span class="${type==='avatar'?'wd-nav-avatar':''}">${icon}</span><small>${label}</small></a>`).join('');document.body.append(nav)}
+function montarMenuCliente(dados={}){if(isSpaShell||isAdminShell||isAdminEmbedded)return;limparNavegacaoAnterior();body.classList.add('wd-member-layout');const current=paginaAtual(),avatar=iniciais(dados.nome||window.WDSession?.user?.displayName||'WD');const items=[['home.html','⌂','Início',''],['mercadorias.html','◇','Mercadorias',''],['rank.html','▥','Rank',''],['cartao.html','▣','Cartão',''],['perfil.html',avatar,'Conta','avatar']];const nav=document.createElement('nav');nav.className='wd-member-nav';nav.setAttribute('aria-label','Navegação principal');nav.innerHTML=items.map(([href,icon,label,type])=>`<a href="${href}" class="${current===href?'is-active':''}" ${current===href?'aria-current="page"':''}><span class="${type==='avatar'?'wd-nav-avatar':''}">${icon}</span><small>${label}</small></a>`).join('');document.body.append(nav)}
 function fecharFerramentasAdmin(){body.classList.remove('spa-admin-open');document.querySelector('[data-admin-tools-trigger]')?.setAttribute('aria-expanded','false')}
 function abrirFerramentasAdmin(){body.classList.add('spa-admin-open');document.querySelector('[data-admin-tools-trigger]')?.setAttribute('aria-expanded','true')}
 function alternarFerramentasAdmin(){body.classList.contains('spa-admin-open')?fecharFerramentasAdmin():abrirFerramentasAdmin()}
