@@ -1,4 +1,170 @@
-const BUILD='3.4.7';
-const routes={home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},store:{title:'Mercadorias',view:'views/store.html',modules:['./mercadorias.js','./stock-waiting-enhancer.js','./product-focus.js']},account:{title:'Minha conta',view:'views/account.html',modules:['./perfil.js']}};
-const aliases={'home.html':'home','cartao.html':'card','ofertas.html':'card','mercadorias.html':'store','perfil.html':'account'},content=document.getElementById('conteudo'),loader=document.getElementById('spaLoader'),views=new Map(),loading=new Map(),htmlCache=new Map(),modulePreloads=new Set();let currentRoute='',navigationId=0,loaderTimer=null,sessionReady=false,pressedLink=null,warmupStarted=false;
-function normalizeRoute(v){return routes[v]?v:'home'}function routeFromUrl(url=new URL(location.href)){const q=url.searchParams.get('page');return routes[q]?q:(aliases[url.pathname.split('/').pop()]||'home')}function routeUrl(route){const url=new URL('app.html',location.href);url.searchParams.set('page',route);url.searchParams.delete('_wd');return `${url.pathname}${url.search}`}function setLoader(show,delayed=false){clearTimeout(loaderTimer);if(!show){loader.hidden=true;return}if(delayed)loaderTimer=setTimeout(()=>loader.hidden=false,180);else loader.hidden=false}function updateNavigation(route){document.querySelectorAll('[data-spa-route]').forEach(link=>{const active=link.dataset.spaRoute===route;link.classList.toggle('is-active',active);active?link.setAttribute('aria-current','page'):link.removeAttribute('aria-current')})}function showPreparedRoute(route){if(!views.get(route))return false;views.forEach((view,key)=>{const visible=key===route;view.hidden=!visible;view.setAttribute('aria-hidden',visible?'false':'true')});updateNavigation(route);document.getElementById('spaError')?.remove();document.body.classList.remove('unified-admin-active');return true}function preloadModule(path){const href=new URL(`${path}?v=${BUILD}`,location.href).href;if(modulePreloads.has(href))return;modulePreloads.add(href);const link=document.createElement('link');link.rel='modulepreload';link.href=href;document.head.append(link)}function preloadRouteModules(route){routes[route]?.modules.forEach(preloadModule)}async function importModules(route){await Promise.all(routes[route].modules.map(path=>import(`${path}?v=${BUILD}`)))}async function fetchViewHtml(route){if(htmlCache.has(route))return htmlCache.get(route);const response=await fetch(`${routes[route].view}?v=${BUILD}`,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});if(!response.ok)throw new Error(`Tela não encontrada (${response.status})`);const html=await response.text();htmlCache.set(route,html);return html}async function createView(route){if(views.has(route))return views.get(route);if(loading.has(route))return loading.get(route);const promise=(async()=>{preloadRouteModules(route);const html=await fetchViewHtml(route),section=document.createElement('section');section.className='spa-view';section.dataset.route=route;section.hidden=true;section.innerHTML=html;content.append(section);views.set(route,section);await importModules(route);section.dataset.ready='true';return section})().finally(()=>loading.delete(route));loading.set(route,promise);return promise}function showError(route,error){console.error(`Falha ao abrir ${route}:`,error);document.getElementById('spaError')?.remove();const box=document.createElement('section');box.id='spaError';box.className='spa-error';box.innerHTML='<h2>Não foi possível abrir esta tela</h2><p>Verifique sua conexão e tente novamente.</p><button type="button">Tentar novamente</button>';box.querySelector('button').addEventListener('click',()=>{box.remove();navigate(route,{replace:true,force:true})});content.append(box)}async function navigate(route,{push=false,replace=false,force=false}={}){if(!sessionReady)return;route=normalizeRoute(route);const same=route===currentRoute,prepared=views.get(route),restore=same&&(prepared?.hidden||document.body.classList.contains('unified-admin-active'));if(same&&!force&&!restore){updateNavigation(route);return}if(restore&&!force){showPreparedRoute(route);document.title=`${routes[route].title} — WD Founder`;if(push)history.pushState({route},'',routeUrl(route));else if(replace)history.replaceState({route},'',routeUrl(route));window.scrollTo(0,0);document.dispatchEvent(new CustomEvent('wd-spa-route',{detail:{route,restored:true}}));return}const id=++navigationId,ready=views.has(route)||htmlCache.has(route);updateNavigation(route);document.body.dataset.spaNavigating='true';setLoader(true,ready||views.size>0);try{await createView(route);if(id!==navigationId)return;views.forEach((view,key)=>{const visible=key===route;view.hidden=!visible;view.setAttribute('aria-hidden',visible?'false':'true')});document.getElementById('spaError')?.remove();currentRoute=route;document.body.classList.remove('unified-admin-active');document.title=`${routes[route].title} — WD Founder`;if(push)history.pushState({route},'',routeUrl(route));else if(replace)history.replaceState({route},'',routeUrl(route));window.scrollTo(0,0);document.dispatchEvent(new CustomEvent('wd-spa-route',{detail:{route}}))}catch(error){if(id===navigationId)showError(route,error)}finally{if(id===navigationId){setLoader(false);delete document.body.dataset.spaNavigating}}}function clearPressed(){if(pressedLink){pressedLink.classList.remove('is-pressed');pressedLink=null}}document.addEventListener('pointerdown',event=>{const link=event.target.closest('[data-spa-route]');if(!link)return;clearPressed();pressedLink=link;link.classList.add('is-pressed');const route=normalizeRoute(link.dataset.spaRoute);updateNavigation(route);preloadRouteModules(route);if(!htmlCache.has(route))fetchViewHtml(route).catch(()=>{})},{passive:true});document.addEventListener('pointerup',clearPressed,{passive:true});document.addEventListener('pointercancel',clearPressed,{passive:true});document.addEventListener('click',event=>{const routeLink=event.target.closest('[data-spa-route]');if(routeLink){event.preventDefault();navigate(routeLink.dataset.spaRoute,{push:true});return}const link=event.target.closest('a[href]');if(!link||link.target==='_blank'||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin)return;const route=aliases[url.pathname.split('/').pop()];if(route){event.preventDefault();navigate(route,{push:true})}});window.addEventListener('popstate',event=>navigate(event.state?.route||routeFromUrl()));document.addEventListener('wd-role-ready',event=>{const name=event.detail?.dados?.nome||event.detail?.user?.displayName||'WD',initials=String(name).trim().split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase()||'WD';document.querySelectorAll('[data-spa-avatar]').forEach(el=>el.textContent=initials)});function carregarEstilo(href,attr){if(document.querySelector(`link[${attr}]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.setAttribute(attr,'true');document.head.append(link)}function ativarVisualPremium(){carregarEstilo(`mobile-nav-account-premium.css?v=${BUILD}`,'data-mobile-premium');carregarEstilo(`mobile-nav-fixed.css?v=${BUILD}`,'data-mobile-fixed');carregarEstilo(`store-sale-premium.css?v=${BUILD}`,'data-store-sale-premium');carregarEstilo(`store-pagination.css?v=${BUILD}`,'data-store-pagination');carregarEstilo(`store-luxury-v2.css?v=${BUILD}`,'data-store-luxury-v2');carregarEstilo(`store-showcase-v3.css?v=${BUILD}`,'data-store-showcase-v3');carregarEstilo(`size-stock-public.css?v=${BUILD}`,'data-size-stock-public');carregarEstilo(`member-commerce.css?v=${BUILD}`,'data-member-commerce');carregarEstilo(`theme-coherence.css?v=${BUILD}`,'data-theme-coherence')}function scheduleWarmup(){if(warmupStarted)return;warmupStarted=true;const queue=Object.keys(routes).filter(route=>route!==currentRoute);const run=()=>{if(!queue.length)return;const route=queue.shift();preloadRouteModules(route);fetchViewHtml(route).catch(()=>{});if(queue.length){if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:1200});else setTimeout(run,450)}};if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:1200});else setTimeout(run,700)}ativarVisualPremium();(async()=>{const state=await window.WDSession.ready;if(state.status!=='ready')return;sessionReady=true;document.documentElement.dataset.authState='ready';document.body.classList.add('wd-auth-ready');const initialRoute=routeFromUrl();preloadRouteModules(initialRoute);await navigate(initialRoute,{replace:true});setLoader(false);scheduleWarmup()})().catch(error=>showError('home',error));
+const BUILD='3.6.0';
+
+const routes={
+  home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},
+  store:{title:'Mercadorias',view:'views/store.html',modules:['./store-controller.js']},
+  card:{title:'Meu cartão',view:'views/card.html',modules:['./cartao.js','./offers.js']},
+  account:{title:'Minha conta',view:'views/account.html',modules:['./perfil.js']}
+};
+
+const aliases={
+  'home.html':'home',
+  'mercadorias.html':'store',
+  'cartao.html':'card',
+  'ofertas.html':'card',
+  'perfil.html':'account'
+};
+
+const content=document.getElementById('conteudo');
+const loader=document.getElementById('spaLoader');
+const views=new Map();
+const loading=new Map();
+let currentRoute='';
+let sessionReady=false;
+let navigationId=0;
+
+function normalizeRoute(value){return routes[value]?value:'home'}
+function routeFromUrl(url=new URL(location.href)){
+  const query=url.searchParams.get('page');
+  if(routes[query])return query;
+  return aliases[url.pathname.split('/').pop()]||'home';
+}
+function routeUrl(route){
+  const url=new URL('app.html',location.href);
+  url.searchParams.set('page',route);
+  url.searchParams.delete('_wd');
+  return `${url.pathname}${url.search}`;
+}
+function setLoader(visible){if(loader)loader.hidden=!visible}
+function updateNavigation(route){
+  document.querySelectorAll('[data-spa-route]').forEach(link=>{
+    const active=link.dataset.spaRoute===route;
+    link.classList.toggle('is-active',active);
+    if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+  });
+}
+async function fetchView(route){
+  const response=await fetch(`${routes[route].view}?v=${BUILD}`,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+  if(!response.ok)throw new Error(`Tela não encontrada (${response.status})`);
+  return response.text();
+}
+async function loadModules(route){
+  for(const modulePath of routes[route].modules){
+    await import(`${modulePath}?v=${BUILD}`);
+  }
+}
+async function createView(route){
+  if(views.has(route))return views.get(route);
+  if(loading.has(route))return loading.get(route);
+  const task=(async()=>{
+    const html=await fetchView(route);
+    const section=document.createElement('section');
+    section.className='spa-view';
+    section.dataset.route=route;
+    section.hidden=true;
+    section.innerHTML=html;
+    content.append(section);
+    views.set(route,section);
+    await loadModules(route);
+    section.dataset.ready='true';
+    return section;
+  })().finally(()=>loading.delete(route));
+  loading.set(route,task);
+  return task;
+}
+function showError(route,error){
+  console.error(`Falha ao abrir ${route}:`,error);
+  document.getElementById('spaError')?.remove();
+  const box=document.createElement('section');
+  box.id='spaError';
+  box.className='spa-error';
+  box.innerHTML='<h2>Não foi possível abrir esta tela</h2><p>Verifique sua conexão e tente novamente.</p><button type="button">Tentar novamente</button>';
+  box.querySelector('button').addEventListener('click',()=>{box.remove();navigate(route,{replace:true,force:true})});
+  content.append(box);
+}
+async function navigate(value,{push=false,replace=false,force=false}={}){
+  if(!sessionReady)return;
+  const route=normalizeRoute(value);
+  if(route===currentRoute&&!force&&!document.body.classList.contains('unified-admin-active')){
+    updateNavigation(route);
+    return;
+  }
+  const id=++navigationId;
+  setLoader(true);
+  document.body.dataset.spaNavigating='true';
+  try{
+    await createView(route);
+    if(id!==navigationId)return;
+    views.forEach((view,key)=>{
+      const visible=key===route;
+      view.hidden=!visible;
+      view.setAttribute('aria-hidden',visible?'false':'true');
+    });
+    document.getElementById('spaError')?.remove();
+    document.body.classList.remove('unified-admin-active');
+    currentRoute=route;
+    updateNavigation(route);
+    document.title=`${routes[route].title} — WD Founder`;
+    if(push)history.pushState({route},'',routeUrl(route));
+    else if(replace)history.replaceState({route},'',routeUrl(route));
+    window.scrollTo({top:0,left:0,behavior:'auto'});
+    document.dispatchEvent(new CustomEvent('wd-spa-route',{detail:{route}}));
+  }catch(error){
+    if(id===navigationId)showError(route,error);
+  }finally{
+    if(id===navigationId){setLoader(false);delete document.body.dataset.spaNavigating}
+  }
+}
+
+document.addEventListener('click',event=>{
+  const routeLink=event.target.closest('[data-spa-route]');
+  if(routeLink){
+    event.preventDefault();
+    navigate(routeLink.dataset.spaRoute,{push:true});
+    return;
+  }
+  const link=event.target.closest('a[href]');
+  if(!link||link.target==='_blank'||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  const url=new URL(link.href,location.href);
+  if(url.origin!==location.origin)return;
+  const route=aliases[url.pathname.split('/').pop()];
+  if(route){event.preventDefault();navigate(route,{push:true})}
+});
+window.addEventListener('popstate',event=>navigate(event.state?.route||routeFromUrl()));
+document.addEventListener('wd-role-ready',event=>{
+  const name=event.detail?.dados?.nome||event.detail?.user?.displayName||'WD';
+  const initials=String(name).trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase()||'WD';
+  document.querySelectorAll('[data-spa-avatar]').forEach(element=>element.textContent=initials);
+});
+
+function loadStyle(href,attribute){
+  if(document.querySelector(`link[${attribute}]`))return;
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=href;
+  link.setAttribute(attribute,'true');
+  document.head.append(link);
+}
+function loadPremiumStyles(){
+  loadStyle(`mobile-nav-account-premium.css?v=${BUILD}`,'data-mobile-premium');
+  loadStyle(`mobile-nav-fixed.css?v=${BUILD}`,'data-mobile-fixed');
+  loadStyle(`store-sale-premium.css?v=${BUILD}`,'data-store-sale-premium');
+  loadStyle(`store-pagination.css?v=${BUILD}`,'data-store-pagination');
+  loadStyle(`store-luxury-v2.css?v=${BUILD}`,'data-store-luxury-v2');
+  loadStyle(`store-showcase-v3.css?v=${BUILD}`,'data-store-showcase-v3');
+  loadStyle(`store-ui-v4.css?v=${BUILD}`,'data-store-ui-v4');
+  loadStyle(`size-stock-public.css?v=${BUILD}`,'data-size-stock-public');
+  loadStyle(`member-commerce.css?v=${BUILD}`,'data-member-commerce');
+  loadStyle(`theme-coherence.css?v=${BUILD}`,'data-theme-coherence');
+}
+
+loadPremiumStyles();
+(async()=>{
+  const state=await window.WDSession.ready;
+  if(state.status!=='ready')return;
+  sessionReady=true;
+  document.documentElement.dataset.authState='ready';
+  document.body.classList.add('wd-auth-ready');
+  await navigate(routeFromUrl(),{replace:true});
+  setLoader(false);
+})().catch(error=>showError('home',error));
