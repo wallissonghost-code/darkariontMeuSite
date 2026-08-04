@@ -1,4 +1,4 @@
-const RELEASE='wd-founder-3.4.4';
+const RELEASE='wd-founder-3.4.5';
 const STATIC_CACHE=`${RELEASE}-static`;
 const RUNTIME_CACHE=`${RELEASE}-runtime`;
 const OFFLINE_FALLBACK='index.html';
