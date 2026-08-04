@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.7.5';
+const LOCAL_VERSION='3.7.6';
 const VERSION_KEY='wd-app-version';
 const RELOAD_KEY='wd-app-reloading';
 const CHECK_INTERVAL=5*60*1000;
