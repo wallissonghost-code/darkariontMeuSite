@@ -5,15 +5,16 @@
 .unified-admin-workspace{
   position:relative;
   width:100%;
-  min-height:100dvh;
+  min-height:0;
+  height:auto;
   background:var(--bg,#090a0c);
-  overflow:hidden;
+  overflow:visible;
 }
 .unified-admin-frame{
   display:block;
   width:100%;
-  min-height:100dvh;
-  height:100dvh;
+  min-height:1px;
+  height:auto;
   border:0;
   opacity:0;
   background:transparent;
@@ -49,9 +50,9 @@
 }
 
 @media(min-width:769px){
-  body.unified-admin-active .spa-main{padding:0!important;overflow:hidden}
-  body.unified-admin-active .unified-admin-workspace{height:100dvh}
-  body.unified-admin-active .unified-admin-frame{height:100dvh}
+  body.unified-admin-active .spa-main{padding:0!important;overflow:visible!important}
+  body.unified-admin-active .unified-admin-workspace{height:auto!important;min-height:100dvh!important;overflow:visible!important}
+  body.unified-admin-active .unified-admin-frame{height:auto;min-height:100dvh}
   .spa-brand strong{font-size:36px!important}
 }
 
@@ -59,39 +60,41 @@
   :root{--wd-mobile-nav-height:calc(70px + env(safe-area-inset-bottom))}
   .spa-brand{display:none!important}
 
-  /* O spa.css já reserva a barra inferior no body. No Admin removemos essa reserva
-     e controlamos a altura apenas aqui, evitando a faixa preta duplicada. */
   body.unified-admin-active{
-    padding-bottom:0!important;
+    height:auto!important;
     min-height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    padding-bottom:var(--wd-mobile-nav-height)!important;
   }
   body.unified-admin-active .spa-shell{
-    min-height:100dvh!important;
-    height:100dvh!important;
-    overflow:hidden!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
   }
-
   body.unified-admin-active .spa-main{
     padding:0!important;
-    min-height:calc(100dvh - var(--wd-mobile-nav-height))!important;
-    height:calc(100dvh - var(--wd-mobile-nav-height))!important;
-    overflow:hidden!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
   }
   body.unified-admin-active .unified-admin-workspace{
     width:100%!important;
-    height:100%!important;
+    height:auto!important;
     min-height:0!important;
     padding:0!important;
     margin:0!important;
+    overflow:visible!important;
     background:var(--bg,#090a0c);
   }
   body.unified-admin-active .unified-admin-frame{
     display:block!important;
     width:100%!important;
-    height:100%!important;
-    min-height:0!important;
+    height:auto;
+    min-height:1px!important;
     margin:0!important;
     padding:0!important;
+    overflow:hidden!important;
   }
   body.unified-admin-active .unified-admin-loader{inset:0!important}
   body.unified-admin-active .spa-bottom-nav{display:grid!important}
