@@ -2,7 +2,7 @@ import './app-session.js';
 import { auth } from './firebase.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
 
-const BUILD='3.8.1';
+const BUILD='3.8.2';
 const body=document.body;
 const params=new URLSearchParams(location.search);
 const isSpaShell=body.dataset.spaShell==='true';
@@ -23,6 +23,7 @@ const ADMIN_TOOLS=[
 let saindo=false;let embeddedReadySent=false;
 function carregarCss(href){if(document.querySelector(`link[href^="${href}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=`${href}?v=${BUILD}`;document.head.append(link)}
 if(!isSpaShell&&!isAdminShell){carregarCss('app-ui.css');carregarCss('dark-mode.css');carregarCss('ios-navigation-performance.css');if(!isAdminEmbedded)carregarCss('navigation.css')}
+if(!isSpaShell)carregarCss('theme-audit-382.css');
 if(isAdminEmbedded){body.classList.add('wd-admin-embedded');document.documentElement.dataset.embeddedAdmin='true'}
 const temaValido=value=>value==='dark'||value==='light';
 function aplicarTema(tema,uid=''){const valor=tema==='dark'?'dark':'light';document.documentElement.dataset.theme=valor;document.documentElement.style.colorScheme=valor;localStorage.setItem('wd-theme',valor);if(uid)localStorage.setItem(`wd-theme:${uid}`,valor);document.dispatchEvent(new CustomEvent('wd-theme-ready',{detail:{theme:valor,uid}}))}
