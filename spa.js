@@ -1,4 +1,4 @@
-const BUILD='3.7.0';
+const BUILD='3.7.4';
 
 const routes={
   home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},
@@ -76,7 +76,7 @@ async function navigate(value,{push=false,replace=false,force=false}={}){
   const id=++navigationId;setLoader(true);document.body.dataset.spaNavigating='true';
   try{
     await createView(route);if(id!==navigationId)return;
-    views.forEach((view,key)=>{const visible=key===route;view.hidden=!visible;view.setAttribute('aria-hidden',visible?'false':'true')});
+    views.forEach((view,key)=>{const visible=key===route;view.hidden=!visible;view.style.display=visible?'':'none';view.setAttribute('aria-hidden',visible?'false':'true')});
     document.getElementById('spaError')?.remove();document.body.classList.remove('unified-admin-active');currentRoute=route;updateNavigation(route);
     document.title=`${routes[route].title} — WD Founder`;
     if(push)history.pushState({route},'',routeUrl(route));else if(replace)history.replaceState({route},'',routeUrl(route));
