@@ -1,4 +1,4 @@
-const BUILD='3.8.3';
+const BUILD='3.9.0';
 
 const routes={
   home:{title:'Início',view:'views/home.html',modules:['./home.js','./home-commerce.js']},
