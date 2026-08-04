@@ -1,0 +1,54 @@
+/* WD Founder 3.7.6 — vitrine e Rank */
+
+/* Vitrine proporcional */
+.store-page .products-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;align-items:start!important}
+.store-page .product-card{display:flex!important;flex-direction:column!important;min-width:0!important;height:auto!important;overflow:hidden!important;border-radius:22px!important}
+.store-page .product-media{display:block!important;position:relative!important;width:100%!important;aspect-ratio:4/5!important;min-height:0!important;overflow:hidden!important}
+.store-page .product-media img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
+.store-page .product-body{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;min-height:174px!important;padding:16px 16px 15px!important;text-align:left!important}
+.store-page .product-title{font-size:clamp(18px,4.6vw,25px)!important;line-height:1.08!important;min-height:2.16em!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important}
+.store-page .product-price-row{margin-top:auto!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;align-items:end!important}
+.store-page .product-price-line{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important}
+.store-page .product-price-line strong{font-size:clamp(21px,5.4vw,29px)!important;line-height:1!important;white-space:nowrap!important}
+.store-page .product-stock{white-space:nowrap!important;font-size:11px!important}
+.store-page .product-media-top{position:absolute!important;left:14px!important;right:14px!important;top:14px!important;display:flex!important;justify-content:flex-start!important;pointer-events:none!important}
+.store-page .product-badge{padding:10px 14px!important;border-radius:999px!important;font-size:9px!important;font-weight:900!important;letter-spacing:.22em!important;text-transform:uppercase!important;color:#fff!important;border:1px solid rgba(255,255,255,.24)!important;box-shadow:0 9px 22px rgba(0,0,0,.24)!important}
+
+/* Identidade por status */
+.store-page .product-card[data-priority="0"] .product-badge{background:linear-gradient(145deg,#8b6514,#c8992f)!important;color:#fff6d3!important}
+.store-page .product-card[data-priority="1"] .product-badge{background:linear-gradient(145deg,#b40018,#e01632)!important;color:#fff!important}
+.store-page .product-card[data-priority="2"] .product-badge{background:linear-gradient(145deg,#1459a8,#2785e6)!important;color:#f2f8ff!important}
+.store-page .product-card[data-priority="3"] .product-badge{background:linear-gradient(145deg,#4d5360,#777e8c)!important;color:#fff!important}
+.store-page .product-card[data-priority="0"]{--status-accent:#b88820}
+.store-page .product-card[data-priority="1"]{--status-accent:#c60020}
+.store-page .product-card[data-priority="2"]{--status-accent:#2679d7}
+.store-page .product-card[data-priority="3"]{--status-accent:#707684}
+.store-page .product-card{border-color:color-mix(in srgb,var(--status-accent) 22%,rgba(120,120,120,.18))!important}
+.store-page .product-category{color:var(--status-accent)!important}
+.store-page .product-discount-inline{background:linear-gradient(145deg,#a90019,#d20a29)!important;color:#fff!important;border-color:rgba(255,255,255,.2)!important}
+html[data-theme="light"] .store-page .product-card{background:#fff!important;box-shadow:0 14px 34px rgba(77,60,24,.11)!important}
+html[data-theme="light"] .store-page .product-body{background:#fff!important}
+html[data-theme="light"] .store-page .product-title,html[data-theme="light"] .store-page .product-price-line strong{color:#17140f!important}
+
+/* Rank: identidade do próprio usuário */
+.rank-identity{display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;flex-wrap:wrap!important}
+.rank-you{display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:4px 8px!important;border-radius:999px!important;background:linear-gradient(145deg,#f6d967,#c99a20)!important;color:#171006!important;font-size:8px!important;font-weight:950!important;letter-spacing:.14em!important;line-height:1!important;box-shadow:0 5px 15px rgba(212,175,55,.22)!important}
+.rank-row .rank-you{font-size:7px!important;padding:3px 7px!important}
+.podium-card.is-current-user,.rank-row.is-current-user{box-shadow:0 0 0 2px rgba(255,215,0,.48),0 20px 55px rgba(255,195,0,.12)!important}
+.rank-avatar img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;border-radius:inherit!important}
+.rank-avatar img[hidden]{display:none!important}
+.rank-alias{overflow-wrap:anywhere!important}
+
+@media(max-width:390px){
+  .store-page .products-grid{gap:10px!important}
+  .store-page .product-card{border-radius:18px!important}
+  .store-page .product-body{min-height:158px!important;padding:13px 12px 13px!important}
+  .store-page .product-media-top{left:10px!important;right:10px!important;top:10px!important}
+  .store-page .product-badge{padding:8px 10px!important;font-size:7.5px!important;letter-spacing:.17em!important}
+  .store-page .product-price-line{gap:5px!important}
+  .store-page .product-price-line strong{font-size:20px!important}
+  .store-page .product-discount-inline{font-size:10px!important;padding:7px 8px!important}
+  .store-page .product-stock{font-size:9px!important}
+}
+@media(min-width:760px){.store-page .products-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:20px!important}.store-page .product-body{min-height:190px!important}}
+@media(min-width:1180px){.store-page .products-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
