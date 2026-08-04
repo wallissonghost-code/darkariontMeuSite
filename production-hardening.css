@@ -1,0 +1,11 @@
+/* WD Founder — Production hardening */
+.skip-link{position:fixed;left:12px;top:12px;z-index:100000;transform:translateY(-160%);padding:12px 16px;border-radius:12px;background:#111;color:#fff;text-decoration:none;font-weight:800;transition:transform .15s ease}.skip-link:focus{transform:none}
+.wd-network-status{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));z-index:99999;transform:translate(-50%,-180%);max-width:min(92vw,520px);padding:10px 16px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:#18191d;color:#fff;box-shadow:0 16px 44px rgba(0,0,0,.28);font-size:13px;font-weight:800;text-align:center;transition:transform .2s ease}.wd-network-status.is-visible{transform:translate(-50%,0)}.wd-network-status.is-online{background:#123c2a}.wd-network-status.is-offline{background:#501a20}
+.wd-runtime-message{position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom));z-index:99998;transform:translateX(-50%);width:min(90vw,520px);padding:14px 18px;border-radius:16px;background:rgba(18,19,22,.97);color:#fff;box-shadow:0 18px 55px rgba(0,0,0,.35);font-size:14px;text-align:center}
+img[data-image-error="true"]{object-fit:contain!important;background:linear-gradient(145deg,#1b1c20,#0e0f12)!important;color:transparent}
+button,a,input,select,textarea,[role="button"]{touch-action:manipulation}
+button,a,[role="button"]{min-height:44px}
+[aria-busy="true"]{cursor:progress}
+[hidden]{display:none!important}
+@media(max-width:420px){body{overflow-wrap:anywhere}.spa-view{min-width:0}.spa-bottom-nav a,.spa-bottom-nav button{min-width:0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
