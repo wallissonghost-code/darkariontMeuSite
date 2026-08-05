@@ -6,9 +6,11 @@ const ICONS={
   stock:'<rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><rect x="14" y="14" width="6" height="6" rx="1.2"/>',
   store:'<path d="M12 3 21 12 12 21 3 12 12 3Z"/><path d="M12 8v8M8 12h8"/>',
   performance:'<path d="m4 17 5-5 3 3 7-8"/><path d="M15 7h4v4"/>',
-  delete:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>'
+  rewards:'<path d="M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M9 15h6M12 13v6M8 20h8"/><path d="M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4"/>',
+  delete:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>',
+  refresh:'<path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M6.1 9a7 7 0 0 1 11.8-2.6L20 11"/><path d="M4 13l2.1 4.6A7 7 0 0 0 17.9 15"/>'
 };
-const ORDER=['panel','purchase','history','stock','store','performance','delete'];
+const ORDER=['panel','purchase','history','stock','store','performance','rewards','delete','refresh'];
 function ensureAdminIconStyle(){
   if(document.querySelector('style[data-wd-admin-icon-visibility]'))return;
   const style=document.createElement('style');
@@ -39,7 +41,7 @@ function ensureAdminIconStyle(){
       stroke-linecap:inherit!important;
       stroke-linejoin:inherit!important;
     }
-    .spa-admin-tools-grid a:last-child .spa-admin-tool-icon.wd-admin-icon-synced{
+    .spa-admin-tools-grid a:has(.spa-admin-tool-icon[data-icon-key="delete"]) .spa-admin-tool-icon.wd-admin-icon-synced{
       color:#ef5b67!important;
       background:#1b1114!important;
       border-color:rgba(205,68,79,.55)!important;
@@ -63,7 +65,7 @@ function syncIcons(root=document){
     [...list.querySelectorAll('a')].forEach((link,index)=>{
       const holder=link.querySelector(':scope>span');
       if(!holder)return;
-      const key=ORDER[index]||'panel';
+      const key=link.hasAttribute('data-force-app-update')?'refresh':(ORDER[index]||'panel');
       if(holder.dataset.iconKey===key)return;
       holder.dataset.iconKey=key;
       holder.classList.add('wd-admin-icon-synced');
@@ -74,7 +76,7 @@ function syncIcons(root=document){
     [...list.querySelectorAll('a')].forEach((link,index)=>{
       const holder=link.querySelector('.spa-admin-tool-icon');
       if(!holder)return;
-      const key=ORDER[index]||'panel';
+      const key=link.hasAttribute('data-force-app-update')?'refresh':(ORDER[index]||'panel');
       if(holder.dataset.iconKey===key)return;
       holder.dataset.iconKey=key;
       holder.classList.add('wd-admin-icon-synced');
