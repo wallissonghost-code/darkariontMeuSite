@@ -1,4 +1,21 @@
-/* WD Founder 3.35 — ferramentas administrativas com o preto exato da barra inferior */
+/* WD Founder 3.35 — ferramentas administrativas responsivas */
+
+/* Cor oficial dos cards administrativos em qualquer dispositivo. */
+.spa-admin-tools-grid a{
+  background:rgba(12,13,16,.985)!important;
+  border-color:#34373d!important;
+}
+.spa-admin-tools-grid a:active{
+  background:#14161b!important;
+}
+.spa-admin-tools-grid a.is-active{
+  background:rgba(12,13,16,.985)!important;
+  border-color:rgba(212,175,55,.4)!important;
+}
+.spa-admin-tools-head button{
+  background:rgba(12,13,16,.985)!important;
+}
+
 @media (max-width:900px){
   .spa-admin-tools-backdrop{
     background:rgba(0,0,0,.70)!important;
@@ -15,7 +32,7 @@
   .spa-admin-tools-head span{color:#f0cf66!important;font-weight:900!important}
   .spa-admin-tools-head h2{color:#fff!important;font-weight:950!important}
   .spa-admin-tools-head p{color:#bcb7ae!important;font-weight:600!important}
-  .spa-admin-tools-head button{color:#fff!important;background:rgba(12,13,16,.985)!important;border:1px solid #34373d!important}
+  .spa-admin-tools-head button{color:#fff!important;border:1px solid #34373d!important}
 
   .spa-admin-tools-grid{display:grid!important;gap:12px!important}
   .spa-admin-tools-grid a{
@@ -30,7 +47,6 @@
     margin:0!important;
     padding:14px 18px!important;
     color:#fff!important;
-    background:rgba(12,13,16,.985)!important;
     border:1px solid #34373d!important;
     border-radius:22px!important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 8px 22px rgba(0,0,0,.18)!important;
@@ -39,15 +55,8 @@
     transition:transform .18s ease,background .18s ease,border-color .18s ease!important;
     -webkit-tap-highlight-color:transparent!important;
   }
-  .spa-admin-tools-grid a:active{
-    transform:scale(.985)!important;
-    background:#14161b!important;
-  }
+  .spa-admin-tools-grid a:active{transform:scale(.985)!important}
   .spa-admin-tools-grid a:hover{border-color:rgba(212,175,55,.4)!important}
-  .spa-admin-tools-grid a.is-active{
-    background:rgba(12,13,16,.985)!important;
-    border-color:rgba(212,175,55,.4)!important;
-  }
   .spa-admin-tools-grid a>div{min-width:0!important;align-self:center!important}
   .spa-admin-tools-grid strong{
     display:block!important;
@@ -167,10 +176,24 @@
   html[data-theme="light"] .spa-admin-tools-head{border-bottom-color:#ded8cd!important}
   html[data-theme="light"] .spa-admin-tools-head h2{color:#111!important}
   html[data-theme="light"] .spa-admin-tools-head p{color:#625d54!important}
-  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;background:rgba(12,13,16,.985)!important;border-color:#34373d!important}
-  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;background:rgba(12,13,16,.985)!important;border-color:#34373d!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:active{background:#14161b!important}
+  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;border-color:#34373d!important}
   html[data-theme="light"] .spa-admin-tools-grid strong{color:#fff!important}
   html[data-theme="light"] .spa-admin-tools-grid small{color:#aaa8a3!important}
   html[data-theme="light"] .spa-admin-tools-grid a:last-child{background:linear-gradient(135deg,#1c1114,#241316)!important;border-color:rgba(205,68,79,.55)!important}
+}
+
+/* Desktop e tablets largos: mesma cor oficial, sem alterar o layout existente. */
+@media (min-width:901px){
+  .spa-admin-tools-grid a{
+    background:rgba(12,13,16,.985)!important;
+    color:#fff!important;
+  }
+  .spa-admin-tools-grid a:active{background:#14161b!important}
+  .spa-admin-tools-grid strong{color:#fff!important}
+  .spa-admin-tools-grid small{color:#aaa8a3!important}
+  .spa-admin-tools-grid a:last-child{
+    background:linear-gradient(135deg,#1c1114,#241316)!important;
+    border-color:rgba(205,68,79,.55)!important;
+  }
 }
