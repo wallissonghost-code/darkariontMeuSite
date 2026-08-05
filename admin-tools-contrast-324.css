@@ -1,4 +1,4 @@
-/* WD Founder 3.31 — painel administrativo mobile compacto */
+/* WD Founder 3.32 — painel administrativo mobile compacto */
 @media (max-width:900px){
   .spa-admin-tools-backdrop{
     background:rgba(0,0,0,.68)!important;
@@ -15,12 +15,9 @@
   .spa-admin-tools-head span{color:#f0cf66!important;font-weight:900!important}
   .spa-admin-tools-head h2{color:#fff!important;font-weight:950!important}
   .spa-admin-tools-head p{color:#bcb7ae!important;font-weight:600!important}
-  .spa-admin-tools-head button{color:#fff!important;background:#17191e!important;border:1px solid #34373d!important}
+  .spa-admin-tools-head button{color:#fff!important;background:#050506!important;border:1px solid #34373d!important}
 
-  .spa-admin-tools-grid{
-    display:grid!important;
-    gap:13px!important;
-  }
+  .spa-admin-tools-grid{display:grid!important;gap:13px!important}
   .spa-admin-tools-grid a{
     position:relative!important;
     display:grid!important;
@@ -31,17 +28,14 @@
     height:auto!important;
     padding:18px 18px 18px 14px!important;
     color:#fff!important;
-    background:#17191e!important;
+    background:#050506!important;
     border:1px solid #34373d!important;
     border-radius:22px!important;
     box-shadow:none!important;
     overflow:hidden!important;
   }
-  .spa-admin-tools-grid a:active{background:#20232a!important}
-  .spa-admin-tools-grid a>div{
-    min-width:0!important;
-    align-self:center!important;
-  }
+  .spa-admin-tools-grid a:active{background:#111318!important}
+  .spa-admin-tools-grid a>div{min-width:0!important;align-self:center!important}
   .spa-admin-tools-grid strong{
     display:block!important;
     margin:0 0 5px!important;
@@ -109,16 +103,9 @@
   }
 
   /* Ação destrutiva: Excluir conta */
-  .spa-admin-tools-grid a:last-child{
-    background:linear-gradient(145deg,#211417,#160f11)!important;
-    border-color:#5c2e35!important;
-  }
+  .spa-admin-tools-grid a:last-child{background:linear-gradient(145deg,#211417,#160f11)!important;border-color:#5c2e35!important}
   .spa-admin-tools-grid a:last-child:active{background:#2a171b!important}
-  .spa-admin-tools-grid a:last-child .spa-admin-tool-icon{
-    color:#fff!important;
-    background:linear-gradient(145deg,#9d2634,#641722)!important;
-    border-color:#bd4654!important;
-  }
+  .spa-admin-tools-grid a:last-child .spa-admin-tool-icon{color:#fff!important;background:linear-gradient(145deg,#9d2634,#641722)!important;border-color:#bd4654!important}
   .spa-admin-tools-grid a:last-child .spa-admin-tool-icon svg,
   .spa-admin-tools-grid a:last-child .spa-admin-tool-icon svg *{stroke:#fff!important}
   .spa-admin-tools-grid a:last-child strong{color:#ffdde1!important}
@@ -127,20 +114,11 @@
 
   .spa-bottom-nav{background:rgba(12,13,16,.985)!important;border-top-color:rgba(240,207,102,.24)!important}
   .spa-bottom-nav a,.spa-admin-nav-button{color:#b8b3aa!important}
-  .spa-bottom-nav a.is-active,.spa-admin-nav-button.is-active,.spa-admin-nav-button.is-current{
-    color:#fff!important;
-    background:rgba(240,207,102,.14)!important;
-    border:1px solid rgba(240,207,102,.30)!important;
-  }
+  .spa-bottom-nav a.is-active,.spa-admin-nav-button.is-active,.spa-admin-nav-button.is-current{color:#fff!important;background:rgba(240,207,102,.14)!important;border:1px solid rgba(240,207,102,.30)!important}
 }
 
 @media (max-width:390px){
-  .spa-admin-tools-grid a{
-    grid-template-columns:78px minmax(0,1fr) 18px!important;
-    min-height:118px!important;
-    gap:12px!important;
-    padding:16px 14px 16px 12px!important;
-  }
+  .spa-admin-tools-grid a{grid-template-columns:78px minmax(0,1fr) 18px!important;min-height:118px!important;gap:12px!important;padding:16px 14px 16px 12px!important}
   .spa-admin-tool-icon{width:78px!important;height:78px!important;min-width:78px!important;flex-basis:78px!important}
   .spa-admin-tool-icon svg{width:35px!important;height:35px!important}
   .spa-admin-tools-grid strong{font-size:17px!important}
@@ -148,19 +126,19 @@
   .spa-admin-tools-grid b{font-size:22px!important}
 }
 
-/* Tema claro mantém a mesma estrutura com contraste equivalente. */
+/* Tema claro: os botões permanecem pretos para preservar o contraste premium. */
 @media (max-width:900px){
   html[data-theme="light"] .spa-admin-tools-backdrop{background:rgba(57,46,28,.42)!important}
   html[data-theme="light"] .spa-admin-tools-panel{color:#171717!important;background:#fffdf8!important;border-color:#d7d0c4!important}
   html[data-theme="light"] .spa-admin-tools-head{border-bottom-color:#ded8cd!important}
   html[data-theme="light"] .spa-admin-tools-head h2{color:#111!important}
   html[data-theme="light"] .spa-admin-tools-head p{color:#625d54!important}
-  html[data-theme="light"] .spa-admin-tools-head button{color:#111!important;background:#f5f1e9!important;border-color:#d7d0c4!important}
-  html[data-theme="light"] .spa-admin-tools-grid a{color:#111!important;background:#f4f2ed!important;border-color:#cfcbc3!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:active{background:#e9e6df!important}
-  html[data-theme="light"] .spa-admin-tools-grid strong{color:#111!important}
-  html[data-theme="light"] .spa-admin-tools-grid small{color:#625d54!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:last-child{background:#f5e9eb!important;border-color:#c98790!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:last-child strong{color:#6f1723!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:last-child small{color:#80545a!important}
+  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;background:#050506!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;background:#050506!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:active{background:#111318!important}
+  html[data-theme="light"] .spa-admin-tools-grid strong{color:#fff!important}
+  html[data-theme="light"] .spa-admin-tools-grid small{color:#bbb6ad!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:last-child{background:linear-gradient(145deg,#211417,#160f11)!important;border-color:#5c2e35!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:last-child strong{color:#ffdde1!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:last-child small{color:#cdaeb2!important}
 }
