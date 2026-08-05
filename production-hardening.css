@@ -18,5 +18,64 @@ html[data-auth-state="loading"] .spa-shell,html[data-auth-state="loading"] .spa-
 @keyframes wdStartupSpin{to{transform:rotate(360deg)}}
 html[data-auth-state="optimistic"] .spa-loader,.wd-auth-optimistic .spa-loader,.wd-auth-ready .spa-loader{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .12s ease,visibility .12s ease!important}
 .spa-view{content-visibility:auto;contain-intrinsic-size:800px}
+
+/* Correção definitiva dos breakpoints e do menu lateral. O shell usa 900px como limite mobile. */
+@media (min-width:901px){
+  body[data-spa-shell="true"] .spa-shell{
+    display:grid!important;
+    grid-template-columns:288px minmax(0,1fr)!important;
+    width:100%!important;
+    min-height:100dvh!important;
+  }
+  body[data-spa-shell="true"] .spa-sidebar{
+    display:flex!important;
+    flex-direction:column!important;
+    position:sticky!important;
+    top:0!important;
+    width:288px!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    max-height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+  }
+  body[data-spa-shell="true"] .spa-main{
+    min-width:0!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  body[data-spa-shell="true"] .spa-bottom-nav{display:none!important}
+  body[data-spa-shell="true"] .spa-nav,
+  body[data-spa-shell="true"] .spa-admin-section,
+  body[data-spa-shell="true"] .spa-sidebar-footer{flex:0 0 auto!important;width:100%!important;min-width:0!important}
+  body[data-spa-shell="true"] .spa-nav a,
+  body[data-spa-shell="true"] .spa-admin-links a{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  body[data-spa-shell="true"] .spa-nav small,
+  body[data-spa-shell="true"] .spa-admin-links small{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  body[data-spa-shell="true"] .spa-sidebar-footer{margin-top:auto!important;position:relative!important;bottom:auto!important}
+  body[data-spa-shell="true"] .spa-loader{inset:0 0 0 288px!important}
+}
+
+@media (min-width:901px) and (max-width:1180px){
+  body[data-spa-shell="true"] .spa-shell{grid-template-columns:260px minmax(0,1fr)!important}
+  body[data-spa-shell="true"] .spa-sidebar{width:260px!important}
+  body[data-spa-shell="true"] .spa-loader{inset:0 0 0 260px!important}
+}
+
+/* Faixa tablet/mobile: remove a coluna fantasma criada pelos estilos antigos de desktop. */
+@media (max-width:900px){
+  body[data-spa-shell="true"] .spa-shell{
+    display:block!important;
+    grid-template-columns:none!important;
+    width:100%!important;
+    min-height:100dvh!important;
+  }
+  body[data-spa-shell="true"] .spa-sidebar{display:none!important;width:0!important}
+  body[data-spa-shell="true"] .spa-main{width:100%!important;min-width:0!important;margin:0!important}
+  body[data-spa-shell="true"] .spa-bottom-nav{display:grid!important}
+  body[data-spa-shell="true"] .spa-loader{inset:0!important}
+}
+
 @media(max-width:420px){body{overflow-wrap:anywhere}.spa-view{min-width:0}.spa-bottom-nav a,.spa-bottom-nav button{min-width:0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
