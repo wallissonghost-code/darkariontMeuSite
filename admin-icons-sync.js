@@ -1,6 +1,6 @@
 /* Ícones administrativos únicos e sincronizados entre desktop, tablet e mobile */
 const ICONS={
-  panel:'<path d="M12 3.5l1.45 4.05L17.5 9l-4.05 1.45L12 14.5l-1.45-4.05L6.5 9l4.05-1.45L12 3.5Z"/><path d="M18.5 15.5l.7 2 .0 0 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7.7-2Z"/>',
+  panel:'<path d="M12 3.5l1.45 4.05L17.5 9l-4.05 1.45L12 14.5l-1.45-4.05L6.5 9l4.05-1.45L12 3.5Z"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7.7-2Z"/>',
   purchase:'<path d="M12 5v14M5 12h14"/>',
   history:'<path d="M4 7v5h5"/><path d="M5.3 16.5A8 8 0 1 0 4.4 9"/><path d="M12 7.5V12l3 2"/>',
   stock:'<rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><rect x="14" y="14" width="6" height="6" rx="1.2"/>',
@@ -9,8 +9,22 @@ const ICONS={
   delete:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>'
 };
 const ORDER=['panel','purchase','history','stock','store','performance','delete'];
+function ensureAdminIconStyle(){
+  if(document.querySelector('style[data-wd-admin-icon-visibility]'))return;
+  const style=document.createElement('style');
+  style.dataset.wdAdminIconVisibility='true';
+  style.textContent=`
+  @media(max-width:900px){
+    .spa-admin-tool-icon.wd-admin-icon-synced{width:58px!important;height:58px!important;min-width:58px!important;display:grid!important;place-items:center!important;border-radius:18px!important;color:#241900!important;background:linear-gradient(145deg,#ffe58d,#d7a719)!important;border:1px solid rgba(105,74,0,.38)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 8px 20px rgba(126,86,0,.2)!important}
+    .spa-admin-tool-icon.wd-admin-icon-synced svg{display:block!important;width:31px!important;height:31px!important;fill:none!important;stroke:currentColor!important;stroke-width:2.5!important;stroke-linecap:round!important;stroke-linejoin:round!important;overflow:visible!important}
+    .spa-admin-tool-icon.wd-admin-icon-synced svg *{fill:none!important;stroke:inherit!important;stroke-width:inherit!important;stroke-linecap:inherit!important;stroke-linejoin:inherit!important}
+    html[data-theme="dark"] .spa-admin-tool-icon.wd-admin-icon-synced{color:#171000!important;background:linear-gradient(145deg,#ffe875,#d5a20c)!important;border-color:rgba(255,229,112,.62)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 10px 24px rgba(212,162,15,.24)!important}
+  }`;
+  document.head.append(style);
+}
 function svgFor(key){return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[key]||ICONS.panel}</svg>`}
 function syncIcons(root=document){
+  ensureAdminIconStyle();
   root.querySelectorAll('.spa-admin-links').forEach(list=>{
     [...list.querySelectorAll('a')].forEach((link,index)=>{
       const holder=link.querySelector(':scope>span');
