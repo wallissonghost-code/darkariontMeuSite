@@ -1,0 +1,11 @@
+/* WD Founder — vitrine refinada v3.21 */
+.store-results-copy h1{display:inline!important;margin:0!important;padding:0!important;border:0!important;outline:0!important;box-shadow:none!important;background:none!important;text-decoration:none!important;-webkit-text-stroke:0!important}
+.store-results-copy h1::before,.store-results-copy h1::after{display:none!important;content:none!important}
+.store-results-copy{border:0!important;outline:0!important;box-shadow:none!important}
+.product-stock{display:inline-flex!important;align-items:center!important;gap:6px!important;white-space:nowrap!important;font-size:.68rem!important;color:#a8aaa4!important;letter-spacing:.02em!important}
+.product-stock::before{content:"";width:7px;height:7px;border-radius:50%;background:#35c982;box-shadow:0 0 8px rgba(53,201,130,.45)}
+.store-empty{min-height:150px!important;display:grid!important;place-items:center!important;border:1px dashed rgba(255,255,255,.12)!important;border-radius:24px!important;color:#a9a59d!important;background:rgba(255,255,255,.015)!important}
+.product-card img{content-visibility:auto}
+@media(max-width:700px){.store-results-copy h1{font-size:clamp(2rem,10vw,3rem)!important;line-height:1!important}.product-stock{font-size:.62rem!important}.store-toolbar{gap:10px!important}.store-search,.store-category{min-height:54px!important}}
+html[data-theme="light"] .store-results-copy h1{color:#171713!important}
+html[data-theme="light"] .store-empty{border-color:rgba(50,42,28,.14)!important;background:rgba(255,255,255,.5)!important;color:#77736b!important}
