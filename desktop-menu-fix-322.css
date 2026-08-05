@@ -1,4 +1,4 @@
-/* WD Founder 3.22 — correção estrutural definitiva dos menus desktop */
+/* WD Founder 3.23 — menu desktop com rolagem única e limpa */
 @media (min-width:901px){
   body[data-spa-shell="true"]{overflow:hidden!important}
   body[data-spa-shell="true"] .spa-shell{
@@ -18,12 +18,20 @@
     min-width:288px!important;
     max-width:288px!important;
     height:100dvh!important;
-    min-height:0!important;
+    min-height:100dvh!important;
     max-height:100dvh!important;
-    padding:24px 18px 18px!important;
-    overflow:hidden!important;
+    padding:24px 18px 20px!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    scrollbar-width:thin!important;
+    scrollbar-color:rgba(217,185,92,.18) transparent!important;
     box-sizing:border-box!important;
   }
+  body[data-spa-shell="true"] .spa-sidebar::-webkit-scrollbar{width:4px!important}
+  body[data-spa-shell="true"] .spa-sidebar::-webkit-scrollbar-track{background:transparent!important}
+  body[data-spa-shell="true"] .spa-sidebar::-webkit-scrollbar-thumb{background:rgba(217,185,92,.18)!important;border-radius:999px!important}
+  body[data-spa-shell="true"] .spa-sidebar:hover::-webkit-scrollbar-thumb{background:rgba(217,185,92,.34)!important}
   body[data-spa-shell="true"] .spa-brand{
     flex:0 0 auto!important;
     min-height:64px!important;
@@ -34,6 +42,23 @@
     width:100%!important;
     margin:16px 0 0!important;
     padding:0!important;
+  }
+  body[data-spa-shell="true"] .spa-admin-section{
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:auto!important;
+    max-height:none!important;
+    margin-top:18px!important;
+    padding-top:18px!important;
+    overflow:visible!important;
+    scrollbar-width:none!important;
+  }
+  body[data-spa-shell="true"] .spa-admin-section::-webkit-scrollbar{display:none!important}
+  body[data-spa-shell="true"] .spa-admin-links{
+    display:grid!important;
+    gap:6px!important;
+    width:100%!important;
+    padding-bottom:4px!important;
   }
   body[data-spa-shell="true"] .spa-nav a,
   body[data-spa-shell="true"] .spa-admin-links a{
@@ -50,28 +75,13 @@
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
   }
-  body[data-spa-shell="true"] .spa-admin-section{
-    flex:1 1 auto!important;
-    min-height:0!important;
-    width:100%!important;
-    margin-top:16px!important;
-    padding-top:16px!important;
-    overflow-x:hidden!important;
-    overflow-y:auto!important;
-    overscroll-behavior:contain!important;
-    scrollbar-width:thin!important;
-    scrollbar-color:rgba(217,185,92,.28) transparent!important;
-  }
-  body[data-spa-shell="true"] .spa-admin-section::-webkit-scrollbar{width:5px!important}
-  body[data-spa-shell="true"] .spa-admin-section::-webkit-scrollbar-track{background:transparent!important}
-  body[data-spa-shell="true"] .spa-admin-section::-webkit-scrollbar-thumb{background:rgba(217,185,92,.28)!important;border-radius:999px!important}
   body[data-spa-shell="true"] .spa-sidebar-footer{
     position:relative!important;
     inset:auto!important;
     flex:0 0 auto!important;
     width:100%!important;
-    margin:12px 0 0!important;
-    padding-top:14px!important;
+    margin:18px 0 0!important;
+    padding:16px 0 4px!important;
     background:inherit!important;
   }
   body[data-spa-shell="true"] .spa-main{
