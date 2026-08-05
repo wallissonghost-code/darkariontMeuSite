@@ -14,12 +14,46 @@ function ensureAdminIconStyle(){
   const style=document.createElement('style');
   style.dataset.wdAdminIconVisibility='true';
   style.textContent=`
-  @media(max-width:900px){
-    .spa-admin-tool-icon.wd-admin-icon-synced{width:58px!important;height:58px!important;min-width:58px!important;display:grid!important;place-items:center!important;border-radius:18px!important;color:#241900!important;background:linear-gradient(145deg,#ffe58d,#d7a719)!important;border:1px solid rgba(105,74,0,.38)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 8px 20px rgba(126,86,0,.2)!important}
-    .spa-admin-tool-icon.wd-admin-icon-synced svg{display:block!important;width:31px!important;height:31px!important;fill:none!important;stroke:currentColor!important;stroke-width:2.5!important;stroke-linecap:round!important;stroke-linejoin:round!important;overflow:visible!important}
-    .spa-admin-tool-icon.wd-admin-icon-synced svg *{fill:none!important;stroke:inherit!important;stroke-width:inherit!important;stroke-linecap:inherit!important;stroke-linejoin:inherit!important}
-    html[data-theme="dark"] .spa-admin-tool-icon.wd-admin-icon-synced{color:#171000!important;background:linear-gradient(145deg,#ffe875,#d5a20c)!important;border-color:rgba(255,229,112,.62)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 10px 24px rgba(212,162,15,.24)!important}
-  }`;
+    .spa-admin-tool-icon.wd-admin-icon-synced{
+      display:grid!important;
+      place-items:center!important;
+      color:#e5c04b!important;
+      background:#14161b!important;
+      border:1px solid #34373d!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 7px 18px rgba(0,0,0,.22)!important;
+    }
+    .spa-admin-tool-icon.wd-admin-icon-synced svg{
+      display:block!important;
+      fill:none!important;
+      stroke:currentColor!important;
+      stroke-width:2.5!important;
+      stroke-linecap:round!important;
+      stroke-linejoin:round!important;
+      overflow:visible!important;
+      filter:none!important;
+    }
+    .spa-admin-tool-icon.wd-admin-icon-synced svg *{
+      fill:none!important;
+      stroke:inherit!important;
+      stroke-width:inherit!important;
+      stroke-linecap:inherit!important;
+      stroke-linejoin:inherit!important;
+    }
+    .spa-admin-tools-grid a:last-child .spa-admin-tool-icon.wd-admin-icon-synced{
+      color:#ef5b67!important;
+      background:#1b1114!important;
+      border-color:rgba(205,68,79,.55)!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 7px 18px rgba(0,0,0,.22)!important;
+    }
+    @media(max-width:900px){
+      .spa-admin-tool-icon.wd-admin-icon-synced{width:76px!important;height:76px!important;min-width:76px!important;border-radius:22px!important}
+      .spa-admin-tool-icon.wd-admin-icon-synced svg{width:32px!important;height:32px!important}
+    }
+    @media(max-width:380px){
+      .spa-admin-tool-icon.wd-admin-icon-synced{width:66px!important;height:66px!important;min-width:66px!important;border-radius:19px!important}
+      .spa-admin-tool-icon.wd-admin-icon-synced svg{width:28px!important;height:28px!important}
+    }
+  `;
   document.head.append(style);
 }
 function svgFor(key){return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[key]||ICONS.panel}</svg>`}
