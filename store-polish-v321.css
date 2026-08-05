@@ -1,11 +1,40 @@
-/* WD Founder — vitrine refinada v3.21 */
+/* WD Founder — vitrine refinada v3.32 */
 .store-results-copy h1{display:inline!important;margin:0!important;padding:0!important;border:0!important;outline:0!important;box-shadow:none!important;background:none!important;text-decoration:none!important;-webkit-text-stroke:0!important}
 .store-results-copy h1::before,.store-results-copy h1::after{display:none!important;content:none!important}
 .store-results-copy{border:0!important;outline:0!important;box-shadow:none!important}
-.product-stock{display:inline-flex!important;align-items:center!important;gap:6px!important;white-space:nowrap!important;font-size:.68rem!important;color:#a8aaa4!important;letter-spacing:.02em!important}
-.product-stock::before{content:"";width:7px;height:7px;border-radius:50%;background:#35c982;box-shadow:0 0 8px rgba(53,201,130,.45)}
+.product-stock{display:inline-flex!important;align-items:center!important;gap:0!important;white-space:nowrap!important;font-size:.72rem!important;font-weight:750!important;color:#8b8d89!important;letter-spacing:.01em!important;padding-left:0!important}
+.product-stock::before{display:none!important;content:none!important}
+.detail-stock{gap:0!important}
+.detail-stock>span{display:none!important}
+.store-results-head{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:0!important;min-width:max-content!important;white-space:nowrap!important;flex:0 0 auto!important}
+.store-results-head strong{display:none!important}
+#storeResultCount{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:max-content!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;line-height:1!important}
 .store-empty{min-height:150px!important;display:grid!important;place-items:center!important;border:1px dashed rgba(255,255,255,.12)!important;border-radius:24px!important;color:#a9a59d!important;background:rgba(255,255,255,.015)!important}
 .product-card img{content-visibility:auto}
-@media(max-width:700px){.store-results-copy h1{font-size:clamp(2rem,10vw,3rem)!important;line-height:1!important}.product-stock{font-size:.62rem!important}.store-toolbar{gap:10px!important}.store-search,.store-category{min-height:54px!important}}
+@media(max-width:700px){
+  .store-page{padding-inline:14px!important}
+  .store-toolbar{gap:10px!important;grid-template-columns:minmax(0,1fr) minmax(142px,.72fr)!important}
+  .store-search,.store-category{min-height:54px!important}
+  .store-results-intro{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:start!important;gap:14px!important}
+  .store-results-copy{min-width:0!important}
+  .store-results-copy h1{font-size:clamp(2rem,10vw,3rem)!important;line-height:1!important}
+  .store-results-head{margin-top:2px!important;padding:10px 13px!important;border-radius:999px!important;max-width:none!important}
+  #storeResultCount{font-size:.72rem!important;font-weight:850!important;letter-spacing:.04em!important;text-transform:uppercase!important}
+  .product-grid{gap:14px!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .store-page button.product-card{min-width:0!important}
+  .product-card .product-body{padding:14px 14px 16px!important}
+  .product-card .product-price-row{display:grid!important;grid-template-columns:1fr!important;align-items:start!important;gap:10px!important}
+  .product-card .product-stock{font-size:.68rem!important;justify-self:start!important}
+}
+@media(max-width:390px){
+  .store-page{padding-inline:10px!important}
+  .store-results-intro{gap:10px!important}
+  .store-results-head{padding:9px 11px!important}
+  #storeResultCount{font-size:.66rem!important}
+  .product-grid{gap:10px!important}
+  .product-card .product-body{padding:12px 11px 14px!important}
+  .product-card .product-stock{font-size:.62rem!important}
+}
 html[data-theme="light"] .store-results-copy h1{color:#171713!important}
 html[data-theme="light"] .store-empty{border-color:rgba(50,42,28,.14)!important;background:rgba(255,255,255,.5)!important;color:#77736b!important}
+html[data-theme="light"] .product-stock{color:#6e6a63!important}
