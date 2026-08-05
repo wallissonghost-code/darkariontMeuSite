@@ -1,5 +1,7 @@
 const ROUTE_META={home:['Início — WD Founder','Acompanhe sua evolução, benefícios e histórico no WD Founder.'],store:['Mercadorias — WD Founder','Consulte as mercadorias e ofertas disponíveis para membros WD Founder.'],rank:['Rank — WD Founder','Classificação protegida de membros elegíveis do WD Founder.'],card:['Meu cartão — WD Founder','Consulte seu cartão, nível VIP e benefícios WD Founder.'],account:['Minha conta — WD Founder','Gerencie seus dados e preferências da conta WD Founder.']};
 const content=document.getElementById('conteudo')||document.querySelector('main');
+function ensurePremiumShell(){if(document.querySelector('link[data-premium-shell]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='premium-shell-v319.css?v=3.19.0';link.dataset.premiumShell='true';document.head.append(link)}
+function closeAdminTools(){document.body.classList.remove('spa-admin-open');document.querySelector('[data-admin-tools-trigger]')?.setAttribute('aria-expanded','false')}
 function ensureSkipLink(){if(document.querySelector('.skip-link')||!content)return;content.id=content.id||'conteudo';const link=document.createElement('a');link.className='skip-link';link.href=`#${content.id}`;link.textContent='Pular para o conteúdo';document.body.prepend(link)}
 function hardenImage(img,index=0){if(img.dataset.wdHardened)return;img.dataset.wdHardened='true';if(!img.hasAttribute('decoding'))img.decoding='async';if(!img.hasAttribute('loading')&&index>0)img.loading='lazy';if(!img.hasAttribute('alt'))img.alt='';img.addEventListener('error',()=>{img.dataset.imageError='true';img.alt=img.alt||'Imagem indisponível'},{once:true})}
 function hardenLinks(root=document){root.querySelectorAll('a[href]').forEach(link=>{let url;try{url=new URL(link.href,location.href)}catch{return}if(url.origin!==location.origin){link.rel='noopener noreferrer';if(!link.target)link.target='_blank'}})}
@@ -14,6 +16,8 @@ window.addEventListener('online',()=>showNetwork('Conexão restaurada.','online'
 let lastErrorAt=0;function runtimeError(){const now=Date.now();if(now-lastErrorAt<5000)return;lastErrorAt=now;const node=document.createElement('div');node.className='wd-runtime-message';node.setAttribute('role','status');node.textContent='Ocorreu uma falha inesperada. Tente novamente ou atualize a página.';document.body.append(node);setTimeout(()=>node.remove(),4500)}
 window.addEventListener('error',event=>{console.error('Erro global:',event.error||event.message);if(event.target===window)runtimeError()});
 window.addEventListener('unhandledrejection',event=>{console.error('Promise rejeitada:',event.reason);runtimeError()});
-document.addEventListener('wd-spa-route',event=>{const route=event.detail?.route||'home';updateRouteMeta(route);setTimeout(()=>{auditRoot(document.querySelector(`.spa-view[data-route="${route}"]`)||document);focusRoute(route)},0)});
+document.addEventListener('wd-spa-route',event=>{closeAdminTools();const route=event.detail?.route||'home';updateRouteMeta(route);setTimeout(()=>{auditRoot(document.querySelector(`.spa-view[data-route="${route}"]`)||document);focusRoute(route)},0)});
+document.addEventListener('click',event=>{if(event.target.closest('[data-spa-route]'))closeAdminTools()},true);
+window.addEventListener('popstate',closeAdminTools);window.addEventListener('pageshow',closeAdminTools);
 const observer=new MutationObserver(records=>{for(const record of records){for(const node of record.addedNodes){if(node.nodeType!==1)continue;if(node.matches?.('img'))hardenImage(node);auditRoot(node)}}});
-ensureSkipLink();auditRoot();observer.observe(content||document.body,{childList:true,subtree:true});
+ensurePremiumShell();ensureSkipLink();auditRoot();observer.observe(content||document.body,{childList:true,subtree:true});
