@@ -1,4 +1,4 @@
-/* WD Founder 3.33 — ferramentas administrativas mobile premium */
+/* WD Founder 3.34 — ferramentas administrativas mobile premium */
 @media (max-width:900px){
   .spa-admin-tools-backdrop{
     background:rgba(0,0,0,.70)!important;
@@ -15,7 +15,7 @@
   .spa-admin-tools-head span{color:#f0cf66!important;font-weight:900!important}
   .spa-admin-tools-head h2{color:#fff!important;font-weight:950!important}
   .spa-admin-tools-head p{color:#bcb7ae!important;font-weight:600!important}
-  .spa-admin-tools-head button{color:#fff!important;background:#111315!important;border:1px solid #34373d!important}
+  .spa-admin-tools-head button{color:#fff!important;background:#0c0d10!important;border:1px solid #34373d!important}
 
   .spa-admin-tools-grid{display:grid!important;gap:12px!important}
   .spa-admin-tools-grid a{
@@ -30,10 +30,10 @@
     margin:0!important;
     padding:14px 18px!important;
     color:#fff!important;
-    background:linear-gradient(135deg,#111315,#15171b 55%,#101214)!important;
+    background:linear-gradient(180deg,#0d0e12 0%,#0c0d10 55%,#090a0d 100%)!important;
     border:1px solid #34373d!important;
     border-radius:22px!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 8px 22px rgba(0,0,0,.18)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 8px 22px rgba(0,0,0,.18)!important;
     overflow:hidden!important;
     cursor:pointer!important;
     transition:transform .18s ease,background .18s ease,border-color .18s ease!important;
@@ -41,7 +41,7 @@
   }
   .spa-admin-tools-grid a:active{
     transform:scale(.985)!important;
-    background:linear-gradient(135deg,#181a1d,#202329)!important;
+    background:linear-gradient(180deg,#15171b,#101216)!important;
   }
   .spa-admin-tools-grid a:hover{border-color:rgba(212,175,55,.4)!important}
   .spa-admin-tools-grid a.is-active{
@@ -117,7 +117,6 @@
     stroke-linejoin:round!important;
   }
 
-  /* Excluir conta: identidade destrutiva */
   .spa-admin-tools-grid a:last-child{
     background:linear-gradient(135deg,#1c1114,#241316)!important;
     border-color:rgba(205,68,79,.55)!important;
@@ -162,16 +161,15 @@
   .spa-admin-tools-grid b{width:18px!important;font-size:19px!important}
 }
 
-/* Tema claro mantém cards escuros premium e alto contraste. */
 @media (max-width:900px){
   html[data-theme="light"] .spa-admin-tools-backdrop{background:rgba(57,46,28,.42)!important}
   html[data-theme="light"] .spa-admin-tools-panel{color:#171717!important;background:#fffdf8!important;border-color:#d7d0c4!important}
   html[data-theme="light"] .spa-admin-tools-head{border-bottom-color:#ded8cd!important}
   html[data-theme="light"] .spa-admin-tools-head h2{color:#111!important}
   html[data-theme="light"] .spa-admin-tools-head p{color:#625d54!important}
-  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;background:#111315!important;border-color:#34373d!important}
-  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;background:linear-gradient(135deg,#111315,#15171b 55%,#101214)!important;border-color:#34373d!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:active{background:linear-gradient(135deg,#181a1d,#202329)!important}
+  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;background:#0c0d10!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;background:linear-gradient(180deg,#0d0e12 0%,#0c0d10 55%,#090a0d 100%)!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:active{background:linear-gradient(180deg,#15171b,#101216)!important}
   html[data-theme="light"] .spa-admin-tools-grid strong{color:#fff!important}
   html[data-theme="light"] .spa-admin-tools-grid small{color:#aaa8a3!important}
   html[data-theme="light"] .spa-admin-tools-grid a:last-child{background:linear-gradient(135deg,#1c1114,#241316)!important;border-color:rgba(205,68,79,.55)!important}
