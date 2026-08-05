@@ -1,0 +1,134 @@
+/* WD Founder 3.24 — contraste reforçado das ferramentas administrativas */
+@media (max-width:900px){
+  .spa-admin-tools-backdrop{
+    background:rgba(18,15,10,.58)!important;
+    backdrop-filter:blur(8px) saturate(115%)!important;
+    -webkit-backdrop-filter:blur(8px) saturate(115%)!important;
+  }
+  .spa-admin-tools-panel{
+    color:#171717!important;
+    background:#fffdf8!important;
+    border:1px solid rgba(91,70,28,.22)!important;
+    box-shadow:0 -24px 70px rgba(45,32,8,.30)!important;
+  }
+  .spa-admin-tools-head{
+    border-bottom:1px solid rgba(44,35,19,.16)!important;
+  }
+  .spa-admin-tools-head span{
+    color:#8c6400!important;
+    font-weight:950!important;
+  }
+  .spa-admin-tools-head h2{
+    color:#111214!important;
+    font-weight:950!important;
+  }
+  .spa-admin-tools-head p{
+    color:#5f5a51!important;
+    font-weight:600!important;
+  }
+  .spa-admin-tools-head button{
+    color:#111214!important;
+    background:#f4efe5!important;
+    border:1px solid rgba(38,32,20,.18)!important;
+  }
+  .spa-admin-tools-grid a{
+    color:#111214!important;
+    background:#ffffff!important;
+    border:1px solid rgba(49,43,31,.16)!important;
+    box-shadow:0 10px 26px rgba(55,39,11,.10)!important;
+  }
+  .spa-admin-tools-grid strong{
+    color:#111214!important;
+    font-weight:900!important;
+  }
+  .spa-admin-tools-grid small{
+    color:#625d54!important;
+    font-weight:620!important;
+  }
+  .spa-admin-tools-grid b{
+    color:#8c6400!important;
+    font-weight:950!important;
+  }
+  .spa-admin-tool-icon{
+    color:#6e5000!important;
+    background:linear-gradient(145deg,#f1d982,#d8ae36)!important;
+    border:1px solid rgba(111,80,0,.22)!important;
+  }
+  .spa-bottom-nav{
+    color:#5e5a52!important;
+    background:rgba(255,253,248,.985)!important;
+    border-top-color:rgba(95,69,13,.22)!important;
+  }
+  .spa-bottom-nav a,.spa-admin-nav-button{
+    color:#69645c!important;
+  }
+  .spa-bottom-nav a.is-active,.spa-admin-nav-button.is-active,.spa-admin-nav-button.is-current{
+    color:#17130b!important;
+    background:linear-gradient(145deg,#f4e5ba,#efe3c6)!important;
+    border:1px solid rgba(143,102,8,.24)!important;
+  }
+}
+
+@media (max-width:900px){
+  html[data-theme="dark"] .spa-admin-tools-backdrop{
+    background:rgba(0,0,0,.74)!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-panel{
+    color:#f8f5ed!important;
+    background:#111318!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    box-shadow:0 -26px 80px rgba(0,0,0,.62)!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-head{
+    border-bottom-color:rgba(255,255,255,.15)!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-head span{
+    color:#f0cf66!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-head h2{
+    color:#ffffff!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-head p{
+    color:#c2bdb3!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-head button{
+    color:#ffffff!important;
+    background:#1b1e24!important;
+    border-color:rgba(255,255,255,.23)!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-grid a{
+    color:#ffffff!important;
+    background:#1a1d22!important;
+    border-color:rgba(255,255,255,.16)!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.28)!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-grid strong{
+    color:#ffffff!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-grid small{
+    color:#c1bcb2!important;
+  }
+  html[data-theme="dark"] .spa-admin-tools-grid b{
+    color:#f0cf66!important;
+  }
+  html[data-theme="dark"] .spa-admin-tool-icon{
+    color:#241a00!important;
+    background:linear-gradient(145deg,#f2cf58,#d4a82c)!important;
+    border-color:rgba(255,220,106,.42)!important;
+  }
+  html[data-theme="dark"] .spa-bottom-nav{
+    background:rgba(12,13,16,.985)!important;
+    border-top-color:rgba(240,207,102,.24)!important;
+  }
+  html[data-theme="dark"] .spa-bottom-nav a,
+  html[data-theme="dark"] .spa-admin-nav-button{
+    color:#b8b3aa!important;
+  }
+  html[data-theme="dark"] .spa-bottom-nav a.is-active,
+  html[data-theme="dark"] .spa-admin-nav-button.is-active,
+  html[data-theme="dark"] .spa-admin-nav-button.is-current{
+    color:#ffffff!important;
+    background:rgba(240,207,102,.14)!important;
+    border:1px solid rgba(240,207,102,.30)!important;
+  }
+}
