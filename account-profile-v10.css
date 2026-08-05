@@ -1,0 +1,76 @@
+/* WD Founder — Conta premium v10: proporção mobile inspirada no cartão Founder */
+.wd-account-v3{width:100%!important;max-width:1180px!important;margin:0 auto!important;box-sizing:border-box!important}
+.wd-account-v3 .profile-panel{width:100%!important;box-sizing:border-box!important}
+.wd-account-v3 .profile-cover{position:relative!important;overflow:hidden!important}
+.wd-account-v3 .profile-cover:after{content:"";position:absolute;inset:auto 10% 0 10%;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.52),transparent);pointer-events:none}
+.wd-account-v3 .profile-identity{position:relative!important;z-index:2!important}
+.wd-account-v3 .profile-meta h2,.wd-account-v3 .profile-meta p,.wd-account-v3 .theme-setting-copy,.wd-account-v3 .profile-field{min-width:0!important;max-width:100%!important}
+.wd-account-v3 .theme-setting{display:grid!important;grid-template-columns:54px minmax(0,1fr) auto!important;align-items:center!important;gap:18px!important;padding:22px 24px!important}
+.wd-account-v3 .theme-setting-copy h3,.wd-account-v3 .theme-setting-copy p{overflow-wrap:normal!important;word-break:normal!important;white-space:normal!important}
+.wd-account-v3 .theme-setting-copy p{max-width:680px!important}
+.wd-account-v3 .theme-switch{justify-self:end!important;flex:0 0 auto!important}
+
+@media (min-width:701px){
+  .wd-account-v3 .profile-cover{padding:46px 52px!important}
+  .wd-account-v3 .profile-identity{grid-template-columns:250px minmax(0,1fr)!important;gap:48px!important;align-items:center!important}
+  .wd-account-v3 .profile-avatar-column{align-items:center!important}
+  .wd-account-v3 .profile-meta{text-align:left!important;align-items:flex-start!important}
+  .wd-account-v3 .profile-meta-badges{justify-content:flex-start!important}
+}
+
+@media (max-width:700px){
+  .wd-account-v3{padding:10px 10px calc(104px + env(safe-area-inset-bottom))!important;overflow-x:hidden!important}
+  .wd-account-v3 .profile-panel{border-radius:26px!important;overflow:hidden!important}
+  .wd-account-v3 .profile-cover{padding:28px 20px 30px!important;background:radial-gradient(circle at 12% 10%,rgba(212,175,55,.18),transparent 34%),linear-gradient(145deg,#111319,#090b0f)!important}
+  .wd-account-v3 .profile-identity{display:grid!important;grid-template-columns:124px minmax(0,1fr)!important;grid-template-areas:"avatar meta" "action action"!important;align-items:center!important;gap:18px 20px!important;width:100%!important}
+  .wd-account-v3 .profile-avatar-column{grid-area:avatar!important;display:block!important;width:124px!important;min-width:124px!important}
+  .wd-account-v3 .profile-avatar-wrap{width:124px!important;height:124px!important;margin:0!important}
+  .wd-account-v3 .profile-avatar{width:78px!important;height:78px!important}
+  .wd-account-v3 .profile-meta{grid-area:meta!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;text-align:left!important;width:100%!important;min-width:0!important}
+  .wd-account-v3 .profile-kicker{font-size:.58rem!important;line-height:1.35!important;letter-spacing:.20em!important;text-align:left!important;color:#e5c760!important}
+  .wd-account-v3 .profile-meta h2{width:100%!important;margin:8px 0 7px!important;font-size:clamp(1.75rem,8.2vw,2.55rem)!important;line-height:.98!important;letter-spacing:-.045em!important;text-align:left!important;overflow-wrap:break-word!important;word-break:normal!important}
+  .wd-account-v3 .profile-meta p{width:100%!important;margin:0!important;font-size:.83rem!important;line-height:1.35!important;text-align:left!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .wd-account-v3 .profile-meta-badges{display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;width:100%!important;margin-top:14px!important;flex-wrap:wrap!important}
+  .wd-account-v3 .profile-badge,.wd-account-v3 .profile-status-chip{padding:7px 10px!important;font-size:.54rem!important;letter-spacing:.11em!important;white-space:nowrap!important}
+  .wd-account-v3 .profile-frame-cta{grid-area:action!important;justify-self:center!important;width:min(100%,300px)!important;min-width:0!important;min-height:48px!important;margin:2px auto 0!important;padding:10px 18px!important;font-size:.64rem!important;line-height:1.25!important;letter-spacing:.14em!important}
+  .wd-account-v3 .profile-frame-cta span:last-child,.wd-account-v3 .profile-frame-cta strong{white-space:normal!important;word-break:normal!important;text-align:center!important}
+
+  .wd-account-v3 .profile-body{padding:14px!important;gap:14px!important}
+  .wd-account-v3 .account-overview,.wd-account-v3 .theme-setting,.wd-account-v3 .profile-form,.wd-account-v3 .account-exit{border-radius:20px!important}
+  .wd-account-v3 .account-overview{padding:20px 16px!important;text-align:center!important}
+  .wd-account-v3 .account-overview-head{display:block!important;text-align:center!important;margin-bottom:16px!important}
+  .wd-account-v3 .account-overview-head h3{font-size:1.65rem!important;line-height:1.05!important}
+  .wd-account-v3 .profile-grid{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+  .wd-account-v3 .profile-field{width:100%!important;padding:18px 16px!important;text-align:center!important;box-sizing:border-box!important}
+  .wd-account-v3 .profile-field span,.wd-account-v3 .profile-field small,.wd-account-v3 .profile-field strong{display:block!important;width:100%!important;text-align:center!important;overflow-wrap:normal!important;word-break:normal!important}
+  .wd-account-v3 .profile-field strong{font-size:clamp(1.35rem,6vw,1.9rem)!important;line-height:1.1!important}
+
+  .wd-account-v3 .theme-setting{display:grid!important;grid-template-columns:44px minmax(0,1fr)!important;grid-template-areas:"icon copy" "switch switch"!important;align-items:start!important;gap:12px 14px!important;padding:20px 16px!important}
+  .wd-account-v3 .theme-setting-icon{grid-area:icon!important;width:44px!important;height:44px!important}
+  .wd-account-v3 .theme-setting-copy{grid-area:copy!important;width:100%!important;min-width:0!important;text-align:left!important}
+  .wd-account-v3 .theme-setting-copy h3{margin:4px 0 6px!important;font-size:1.3rem!important;line-height:1.1!important;white-space:normal!important;word-break:normal!important}
+  .wd-account-v3 .theme-setting-copy p{margin:0!important;font-size:.88rem!important;line-height:1.5!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important}
+  .wd-account-v3 .theme-switch{grid-area:switch!important;justify-self:end!important;margin-top:2px!important}
+
+  .wd-account-v3 .profile-form{padding:20px 16px!important}
+  .wd-account-v3 .profile-form-head{display:block!important;text-align:center!important}
+  .wd-account-v3 .profile-form-head>div{text-align:center!important}
+  .wd-account-v3 .profile-form-symbol{display:none!important}
+  .wd-account-v3 .form-grid{grid-template-columns:1fr!important}
+  .wd-account-v3 .profile-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+  .wd-account-v3 .primary-btn,.wd-account-v3 .secondary-btn{width:100%!important}
+  .wd-account-v3 .profile-security{align-items:flex-start!important;text-align:left!important}
+
+  .wd-account-v3 .account-exit{display:grid!important;grid-template-columns:1fr!important;gap:14px!important;padding:20px 16px!important;text-align:center!important}
+  .wd-account-v3 .profile-logout-btn{width:100%!important}
+}
+
+@media (max-width:390px){
+  .wd-account-v3 .profile-identity{grid-template-columns:108px minmax(0,1fr)!important;gap:14px!important}
+  .wd-account-v3 .profile-avatar-column,.wd-account-v3 .profile-avatar-wrap{width:108px!important;min-width:108px!important;height:108px!important}
+  .wd-account-v3 .profile-avatar{width:68px!important;height:68px!important}
+  .wd-account-v3 .profile-meta h2{font-size:clamp(1.55rem,8vw,2.05rem)!important}
+}
+
+html[data-theme="light"] .wd-account-v3 .profile-cover{background:radial-gradient(circle at 12% 10%,rgba(212,175,55,.20),transparent 34%),linear-gradient(145deg,#fffdf8,#f3eee4)!important}
+html[data-theme="light"] .wd-account-v3 .profile-kicker{color:#916900!important}
