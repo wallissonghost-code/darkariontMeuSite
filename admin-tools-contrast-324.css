@@ -1,7 +1,7 @@
-/* WD Founder 3.32 — painel administrativo mobile compacto */
+/* WD Founder 3.33 — ferramentas administrativas mobile premium */
 @media (max-width:900px){
   .spa-admin-tools-backdrop{
-    background:rgba(0,0,0,.68)!important;
+    background:rgba(0,0,0,.70)!important;
     backdrop-filter:blur(8px) saturate(110%)!important;
     -webkit-backdrop-filter:blur(8px) saturate(110%)!important;
   }
@@ -15,80 +15,95 @@
   .spa-admin-tools-head span{color:#f0cf66!important;font-weight:900!important}
   .spa-admin-tools-head h2{color:#fff!important;font-weight:950!important}
   .spa-admin-tools-head p{color:#bcb7ae!important;font-weight:600!important}
-  .spa-admin-tools-head button{color:#fff!important;background:#050506!important;border:1px solid #34373d!important}
+  .spa-admin-tools-head button{color:#fff!important;background:#111315!important;border:1px solid #34373d!important}
 
-  .spa-admin-tools-grid{display:grid!important;gap:13px!important}
+  .spa-admin-tools-grid{display:grid!important;gap:12px!important}
   .spa-admin-tools-grid a{
     position:relative!important;
     display:grid!important;
-    grid-template-columns:82px minmax(0,1fr) 22px!important;
+    grid-template-columns:76px minmax(0,1fr) 22px!important;
     align-items:center!important;
-    gap:14px!important;
-    min-height:122px!important;
+    gap:16px!important;
+    width:100%!important;
+    min-height:110px!important;
     height:auto!important;
-    padding:18px 18px 18px 14px!important;
+    margin:0!important;
+    padding:14px 18px!important;
     color:#fff!important;
-    background:#050506!important;
+    background:linear-gradient(135deg,#111315,#15171b 55%,#101214)!important;
     border:1px solid #34373d!important;
     border-radius:22px!important;
-    box-shadow:none!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 8px 22px rgba(0,0,0,.18)!important;
     overflow:hidden!important;
+    cursor:pointer!important;
+    transition:transform .18s ease,background .18s ease,border-color .18s ease!important;
+    -webkit-tap-highlight-color:transparent!important;
   }
-  .spa-admin-tools-grid a:active{background:#111318!important}
+  .spa-admin-tools-grid a:active{
+    transform:scale(.985)!important;
+    background:linear-gradient(135deg,#181a1d,#202329)!important;
+  }
+  .spa-admin-tools-grid a:hover{border-color:rgba(212,175,55,.4)!important}
+  .spa-admin-tools-grid a.is-active{
+    background:linear-gradient(135deg,#1b1914,#211d14)!important;
+    border-color:rgba(212,175,55,.4)!important;
+  }
   .spa-admin-tools-grid a>div{min-width:0!important;align-self:center!important}
   .spa-admin-tools-grid strong{
     display:block!important;
     margin:0 0 5px!important;
     color:#fff!important;
     font-size:18px!important;
+    font-weight:750!important;
     line-height:1.15!important;
-    font-weight:900!important;
     letter-spacing:-.015em!important;
     overflow-wrap:normal!important;
     word-break:normal!important;
   }
   .spa-admin-tools-grid small{
     display:-webkit-box!important;
+    margin:0!important;
     -webkit-box-orient:vertical!important;
     -webkit-line-clamp:2!important;
     overflow:hidden!important;
-    color:#bbb6ad!important;
-    font-size:14px!important;
-    line-height:1.34!important;
-    font-weight:600!important;
+    color:#aaa8a3!important;
+    font-size:13.5px!important;
+    font-weight:500!important;
+    line-height:1.35!important;
     overflow-wrap:normal!important;
     word-break:normal!important;
   }
   .spa-admin-tools-grid b{
     justify-self:end!important;
     align-self:center!important;
-    width:18px!important;
-    color:#e7c653!important;
-    font-size:25px!important;
+    width:22px!important;
+    color:#f2c94c!important;
+    font-size:22px!important;
+    font-weight:800!important;
     line-height:1!important;
-    font-weight:900!important;
     text-align:center!important;
   }
   .spa-admin-tool-icon{
-    width:82px!important;
-    height:82px!important;
-    min-width:82px!important;
-    flex:0 0 82px!important;
-    display:grid!important;
-    place-items:center!important;
-    color:#16130a!important;
-    background:linear-gradient(145deg,#f7d75b,#dcaa16)!important;
-    border:1px solid rgba(255,226,117,.56)!important;
-    border-radius:20px!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 7px 18px rgba(0,0,0,.18)!important;
+    width:76px!important;
+    height:76px!important;
+    min-width:76px!important;
+    flex:0 0 76px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    color:#111318!important;
+    background:linear-gradient(145deg,#ffe477,#f2c62d 55%,#d9a915)!important;
+    border:1px solid rgba(255,228,119,.52)!important;
+    border-radius:22px!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 7px 20px rgba(218,170,22,.14)!important;
   }
   .spa-admin-tool-icon svg{
     display:block!important;
-    width:38px!important;
-    height:38px!important;
+    width:32px!important;
+    height:32px!important;
     overflow:visible!important;
     fill:none!important;
-    stroke:#151515!important;
+    stroke:#111318!important;
     stroke-width:2.45!important;
     stroke-linecap:round!important;
     stroke-linejoin:round!important;
@@ -96,49 +111,68 @@
   }
   .spa-admin-tool-icon svg *{
     fill:none!important;
-    stroke:#151515!important;
+    stroke:#111318!important;
     stroke-width:2.45!important;
     stroke-linecap:round!important;
     stroke-linejoin:round!important;
   }
 
-  /* Ação destrutiva: Excluir conta */
-  .spa-admin-tools-grid a:last-child{background:linear-gradient(145deg,#211417,#160f11)!important;border-color:#5c2e35!important}
-  .spa-admin-tools-grid a:last-child:active{background:#2a171b!important}
-  .spa-admin-tools-grid a:last-child .spa-admin-tool-icon{color:#fff!important;background:linear-gradient(145deg,#9d2634,#641722)!important;border-color:#bd4654!important}
+  /* Excluir conta: identidade destrutiva */
+  .spa-admin-tools-grid a:last-child{
+    background:linear-gradient(135deg,#1c1114,#241316)!important;
+    border-color:rgba(205,68,79,.55)!important;
+  }
+  .spa-admin-tools-grid a:last-child:hover{border-color:#ef5b67!important}
+  .spa-admin-tools-grid a:last-child:active{background:linear-gradient(135deg,#251317,#30171c)!important}
+  .spa-admin-tools-grid a:last-child .spa-admin-tool-icon{
+    color:#16090b!important;
+    background:linear-gradient(145deg,#e95b67,#9f2934)!important;
+    border-color:rgba(239,91,103,.68)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 7px 20px rgba(205,68,79,.16)!important;
+  }
   .spa-admin-tools-grid a:last-child .spa-admin-tool-icon svg,
-  .spa-admin-tools-grid a:last-child .spa-admin-tool-icon svg *{stroke:#fff!important}
-  .spa-admin-tools-grid a:last-child strong{color:#ffdde1!important}
-  .spa-admin-tools-grid a:last-child small{color:#cdaeb2!important}
-  .spa-admin-tools-grid a:last-child b{color:#ef7180!important}
+  .spa-admin-tools-grid a:last-child .spa-admin-tool-icon svg *{stroke:#16090b!important}
+  .spa-admin-tools-grid a:last-child strong{color:#fff!important}
+  .spa-admin-tools-grid a:last-child small{color:#c7aeb1!important}
+  .spa-admin-tools-grid a:last-child b{color:#ef5b67!important}
 
   .spa-bottom-nav{background:rgba(12,13,16,.985)!important;border-top-color:rgba(240,207,102,.24)!important}
   .spa-bottom-nav a,.spa-admin-nav-button{color:#b8b3aa!important}
   .spa-bottom-nav a.is-active,.spa-admin-nav-button.is-active,.spa-admin-nav-button.is-current{color:#fff!important;background:rgba(240,207,102,.14)!important;border:1px solid rgba(240,207,102,.30)!important}
 }
 
-@media (max-width:390px){
-  .spa-admin-tools-grid a{grid-template-columns:78px minmax(0,1fr) 18px!important;min-height:118px!important;gap:12px!important;padding:16px 14px 16px 12px!important}
-  .spa-admin-tool-icon{width:78px!important;height:78px!important;min-width:78px!important;flex-basis:78px!important}
-  .spa-admin-tool-icon svg{width:35px!important;height:35px!important}
-  .spa-admin-tools-grid strong{font-size:17px!important}
-  .spa-admin-tools-grid small{font-size:13px!important}
-  .spa-admin-tools-grid b{font-size:22px!important}
+@media (max-width:380px){
+  .spa-admin-tools-grid a{
+    grid-template-columns:66px minmax(0,1fr) 18px!important;
+    min-height:100px!important;
+    padding:12px 14px!important;
+    gap:12px!important;
+    border-radius:20px!important;
+  }
+  .spa-admin-tool-icon{
+    width:66px!important;
+    height:66px!important;
+    min-width:66px!important;
+    flex-basis:66px!important;
+    border-radius:19px!important;
+  }
+  .spa-admin-tool-icon svg{width:28px!important;height:28px!important}
+  .spa-admin-tools-grid strong{font-size:16px!important}
+  .spa-admin-tools-grid small{font-size:12.5px!important}
+  .spa-admin-tools-grid b{width:18px!important;font-size:19px!important}
 }
 
-/* Tema claro: os botões permanecem pretos para preservar o contraste premium. */
+/* Tema claro mantém cards escuros premium e alto contraste. */
 @media (max-width:900px){
   html[data-theme="light"] .spa-admin-tools-backdrop{background:rgba(57,46,28,.42)!important}
   html[data-theme="light"] .spa-admin-tools-panel{color:#171717!important;background:#fffdf8!important;border-color:#d7d0c4!important}
   html[data-theme="light"] .spa-admin-tools-head{border-bottom-color:#ded8cd!important}
   html[data-theme="light"] .spa-admin-tools-head h2{color:#111!important}
   html[data-theme="light"] .spa-admin-tools-head p{color:#625d54!important}
-  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;background:#050506!important;border-color:#34373d!important}
-  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;background:#050506!important;border-color:#34373d!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:active{background:#111318!important}
+  html[data-theme="light"] .spa-admin-tools-head button{color:#fff!important;background:#111315!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a{color:#fff!important;background:linear-gradient(135deg,#111315,#15171b 55%,#101214)!important;border-color:#34373d!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:active{background:linear-gradient(135deg,#181a1d,#202329)!important}
   html[data-theme="light"] .spa-admin-tools-grid strong{color:#fff!important}
-  html[data-theme="light"] .spa-admin-tools-grid small{color:#bbb6ad!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:last-child{background:linear-gradient(145deg,#211417,#160f11)!important;border-color:#5c2e35!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:last-child strong{color:#ffdde1!important}
-  html[data-theme="light"] .spa-admin-tools-grid a:last-child small{color:#cdaeb2!important}
+  html[data-theme="light"] .spa-admin-tools-grid small{color:#aaa8a3!important}
+  html[data-theme="light"] .spa-admin-tools-grid a:last-child{background:linear-gradient(135deg,#1c1114,#241316)!important;border-color:rgba(205,68,79,.55)!important}
 }
