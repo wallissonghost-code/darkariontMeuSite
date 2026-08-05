@@ -1,69 +1,23 @@
-<link rel="stylesheet" href="account-profile-premium.css?v=3.18.0"><link rel="stylesheet" href="account-profile-v2.css?v=3.18.0"><link rel="stylesheet" href="account-profile-light-premium.css?v=3.18.0"><link rel="stylesheet" href="account-founder-elite.css?v=3.18.0"><link rel="stylesheet" href="account-founder-v2.css?v=3.18.0"><link rel="stylesheet" href="account-founder-final-375.css?v=3.18.0"><link rel="stylesheet" href="profile-frames.css?v=3.18.0"><link rel="stylesheet" href="profile-frames-assets.css?v=3.18.0"><link rel="stylesheet" href="account-profile-v4.css?v=3.18.0"><link rel="stylesheet" href="account-profile-v5.css?v=3.18.0">
+<link rel="stylesheet" href="account-profile-premium.css?v=3.20.0"><link rel="stylesheet" href="account-profile-v2.css?v=3.20.0"><link rel="stylesheet" href="account-profile-light-premium.css?v=3.20.0"><link rel="stylesheet" href="account-founder-elite.css?v=3.20.0"><link rel="stylesheet" href="account-founder-v2.css?v=3.20.0"><link rel="stylesheet" href="account-founder-final-375.css?v=3.20.0"><link rel="stylesheet" href="profile-frames.css?v=3.20.0"><link rel="stylesheet" href="profile-frames-assets.css?v=3.20.0"><link rel="stylesheet" href="account-profile-v4.css?v=3.20.0"><link rel="stylesheet" href="account-profile-v5.css?v=3.20.0"><link rel="stylesheet" href="account-profile-v7.css?v=3.20.0">
 <section class="conteudo profile-page spa-page-content wd-account-v3" data-view="account" data-vip="0">
   <section class="profile-panel profile-premium">
     <div class="profile-cover">
-      <div class="profile-cover-glow"></div>
-      <div class="profile-cover-grid"></div>
+      <div class="profile-cover-glow"></div><div class="profile-cover-grid"></div>
       <div class="profile-identity">
         <div class="profile-avatar-column">
-          <div class="profile-avatar-wrap" data-frame="frame-01">
-            <div class="profile-avatar" id="profileAvatar">
-              <span id="profileAvatarInitials">WD</span>
-              <img id="profileAvatarImage" alt="Avatar da conta" hidden>
-            </div>
-          </div>
+          <div class="profile-avatar-wrap" data-frame="frame-01"><div class="profile-avatar" id="profileAvatar"><span id="profileAvatarInitials">WD</span><img id="profileAvatarImage" alt="Avatar da conta" hidden></div></div>
           <input id="profilePhotoInput" type="file" accept="image/*" hidden>
-          <div class="profile-photo-actions" aria-label="Ações da foto de perfil">
-            <button class="profile-photo-action" id="profilePhotoButton" type="button">Alterar foto</button>
-            <button class="profile-photo-action is-danger" id="removeProfilePhoto" type="button">Remover foto</button>
-          </div>
-          <button class="profile-frame-cta" id="profileFrameButton" type="button" aria-label="Escolher moldura do perfil">
-            <span class="profile-frame-cta-icon">✦</span>
-            <span><strong>Trocar moldura</strong></span>
-          </button>
+          <div class="profile-photo-actions" aria-label="Ações da foto de perfil"><button class="profile-photo-action" id="profilePhotoButton" type="button">Alterar foto</button><button class="profile-photo-action is-danger" id="removeProfilePhoto" type="button">Remover foto</button></div>
+          <button class="profile-frame-cta" id="profileFrameButton" type="button" aria-label="Escolher moldura do perfil"><span class="profile-frame-cta-icon">✦</span><span><strong>Escolher moldura</strong></span></button>
         </div>
-        <div class="profile-meta">
-          <span class="profile-kicker">MEMBRO WD FOUNDER</span>
-          <h2 id="perfilNome">Carregando...</h2>
-          <p id="perfilEmail">Sincronizando conta</p>
-          <div class="profile-meta-badges">
-            <span class="profile-badge" id="perfilBadge">MEMBRO WD</span>
-            <span class="profile-status-chip"><i></i> CONTA ATIVA</span>
-          </div>
-        </div>
+        <div class="profile-meta"><span class="profile-kicker">MEMBRO WD FOUNDER</span><h2 id="perfilNome">Carregando...</h2><p id="perfilEmail">Sincronizando conta</p><div class="profile-meta-badges"><span class="profile-badge" id="perfilBadge">MEMBRO WD</span><span class="profile-status-chip"><i></i> CONTA ATIVA</span></div></div>
       </div>
     </div>
-
     <div class="profile-body">
-      <section class="account-overview">
-        <div class="account-overview-head">
-          <div><span class="account-eyebrow">VISÃO GERAL</span><h3>Sua conta WD</h3></div>
-          <span class="account-secure-chip">◆ PERFIL PROTEGIDO</span>
-        </div>
-        <div class="profile-grid">
-          <div class="profile-field profile-field-level"><span>Nível atual</span><strong id="perfilNivel">Carregando...</strong><small>Seu status dentro do WD Founder</small></div>
-          <div class="profile-field"><span>Telefone cadastrado</span><strong id="perfilTelefone">Carregando...</strong><small>Contato principal da sua conta</small></div>
-        </div>
-      </section>
-
-      <div class="theme-setting">
-        <div class="theme-setting-icon">◐</div>
-        <div class="theme-setting-copy"><span class="account-eyebrow">APARÊNCIA</span><h3>Modo noturno</h3><p>Essa preferência fica salva na sua conta e é aplicada em todas as telas.</p></div>
-        <label class="theme-switch" aria-label="Ativar modo noturno"><input id="darkModeToggle" type="checkbox"><span class="theme-slider"></span></label>
-      </div>
-
-      <form class="profile-form" id="profileForm">
-        <div class="profile-form-head"><div><span class="account-eyebrow">INFORMAÇÕES</span><h3>Dados pessoais</h3><p>Mantenha seus dados atualizados para uma experiência completa.</p></div><span class="profile-form-symbol">WD</span></div>
-        <div class="form-grid">
-          <div class="input-premium"><label for="nome">Nome completo</label><input id="nome" autocomplete="name" required><span class="input-line"></span></div>
-          <div class="input-premium"><label for="telefone">Número de telefone</label><input id="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Digite seu telefone"><span class="input-line"></span></div>
-        </div>
-        <div class="profile-actions"><button class="primary-btn" type="submit"><span>Salvar alterações</span></button><button class="secondary-btn" type="button" id="resetPassword">Alterar senha</button></div>
-        <div class="status" id="profileStatus" aria-live="polite"></div>
-        <div class="profile-security"><span>◆</span><div><strong>Conta autenticada e protegida</strong><small>Seus dados são sincronizados com segurança.</small></div></div>
-      </form>
-
-      <section class="account-exit"><div><span>SESSÃO</span><h3>Sair da sua conta</h3><p>Encerra o acesso neste aparelho e retorna para a tela de login.</p></div><button class="profile-logout-btn" data-action="logout" type="button">Sair da conta</button></section>
+      <section class="account-overview"><div class="account-overview-head"><div><span class="account-eyebrow">VISÃO GERAL</span><h3>Sua conta WD</h3></div><span class="account-secure-chip">◆ PERFIL PROTEGIDO</span></div><div class="profile-grid"><div class="profile-field profile-field-level"><span>Nível atual</span><strong id="perfilNivel">Carregando...</strong><small>Seu status dentro do WD Founder</small></div><div class="profile-field"><span>Telefone cadastrado</span><strong id="perfilTelefone">Carregando...</strong><small>Contato principal da sua conta</small></div></div></section>
+      <div class="theme-setting"><div class="theme-setting-icon">◐</div><div class="theme-setting-copy"><span class="account-eyebrow">APARÊNCIA</span><h3>Modo noturno</h3><p>Essa preferência fica salva na sua conta e é aplicada em todas as telas.</p></div><label class="theme-switch" aria-label="Ativar modo noturno"><input id="darkModeToggle" type="checkbox"><span class="theme-slider"></span></label></div>
+      <form class="profile-form" id="profileForm"><div class="profile-form-head"><div><span class="account-eyebrow">INFORMAÇÕES</span><h3>Dados pessoais</h3><p>Mantenha seus dados atualizados.</p></div><span class="profile-form-symbol">WD</span></div><div class="form-grid"><div class="input-premium"><label for="nome">Nome completo</label><input id="nome" autocomplete="name" required><span class="input-line"></span></div><div class="input-premium"><label for="telefone">Número de telefone</label><input id="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Digite seu telefone"><span class="input-line"></span></div></div><div class="profile-actions"><button class="primary-btn" type="submit"><span>Salvar alterações</span></button><button class="secondary-btn" type="button" id="resetPassword">Alterar senha</button></div><div class="status" id="profileStatus" aria-live="polite"></div><div class="profile-security"><span>◆</span><div><strong>Conta autenticada e protegida</strong><small>Seus dados são sincronizados com segurança.</small></div></div></form>
+      <section class="account-exit"><div><span>SESSÃO</span><h3>Sair da sua conta</h3><p>Encerra o acesso neste aparelho.</p></div><button class="profile-logout-btn" data-action="logout" type="button">Sair da conta</button></section>
     </div>
   </section>
 </section>
