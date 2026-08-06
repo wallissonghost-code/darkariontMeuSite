@@ -1,5 +1,5 @@
 /* WD Founder — status do sistema para administradores */
-const CURRENT_VERSION='3.42.0';
+const CURRENT_VERSION=String(window.WDAppVersion?.version||'3.44.0');
 let adminAuthorized=false;
 let remoteVersion=CURRENT_VERSION;
 let refreshing=false;
@@ -20,42 +20,12 @@ function ensureStyles(){
   document.head.append(style);
 }
 function cardMarkup(){return `<button type="button" class="wd-system-status-card" data-system-status-card data-status="checking"><span class="wd-system-status-main"><span class="wd-system-dot"></span><span class="wd-system-copy"><small>STATUS DO SISTEMA</small><strong data-system-title>Verificando atualização…</strong><span data-system-meta>Versão instalada ${CURRENT_VERSION}</span></span></span><span class="wd-system-arrow">›</span></button>`}
-function installCard(){
-  if(!adminAuthorized||document.querySelector('[data-system-status-card]'))return;
-  const grid=document.querySelector('.spa-view[data-route="home"] .metric-grid');
-  if(!grid)return;
-  ensureStyles();
-  grid.insertAdjacentHTML('beforebegin',cardMarkup());
-  updateCard();
-}
-function updateCard(status='ok'){
-  const hasUpdate=remoteVersion!==CURRENT_VERSION;
-  document.querySelectorAll('[data-system-status-card]').forEach(card=>{
-    const nextStatus=status==='error'?'error':(hasUpdate?'update':'ok');
-    const title=status==='error'?'Não foi possível verificar':(hasUpdate?'Nova versão disponível':'Sistema atualizado');
-    const meta=hasUpdate?`Instalada ${CURRENT_VERSION} • disponível ${remoteVersion}`:`Última versão ${CURRENT_VERSION}`;
-    if(card.dataset.status!==nextStatus)card.dataset.status=nextStatus;
-    const titleNode=card.querySelector('[data-system-title]');
-    const metaNode=card.querySelector('[data-system-meta]');
-    if(titleNode&&titleNode.textContent!==title)titleNode.textContent=title;
-    if(metaNode&&metaNode.textContent!==meta)metaNode.textContent=meta;
-  });
-}
-async function fetchVersion(){
-  try{const r=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error(r.status);const data=await r.json();remoteVersion=String(data.version||CURRENT_VERSION).trim();updateCard();return data}catch(error){updateCard('error');throw error}
-}
+function installCard(){if(!adminAuthorized||document.querySelector('[data-system-status-card]'))return;const grid=document.querySelector('.spa-view[data-route="home"] .metric-grid');if(!grid)return;ensureStyles();grid.insertAdjacentHTML('beforebegin',cardMarkup());updateCard()}
+function updateCard(status='ok'){const hasUpdate=remoteVersion!==CURRENT_VERSION;document.querySelectorAll('[data-system-status-card]').forEach(card=>{const nextStatus=status==='error'?'error':(hasUpdate?'update':'ok');const title=status==='error'?'Não foi possível verificar':(hasUpdate?'Nova versão disponível':'Sistema atualizado');const meta=hasUpdate?`Instalada ${CURRENT_VERSION} • disponível ${remoteVersion}`:`Última versão ${CURRENT_VERSION}`;if(card.dataset.status!==nextStatus)card.dataset.status=nextStatus;const titleNode=card.querySelector('[data-system-title]');const metaNode=card.querySelector('[data-system-meta]');if(titleNode&&titleNode.textContent!==title)titleNode.textContent=title;if(metaNode&&metaNode.textContent!==meta)metaNode.textContent=meta})}
+async function fetchVersion(){try{const r=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error(r.status);const data=await r.json();remoteVersion=String(data.version||CURRENT_VERSION).trim();updateCard();return data}catch(error){updateCard('error');throw error}}
 function closeSheet(){document.querySelector('[data-system-sheet]')?.remove();document.querySelector('[data-system-backdrop]')?.remove();document.body.style.removeProperty('overflow')}
-function openSheet(){
-  closeSheet();const hasUpdate=remoteVersion!==CURRENT_VERSION;
-  const backdrop=document.createElement('button');backdrop.type='button';backdrop.className='wd-system-backdrop';backdrop.dataset.systemBackdrop='true';backdrop.setAttribute('aria-label','Fechar');
-  const sheet=document.createElement('section');sheet.className='wd-system-sheet';sheet.dataset.systemSheet='true';sheet.innerHTML=`<div class="wd-system-head"><div><small>WD FOUNDER</small><h2>Status do sistema</h2></div><button type="button" class="wd-system-close" data-close-system>×</button></div><div class="wd-system-versions"><div><small>Versão instalada</small><strong>${CURRENT_VERSION}</strong></div><div><small>Versão publicada</small><strong>${remoteVersion}</strong></div></div><div class="wd-system-actions"><button class="wd-system-action" data-check-system>Verificar atualização</button><button class="wd-system-action primary" data-download-system ${hasUpdate?'':'disabled'}>${hasUpdate?'Baixar atualização':'Nenhuma atualização disponível'}</button><button class="wd-system-action" data-clear-system>Limpar cache</button><button class="wd-system-action" data-force-system>Forçar atualização</button></div>`;
-  backdrop.onclick=closeSheet;sheet.querySelector('[data-close-system]').onclick=closeSheet;document.body.append(backdrop,sheet);document.body.style.overflow='hidden';
-}
+function openSheet(){closeSheet();const hasUpdate=remoteVersion!==CURRENT_VERSION;const backdrop=document.createElement('button');backdrop.type='button';backdrop.className='wd-system-backdrop';backdrop.dataset.systemBackdrop='true';backdrop.setAttribute('aria-label','Fechar');const sheet=document.createElement('section');sheet.className='wd-system-sheet';sheet.dataset.systemSheet='true';sheet.innerHTML=`<div class="wd-system-head"><div><small>WD FOUNDER</small><h2>Status do sistema</h2></div><button type="button" class="wd-system-close" data-close-system>×</button></div><div class="wd-system-versions"><div><small>Versão instalada</small><strong>${CURRENT_VERSION}</strong></div><div><small>Versão publicada</small><strong>${remoteVersion}</strong></div></div><div class="wd-system-actions"><button class="wd-system-action" data-check-system>Verificar atualização</button><button class="wd-system-action primary" data-download-system ${hasUpdate?'':'disabled'}>${hasUpdate?'Baixar atualização':'Nenhuma atualização disponível'}</button><button class="wd-system-action" data-clear-system>Limpar cache</button><button class="wd-system-action" data-force-system>Forçar atualização</button></div>`;backdrop.onclick=closeSheet;sheet.querySelector('[data-close-system]').onclick=closeSheet;document.body.append(backdrop,sheet);document.body.style.overflow='hidden'}
 async function clearCaches(){if(!('caches'in window))return;const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)))}
-async function forceUpdate(button){if(refreshing)return;refreshing=true;button?.setAttribute('aria-busy','true');try{await clearCaches();if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(async r=>{await r.update().catch(()=>{});r.waiting?.postMessage({type:'SKIP_WAITING'})}))}const url=new URL(location.href);url.searchParams.set('_wd',Date.now());location.replace(url.toString())}catch(e){refreshing=false;button?.removeAttribute('aria-busy');alert('Não foi possível atualizar. Verifique sua conexão.')}}
+async function forceUpdate(button){if(refreshing)return;refreshing=true;button?.setAttribute('aria-busy','true');try{await clearCaches();if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(async reg=>{await reg.update().catch(()=>{});if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});await new Promise(resolve=>setTimeout(resolve,350))}}))}await fetch(`./app.html?refresh=${Date.now()}`,{cache:'no-store'}).catch(()=>null);await fetch(`./version.json?refresh=${Date.now()}`,{cache:'no-store'}).catch(()=>null);localStorage.setItem('wd-installed-version',remoteVersion);const url=new URL(location.href);url.searchParams.set('_wd',`${remoteVersion}-${Date.now()}`);location.replace(url.toString())}catch(e){refreshing=false;button?.removeAttribute('aria-busy');alert('Não foi possível atualizar. Verifique sua conexão.')}}
 document.addEventListener('click',async e=>{if(e.target.closest('[data-system-status-card]'))return openSheet();if(e.target.closest('[data-check-system]')){await fetchVersion().catch(()=>{});closeSheet();openSheet();return}if(e.target.closest('[data-download-system]')&&!e.target.closest('[data-download-system]').disabled)return forceUpdate(e.target.closest('[data-download-system]'));if(e.target.closest('[data-clear-system]')){await clearCaches();e.target.closest('[data-clear-system]').textContent='Cache limpo';return}if(e.target.closest('[data-force-system]'))return forceUpdate(e.target.closest('[data-force-system]'))});
-document.addEventListener('wd-role-ready',e=>{adminAuthorized=Boolean(e.detail?.admin);if(adminAuthorized){installCard();fetchVersion().catch(()=>{})}});
-document.addEventListener('wd-spa-route',e=>{if(e.detail?.route==='home'&&adminAuthorized)requestAnimationFrame(()=>{installCard();fetchVersion().catch(()=>{})})});
-/* Observa somente a chegada inicial da Home e se desliga assim que o card é instalado. */
-const homeObserver=new MutationObserver(()=>{if(!adminAuthorized)return;if(document.querySelector('[data-system-status-card]')){homeObserver.disconnect();return}installCard();if(document.querySelector('[data-system-status-card]'))homeObserver.disconnect()});
-homeObserver.observe(document.getElementById('conteudo')||document.body,{subtree:true,childList:true});
+document.addEventListener('wd-role-ready',e=>{adminAuthorized=Boolean(e.detail?.admin);if(adminAuthorized){installCard();fetchVersion().catch(()=>{})}});document.addEventListener('wd-spa-route',e=>{if(e.detail?.route==='home'&&adminAuthorized)requestAnimationFrame(()=>{installCard();fetchVersion().catch(()=>{})})});const homeObserver=new MutationObserver(()=>{if(!adminAuthorized)return;if(document.querySelector('[data-system-status-card]')){homeObserver.disconnect();return}installCard();if(document.querySelector('[data-system-status-card]'))homeObserver.disconnect()});homeObserver.observe(document.getElementById('conteudo')||document.body,{subtree:true,childList:true});
