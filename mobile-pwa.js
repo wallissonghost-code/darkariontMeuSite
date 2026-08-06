@@ -4,7 +4,7 @@
   document.body.dataset.pwaStandalone=standalone?'true':'false';
   document.documentElement.classList.toggle('wd-pwa-standalone',standalone);
 
-  const setViewport=()=>document.documentElement.style.setProperty('--wd-vh',`${window.visualViewport?.height||window.innerHeight}px`);
+  const setViewport=()=>document.documentElement.style.setProperty('--wd-app-height',`${window.visualViewport?.height||window.innerHeight}px`);
   setViewport();
   let viewportTimer=0;
   const scheduleViewport=()=>{clearTimeout(viewportTimer);viewportTimer=setTimeout(setViewport,60)};
@@ -43,4 +43,5 @@
   },true);
 
   if('serviceWorker'in navigator){navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sessionStorage.getItem('wd-sw-reloaded')==='1')return;sessionStorage.setItem('wd-sw-reloaded','1');location.reload()});window.addEventListener('load',()=>setTimeout(()=>sessionStorage.removeItem('wd-sw-reloaded'),3000),{once:true})}
+  syncRoute();
 })();
