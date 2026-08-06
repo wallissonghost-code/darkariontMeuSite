@@ -1,4 +1,4 @@
-const RELEASE='wd-founder-3.39.0';
+const RELEASE='wd-founder-3.40.0';
 const STATIC_CACHE=`${RELEASE}-static`,RUNTIME_CACHE=`${RELEASE}-runtime`,OFFLINE_FALLBACK='index.html';
 const PRECACHE=['./','./index.html','./app.html','./views/home.html','./views/account.html','./views/store.html','./views/rank.html','./views/card.html','./404.html','./manifest.webmanifest','./version.json','./production-hardening.css','./production-hardening.js','./premium-shell-v319.css','./admin-panel-autoclose.js','./admin-force-refresh.js','./admin-icons-sync.js','./firebase.js','./app-session.js','./app-shell.js','./spa.js','./home.js','./home-commerce.js','./perfil.js','./profile-frames.css','./profile-frames-assets.css','./account-profile-v8.css','./profile-frames.js','./store-controller.js','./store-runtime-polish.js','./store-polish-v321.css'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(STATIC_CACHE).then(cache=>cache.addAll(PRECACHE)).then(()=>self.skipWaiting())));
