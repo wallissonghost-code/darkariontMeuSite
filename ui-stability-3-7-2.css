@@ -50,3 +50,57 @@ html[data-theme="light"] .profile-page[data-vip="10"] .profile-field:not(:first-
   .profile-page[data-vip="10"] .profile-meta p{font-size:11px!important}
   .profile-page[data-vip="10"] .profile-badge{padding:6px 8px!important;font-size:6.5px!important}
 }
+
+/* Splash absolutamente estática: sem efeitos, brilho ou transições */
+.spa-loader,
+.spa-loader *,
+.spa-loader::before,
+.spa-loader::after,
+.spa-loader *::before,
+.spa-loader *::after{
+  animation:none!important;
+  transition:none!important;
+  transform:none!important;
+  filter:none!important;
+}
+.spa-loader{
+  background:#050506!important;
+}
+.spa-loader::before,
+.spa-loader::after,
+.wd-splash-mark::before,
+.wd-splash-mark::after,
+.wd-splash-progress,
+.wd-splash-status,
+.wd-splash-subtitle{
+  display:none!important;
+  content:none!important;
+}
+.spa-loader-box{
+  width:auto!important;
+  min-height:0!important;
+}
+.wd-splash-mark{
+  width:auto!important;
+  height:auto!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.wd-splash-monogram{
+  color:#d8b84e!important;
+  font-size:48px!important;
+  font-weight:850!important;
+  letter-spacing:.08em!important;
+  text-shadow:none!important;
+}
+.wd-splash-brand{
+  margin-top:12px!important;
+  color:#f4efe4!important;
+  font-size:12px!important;
+  font-weight:750!important;
+  letter-spacing:.28em!important;
+  text-indent:.28em!important;
+}
