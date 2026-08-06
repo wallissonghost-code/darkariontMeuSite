@@ -1,8 +1,11 @@
-const LOCAL_VERSION='3.42.0';
+const LOCAL_VERSION='3.43.0';
 const VERSION_KEY='wd-app-version';
 const CHECK_INTERVAL=10*60*1000;
 let updateAvailable=false;
 function loadRuntimeScript(src,id){if(document.getElementById(id))return;const script=document.createElement('script');script.id=id;script.src=`${src}?v=${LOCAL_VERSION}`;script.defer=true;script.onerror=()=>console.warn(`Falha ao carregar ${src}`);document.head.append(script)}
+function loadRuntimeStyle(href,id){if(document.getElementById(id))return;const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`${href}?v=${LOCAL_VERSION}`;document.head.append(link)}
+loadRuntimeStyle('./mobile-pwa.css','wd-mobile-pwa-style');
+loadRuntimeScript('./mobile-pwa.js','wd-mobile-pwa-runtime');
 loadRuntimeScript('./system-status.js','wd-system-status-runtime');
 loadRuntimeScript('./system-status-bootstrap.js','wd-system-status-bootstrap');
 async function clearLegacyCaches(){if(!('caches' in window))return;const keys=await caches.keys();await Promise.all(keys.filter(key=>key.startsWith('wd-founder-')&&!key.includes(LOCAL_VERSION)).map(key=>caches.delete(key)))}
