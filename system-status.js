@@ -1,5 +1,5 @@
 /* WD Founder — status do sistema para administradores */
-const CURRENT_VERSION='3.41.0';
+const CURRENT_VERSION='3.42.0';
 let adminAuthorized=false;
 let remoteVersion=CURRENT_VERSION;
 let refreshing=false;
@@ -21,20 +21,24 @@ function ensureStyles(){
 }
 function cardMarkup(){return `<button type="button" class="wd-system-status-card" data-system-status-card data-status="checking"><span class="wd-system-status-main"><span class="wd-system-dot"></span><span class="wd-system-copy"><small>STATUS DO SISTEMA</small><strong data-system-title>Verificando atualização…</strong><span data-system-meta>Versão instalada ${CURRENT_VERSION}</span></span></span><span class="wd-system-arrow">›</span></button>`}
 function installCard(){
-  if(!adminAuthorized)return;
+  if(!adminAuthorized||document.querySelector('[data-system-status-card]'))return;
+  const grid=document.querySelector('.spa-view[data-route="home"] .metric-grid');
+  if(!grid)return;
   ensureStyles();
-  document.querySelectorAll('.spa-view[data-route="home"] .metric-grid').forEach(grid=>{
-    if(grid.previousElementSibling?.matches('[data-system-status-card]'))return;
-    grid.insertAdjacentHTML('beforebegin',cardMarkup());
-  });
+  grid.insertAdjacentHTML('beforebegin',cardMarkup());
   updateCard();
 }
 function updateCard(status='ok'){
   const hasUpdate=remoteVersion!==CURRENT_VERSION;
   document.querySelectorAll('[data-system-status-card]').forEach(card=>{
-    card.dataset.status=status==='error'?'error':(hasUpdate?'update':'ok');
-    card.querySelector('[data-system-title]').textContent=status==='error'?'Não foi possível verificar':(hasUpdate?'Nova versão disponível':'Sistema atualizado');
-    card.querySelector('[data-system-meta]').textContent=hasUpdate?`Instalada ${CURRENT_VERSION} • disponível ${remoteVersion}`:`Última versão ${CURRENT_VERSION}`;
+    const nextStatus=status==='error'?'error':(hasUpdate?'update':'ok');
+    const title=status==='error'?'Não foi possível verificar':(hasUpdate?'Nova versão disponível':'Sistema atualizado');
+    const meta=hasUpdate?`Instalada ${CURRENT_VERSION} • disponível ${remoteVersion}`:`Última versão ${CURRENT_VERSION}`;
+    if(card.dataset.status!==nextStatus)card.dataset.status=nextStatus;
+    const titleNode=card.querySelector('[data-system-title]');
+    const metaNode=card.querySelector('[data-system-meta]');
+    if(titleNode&&titleNode.textContent!==title)titleNode.textContent=title;
+    if(metaNode&&metaNode.textContent!==meta)metaNode.textContent=meta;
   });
 }
 async function fetchVersion(){
@@ -51,5 +55,7 @@ async function clearCaches(){if(!('caches'in window))return;const keys=await cac
 async function forceUpdate(button){if(refreshing)return;refreshing=true;button?.setAttribute('aria-busy','true');try{await clearCaches();if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(async r=>{await r.update().catch(()=>{});r.waiting?.postMessage({type:'SKIP_WAITING'})}))}const url=new URL(location.href);url.searchParams.set('_wd',Date.now());location.replace(url.toString())}catch(e){refreshing=false;button?.removeAttribute('aria-busy');alert('Não foi possível atualizar. Verifique sua conexão.')}}
 document.addEventListener('click',async e=>{if(e.target.closest('[data-system-status-card]'))return openSheet();if(e.target.closest('[data-check-system]')){await fetchVersion().catch(()=>{});closeSheet();openSheet();return}if(e.target.closest('[data-download-system]')&&!e.target.closest('[data-download-system]').disabled)return forceUpdate(e.target.closest('[data-download-system]'));if(e.target.closest('[data-clear-system]')){await clearCaches();e.target.closest('[data-clear-system]').textContent='Cache limpo';return}if(e.target.closest('[data-force-system]'))return forceUpdate(e.target.closest('[data-force-system]'))});
 document.addEventListener('wd-role-ready',e=>{adminAuthorized=Boolean(e.detail?.admin);if(adminAuthorized){installCard();fetchVersion().catch(()=>{})}});
-document.addEventListener('wd-spa-route',e=>{if(e.detail?.route==='home')requestAnimationFrame(()=>{installCard();fetchVersion().catch(()=>{})})});
-new MutationObserver(m=>{if(adminAuthorized&&m.some(x=>x.addedNodes.length))installCard()}).observe(document.documentElement,{subtree:true,childList:true});
+document.addEventListener('wd-spa-route',e=>{if(e.detail?.route==='home'&&adminAuthorized)requestAnimationFrame(()=>{installCard();fetchVersion().catch(()=>{})})});
+/* Observa somente a chegada inicial da Home e se desliga assim que o card é instalado. */
+const homeObserver=new MutationObserver(()=>{if(!adminAuthorized)return;if(document.querySelector('[data-system-status-card]')){homeObserver.disconnect();return}installCard();if(document.querySelector('[data-system-status-card]'))homeObserver.disconnect()});
+homeObserver.observe(document.getElementById('conteudo')||document.body,{subtree:true,childList:true});
