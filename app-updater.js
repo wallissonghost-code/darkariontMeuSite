@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.45.0';
+const LOCAL_VERSION='3.46.0';
 const VERSION_KEY='wd-app-version';
 const CHECK_INTERVAL=10*60*1000;
 let updateAvailable=false;
