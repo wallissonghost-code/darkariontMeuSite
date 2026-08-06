@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.47.0';
+const LOCAL_VERSION='3.48.0';
 const VERSION_KEY='wd-app-version';
 const CHECK_INTERVAL=10*60*1000;
 let updateAvailable=false;
@@ -8,7 +8,7 @@ async function checkForUpdate(){try{const remote=await publishedVersion(),versio
 window.WDAppVersion={version:LOCAL_VERSION,check:checkForUpdate,clearCaches:clearLegacyCaches,get updateAvailable(){return updateAvailable}};
 function loadRuntimeScript(src,id){if(document.getElementById(id))return;const script=document.createElement('script');script.id=id;script.src=`${src}?v=${LOCAL_VERSION}`;script.defer=true;script.onerror=()=>console.warn(`Falha ao carregar ${src}`);document.head.append(script)}
 function loadRuntimeStyle(href,id){if(document.getElementById(id))return;const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`${href}?v=${LOCAL_VERSION}`;document.head.append(link)}
-loadRuntimeStyle('./splash-premium-v347.css','wd-splash-premium-style');
+loadRuntimeStyle('./splash-lite.css','wd-splash-lite-style');
 loadRuntimeStyle('./mobile-pwa.css','wd-mobile-pwa-style');
 loadRuntimeScript('./mobile-pwa.js','wd-mobile-pwa-runtime');
 loadRuntimeScript('./navigation-state.js','wd-navigation-state-runtime');
