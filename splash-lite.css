@@ -1,0 +1,79 @@
+/* WD Founder — splash leve e estática 3.48.0 */
+.spa-loader{
+  background:#060607!important;
+  transition:opacity .12s ease,visibility .12s ease!important;
+  contain:strict;
+}
+.spa-loader::before,
+.wd-splash-mark::before,
+.wd-splash-mark::after,
+.wd-splash-status{
+  content:none!important;
+  display:none!important;
+}
+.spa-loader-box{
+  width:auto!important;
+  min-height:0!important;
+  transform:translateY(-2vh);
+}
+.wd-splash-mark{
+  width:124px!important;
+  height:124px!important;
+  aspect-ratio:1!important;
+  border-radius:32px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(212,175,55,.42)!important;
+  background:#0d0d0f!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 14px 36px rgba(0,0,0,.34)!important;
+  animation:none!important;
+  transform:none!important;
+  filter:none!important;
+}
+.wd-splash-monogram{
+  color:#e3c15a!important;
+  font-size:47px!important;
+  font-weight:800!important;
+  letter-spacing:.035em!important;
+  text-shadow:none!important;
+}
+.wd-splash-brand{
+  margin-top:24px!important;
+  color:#e5c65d!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  letter-spacing:.28em!important;
+  text-indent:.28em!important;
+  animation:none!important;
+}
+.wd-splash-subtitle{
+  margin-top:8px!important;
+  color:#76767b!important;
+  font-size:9px!important;
+  letter-spacing:.24em!important;
+  text-indent:.24em!important;
+  animation:none!important;
+}
+.wd-splash-progress{
+  width:42px!important;
+  height:2px!important;
+  margin-top:20px!important;
+  background:rgba(255,255,255,.08)!important;
+}
+.wd-splash-progress::after{
+  width:100%!important;
+  background:#d8b84e!important;
+  box-shadow:none!important;
+  animation:wdSplashLite 1s ease-in-out infinite!important;
+  transform-origin:center;
+}
+@keyframes wdSplashLite{
+  0%,100%{opacity:.28;transform:scaleX(.36)}
+  50%{opacity:1;transform:scaleX(1)}
+}
+@media(max-height:650px){
+  .wd-splash-mark{width:108px!important;height:108px!important}
+  .wd-splash-brand{margin-top:18px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .wd-splash-progress::after{animation:none!important;opacity:.75!important;transform:none!important}
+}
