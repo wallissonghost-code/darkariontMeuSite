@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.44.0';
+const LOCAL_VERSION='3.45.0';
 const VERSION_KEY='wd-app-version';
 const CHECK_INTERVAL=10*60*1000;
 let updateAvailable=false;
@@ -10,6 +10,7 @@ function loadRuntimeScript(src,id){if(document.getElementById(id))return;const s
 function loadRuntimeStyle(href,id){if(document.getElementById(id))return;const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`${href}?v=${LOCAL_VERSION}`;document.head.append(link)}
 loadRuntimeStyle('./mobile-pwa.css','wd-mobile-pwa-style');
 loadRuntimeScript('./mobile-pwa.js','wd-mobile-pwa-runtime');
+loadRuntimeScript('./navigation-state.js','wd-navigation-state-runtime');
 loadRuntimeScript('./system-status.js','wd-system-status-runtime');
 loadRuntimeScript('./system-status-bootstrap.js','wd-system-status-bootstrap');
 async function registerWorker(){if(!('serviceWorker' in navigator))return null;const registration=await navigator.serviceWorker.register(`./sw.js?v=${LOCAL_VERSION}`,{scope:'./',updateViaCache:'none'});registration.update().catch(()=>{});return registration}
