@@ -1,4 +1,4 @@
-const LOCAL_VERSION='3.48.0';
+const LOCAL_VERSION='3.49.0';
 const VERSION_KEY='wd-app-version';
 const CHECK_INTERVAL=10*60*1000;
 let updateAvailable=false;
@@ -15,4 +15,4 @@ loadRuntimeScript('./navigation-state.js','wd-navigation-state-runtime');
 loadRuntimeScript('./system-status.js','wd-system-status-runtime');
 loadRuntimeScript('./system-status-bootstrap.js','wd-system-status-bootstrap');
 async function registerWorker(){if(!('serviceWorker' in navigator))return null;const registration=await navigator.serviceWorker.register(`./sw.js?v=${LOCAL_VERSION}`,{scope:'./',updateViaCache:'none'});registration.update().catch(()=>{});return registration}
-(async()=>{try{await clearLegacyCaches();registerWorker()}catch(error){console.warn('Service Worker não pôde ser ativado:',error)}checkForUpdate();setInterval(checkForUpdate,CHECK_INTERVAL);window.addEventListener('online',checkForUpdate)})();
+(async()=>{try{registerWorker();setTimeout(clearLegacyCaches,1200)}catch(error){console.warn('Service Worker não pôde ser ativado:',error)}setTimeout(checkForUpdate,1500);setInterval(checkForUpdate,CHECK_INTERVAL);window.addEventListener('online',checkForUpdate)})();
