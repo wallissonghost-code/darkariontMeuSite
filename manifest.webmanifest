@@ -8,8 +8,17 @@
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#08090b",
-  "theme_color": "#0a0a0a",
+  "background_color": "#090a0c",
+  "theme_color": "#090a0c",
   "orientation": "portrait-primary",
-  "categories": ["shopping", "lifestyle"]
+  "categories": ["shopping", "lifestyle", "business"],
+  "prefer_related_applications": false,
+  "launch_handler": {"client_mode": ["navigate-existing", "auto"]},
+  "handle_links": "preferred",
+  "shortcuts": [
+    {"name": "Início", "short_name": "Início", "url": "./app.html?page=home&source=shortcut"},
+    {"name": "Mercadorias", "short_name": "Loja", "url": "./app.html?page=store&source=shortcut"},
+    {"name": "Meu cartão", "short_name": "Cartão", "url": "./app.html?page=card&source=shortcut"},
+    {"name": "Conta", "short_name": "Conta", "url": "./app.html?page=account&source=shortcut"}
+  ]
 }
