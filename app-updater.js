@@ -6,9 +6,8 @@ async function clearLegacyCaches(){if(!('caches' in window))return;const keys=aw
 async function publishedVersion(){const response=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store'});if(!response.ok)throw new Error(`version ${response.status}`);return response.json()}
 async function checkForUpdate(){try{const remote=await publishedVersion(),version=String(remote.version||'').trim();if(!version)return false;localStorage.setItem(VERSION_KEY,version);updateAvailable=version!==LOCAL_VERSION;return updateAvailable}catch(error){console.warn('Verificação de versão indisponível:',error);return false}}
 window.WDAppVersion={version:LOCAL_VERSION,check:checkForUpdate,clearCaches:clearLegacyCaches,get updateAvailable(){return updateAvailable}};
-function loadRuntimeScript(src,id){if(document.getElementById(id))return;const script=document.createElement('script');script.id=id;script.src=`${src}?v=${LOCAL_VERSION}`;script.defer=true;script.onerror=()=>console.warn(`Falha ao carregar ${src}`);document.head.append(script)}
+function loadRuntimeScript(src,id,type='text/javascript'){if(document.getElementById(id))return;const script=document.createElement('script');script.id=id;script.src=`${src}?v=${LOCAL_VERSION}`;script.defer=true;script.type=type;script.onerror=()=>console.warn(`Falha ao carregar ${src}`);document.head.append(script)}
 function loadRuntimeStyle(href,id){if(document.getElementById(id))return;const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`${href}?v=${LOCAL_VERSION}`;document.head.append(link)}
-/* Estes estilos definem o layout real da Home e da barra inferior. Precisam entrar antes da primeira pintura. */
 loadRuntimeStyle('./splash-lite.css','wd-splash-lite-style');
 loadRuntimeStyle('./mobile-nav-fixed.css','wd-mobile-nav-fixed-style');
 loadRuntimeStyle('./mobile-nav-account-premium.css','wd-mobile-nav-account-style');
@@ -18,6 +17,7 @@ async function registerWorker(){if(!('serviceWorker' in navigator))return null;c
 const afterFirstPaint=callback=>requestAnimationFrame(()=>requestAnimationFrame(callback));
 afterFirstPaint(()=>{
   loadRuntimeScript('./navigation-state.js','wd-navigation-state-runtime');
+  loadRuntimeScript('./store-recovery.js','wd-store-recovery-runtime','module');
   setTimeout(()=>{loadRuntimeScript('./mobile-pwa.js','wd-mobile-pwa-runtime');loadRuntimeScript('./system-status.js','wd-system-status-runtime');loadRuntimeScript('./system-status-bootstrap.js','wd-system-status-bootstrap')},500);
   setTimeout(()=>{registerWorker().then(registration=>registration?.update().catch(()=>{})).catch(error=>console.warn('Service Worker indisponível:',error));clearLegacyCaches().catch(()=>{});checkForUpdate()},1400);
 });
