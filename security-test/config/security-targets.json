@@ -1,0 +1,12 @@
+{
+  "mode": "controlled-defensive-test",
+  "repository": "wallissonghost-code/darkariontMeuSite",
+  "networkTargets": [],
+  "productionCredentialsAllowed": false,
+  "destructiveTestsAllowed": false,
+  "bruteForceAllowed": false,
+  "rules": {
+    "firestore": "../firestore.rules",
+    "storage": "../storage.rules"
+  }
+}
